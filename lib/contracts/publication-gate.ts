@@ -58,6 +58,9 @@ export function normalizeCanonicalQuery(rawSearchOrPath: string): string {
   return `/?k=${normalizedEncodedKey}`;
 }
 
+export const OFFICIAL_PRODUCTION_HOST = 'www.allcaretan.co.kr';
+export const OFFICIAL_PRODUCTION_ORIGIN = 'https://www.allcaretan.co.kr';
+
 /**
  * Checks whether an origin is valid for preview/local environments.
  */
@@ -73,6 +76,7 @@ export function isPreviewOriginValid(origin?: string | null): boolean {
  * - Must start with 'https://'
  * - Must not be localhost or loopback
  * - Must not be a preview-only domain (*.vercel.app or containing 'preview')
+ * - Must not be non-www allcaretan.co.kr (official canonical host is www.allcaretan.co.kr)
  */
 export function isProductionOriginReady(origin?: string | null): boolean {
   if (!origin || origin.trim().length === 0) return false;
@@ -84,6 +88,7 @@ export function isProductionOriginReady(origin?: string | null): boolean {
 
   try {
     const u = new URL(trimmed);
+    if (u.hostname === 'allcaretan.co.kr') return false; // Non-www rejected
     return u.protocol === 'https:' && Boolean(u.hostname) && !u.hostname.includes('localhost');
   } catch {
     return false;
@@ -134,6 +139,14 @@ export function evaluateProductionCanonicalGate(
     }
     if (trimmed.includes('.vercel.app') || trimmed.includes('preview')) {
       issues.push('PREVIEW_DOMAIN_NOT_ALLOWED: Preview domains cannot be used as production canonical origin.');
+    }
+    try {
+      const u = new URL(trimmed);
+      if (u.hostname === 'allcaretan.co.kr') {
+        issues.push('NON_WWW_NOT_ALLOWED: Production canonical host must be www.allcaretan.co.kr.');
+      }
+    } catch {
+      issues.push('INVALID_URL: Origin cannot be parsed as a valid URL.');
     }
   }
 

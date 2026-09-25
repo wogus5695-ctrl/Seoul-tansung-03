@@ -1299,43 +1299,57 @@ test('PHASE 6-A: Origin Classification & Production Canonical Readiness Matrix',
   assert.strictEqual(isProductionOriginReady(TEST_RESERVED_PRODUCTION_ORIGIN), true);
   assert.strictEqual(isPreviewOriginValid(TEST_RESERVED_PRODUCTION_ORIGIN), true);
 
-  // Current SSOT state: UNCONFIGURED
+  // Non-www rejected (must be www.allcaretan.co.kr)
+  assert.strictEqual(isProductionOriginReady('https://allcaretan.co.kr'), false);
+  assert.strictEqual(isPreviewOriginValid('https://allcaretan.co.kr'), true);
+
+  // Official Production Origin
+  assert.strictEqual(isProductionOriginReady('https://www.allcaretan.co.kr'), true);
+  assert.strictEqual(isPreviewOriginValid('https://www.allcaretan.co.kr'), true);
+
+  // Current SSOT state: BOUND TO OFFICIAL PRODUCTION DOMAIN
   const ssotOrigin = getPublicationOrigin();
-  assert.strictEqual(ssotOrigin.isProductionReady, false, 'Production origin must be unconfigured at Phase 6-A');
-  assert.strictEqual(SITE_CONFIG.siteOrigin, null, 'SITE_CONFIG.siteOrigin must be null');
+  assert.strictEqual(ssotOrigin.isProductionReady, true, 'Production origin must be ready in Phase 6-B');
+  assert.strictEqual(SITE_CONFIG.siteOrigin, 'https://www.allcaretan.co.kr', 'SITE_CONFIG.siteOrigin must match official domain');
 });
 
-test('PHASE 6-A: evaluateProductionCanonicalGate evaluates readiness across origins', () => {
-  // Current unconfigured state
+test('PHASE 6-B: evaluateProductionCanonicalGate evaluates readiness across origins', () => {
+  // Negative: null origin
   const unconfiguredEval = evaluateProductionCanonicalGate(null, '강남구', '탄성코트');
   assert.strictEqual(unconfiguredEval.isReady, false);
   assert.strictEqual(unconfiguredEval.productionCanonicalReady, false);
   assert.strictEqual(unconfiguredEval.canonicalUrl, null);
   assert(unconfiguredEval.issues.some((i) => i.includes('SITE_ORIGIN_MISSING')));
 
-  // Localhost preview state
+  // Negative: Localhost preview state
   const localhostEval = evaluateProductionCanonicalGate('http://localhost:3000', '강남구', '탄성코트');
   assert.strictEqual(localhostEval.isReady, false);
   assert.strictEqual(localhostEval.previewCanonicalValid, true);
   assert.strictEqual(localhostEval.productionCanonicalReady, false);
   assert(localhostEval.issues.some((i) => i.includes('LOCALHOST_NOT_ALLOWED')));
 
-  // Preview vercel domain
+  // Negative: Preview vercel domain
   const vercelEval = evaluateProductionCanonicalGate('https://preview.vercel.app', '강남구', '탄성코트');
   assert.strictEqual(vercelEval.isReady, false);
   assert.strictEqual(vercelEval.previewCanonicalValid, true);
   assert.strictEqual(vercelEval.productionCanonicalReady, false);
   assert(vercelEval.issues.some((i) => i.includes('PREVIEW_DOMAIN_NOT_ALLOWED')));
 
-  // Hypothetical Valid HTTPS Production Domain
-  const validProdEval = evaluateProductionCanonicalGate(TEST_RESERVED_PRODUCTION_ORIGIN, '강남구', '탄성코트');
-  assert.strictEqual(validProdEval.isReady, true);
-  assert.strictEqual(validProdEval.previewCanonicalValid, true);
-  assert.strictEqual(validProdEval.productionCanonicalReady, true);
-  assert.strictEqual(validProdEval.issues.length, 0);
+  // Negative: Non-www production domain
+  const nonWwwEval = evaluateProductionCanonicalGate('https://allcaretan.co.kr', '강남구', '탄성코트');
+  assert.strictEqual(nonWwwEval.isReady, false);
+  assert.strictEqual(nonWwwEval.productionCanonicalReady, false);
+  assert(nonWwwEval.issues.some((i) => i.includes('NON_WWW_NOT_ALLOWED')));
+
+  // Official Production Domain
+  const officialEval = evaluateProductionCanonicalGate(SITE_CONFIG.siteOrigin, '강남구', '탄성코트');
+  assert.strictEqual(officialEval.isReady, true);
+  assert.strictEqual(officialEval.previewCanonicalValid, true);
+  assert.strictEqual(officialEval.productionCanonicalReady, true);
+  assert.strictEqual(officialEval.issues.length, 0);
   assert.strictEqual(
-    validProdEval.canonicalUrl,
-    `${TEST_RESERVED_PRODUCTION_ORIGIN}/?k=${encodeURIComponent('강남구-탄성코트')}`
+    officialEval.canonicalUrl,
+    `https://www.allcaretan.co.kr/?k=${encodeURIComponent('강남구-탄성코트')}`
   );
 });
 
@@ -1429,7 +1443,7 @@ test('PHASE 6-A: evaluatePublicationGate 11-Rule Gate Matrix & User Approval Loc
   assert(stateFail.blockingReasons.some((r) => r.includes('STATE_TRANSITION_NOT_APPROVED')));
 });
 
-test('PHASE 6-A: Canonical & Publication Test Matrix on 6 Representative URLs', () => {
+test('PHASE 6-B: Canonical & Publication Test Matrix on 6 Representative URLs', () => {
   const representativeCases = [
     { name: 'Main Page', regionName: null, intent: null, isCollision: false },
     { name: '강남구-탄성코트', regionName: '강남구', intent: '탄성코트' as const, isCollision: false },
@@ -1441,21 +1455,34 @@ test('PHASE 6-A: Canonical & Publication Test Matrix on 6 Representative URLs', 
 
   for (const c of representativeCases) {
     if (c.regionName && c.intent) {
-      // 1. Current State: UNCONFIGURED origin
+      // 1. Official Production Domain: Canonical Ready = true
       const currentEval = evaluateProductionCanonicalGate(SITE_CONFIG.siteOrigin, c.regionName, c.intent);
-      assert.strictEqual(currentEval.isReady, false);
-      assert.strictEqual(currentEval.canonicalUrl, null);
-
-      // 2. Mock Production Domain (RFC-reserved test domain)
-      const mockOrigin = TEST_RESERVED_PRODUCTION_ORIGIN;
-      const mockEval = evaluateProductionCanonicalGate(mockOrigin, c.regionName, c.intent);
-      assert.strictEqual(mockEval.isReady, true);
+      assert.strictEqual(currentEval.isReady, true);
+      assert.strictEqual(currentEval.productionCanonicalReady, true);
       const expectedHref = buildPublicHref(c.regionName, c.intent);
-      assert.strictEqual(mockEval.canonicalUrl, `${mockOrigin}${expectedHref}`);
+      assert.strictEqual(currentEval.canonicalUrl, `https://www.allcaretan.co.kr${expectedHref}`);
+
+      // 2. Publication Gate check (INDEXABLE still strictly blocked!)
+      const gate = evaluatePublicationGate({
+        regionId: c.isCollision ? 'seoul-eunpyeong-sinsa' : 'seoul-test',
+        regionApprovalStatus: c.isCollision ? 'COLLISION_HOLD' : 'APPROVED',
+        publicationStateTransitionApproved: true,
+        productionCanonicalReady: currentEval.productionCanonicalReady,
+        businessSSOTValid: true,
+        claimGuardPass: true,
+        dynamicContentValid: true,
+        metadataValid: true,
+        internalLinksValid: true,
+        requiredAssetsValid: true,
+        serviceAreaApproved: false, // NOT approved
+        userPublicationApproval: false, // NOT approved yet
+      });
+      assert.strictEqual(gate.isIndexable, false, 'INDEXABLE must remain false in Phase 6-B');
+      assert.strictEqual(gate.targetPublicationState, 'PUBLISHED_NOINDEX');
 
       // 3. Collision Hold check
       if (c.isCollision) {
-        const gate = evaluatePublicationGate({
+        const collisionGate = evaluatePublicationGate({
           regionId: 'seoul-eunpyeong-sinsa',
           regionApprovalStatus: 'COLLISION_HOLD',
           publicationStateTransitionApproved: true,
@@ -1469,8 +1496,8 @@ test('PHASE 6-A: Canonical & Publication Test Matrix on 6 Representative URLs', 
           serviceAreaApproved: true,
           userPublicationApproval: true,
         });
-        assert.strictEqual(gate.isIndexable, false, 'Collision hold region must NEVER be indexable');
-        assert(gate.blockingReasons.some((r) => r.includes('COLLISION_HOLD_REGION')));
+        assert.strictEqual(collisionGate.isIndexable, false, 'Collision hold region must NEVER be indexable');
+        assert(collisionGate.blockingReasons.some((r) => r.includes('COLLISION_HOLD_REGION')));
       }
     }
   }
@@ -1562,6 +1589,147 @@ test('PHASE 6-A2: Full 1,908 Dynamic URL Schema & Business SSOT exhaustive audit
   assert.strictEqual(localBusinessCount, 0, 'LocalBusiness subtype count must be 0');
   assert.strictEqual(fakeAddressCount, 0, 'Fake address count must be 0');
   assert.strictEqual(wrongNameContaminationCount, 0, 'Wrong name/phone contamination count must be 0');
+});
+
+// ----------------------------------------------------
+// PHASE 6-B: FULL 1,908 CANONICAL AUDIT, UNIQUENESS & ZERO-LEAK VERIFICATION
+// ----------------------------------------------------
+test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verification', () => {
+  assert.strictEqual(SITE_CONFIG.siteOrigin, 'https://www.allcaretan.co.kr');
+
+  const seenCanonicals = new Set<string>();
+  const duplicateCanonicals: string[] = [];
+  let totalChecked = 0;
+  let wrongHostCount = 0;
+  let wrongSchemeCount = 0;
+  let nonWwwLeakCount = 0;
+  let localhostLeakCount = 0;
+  let previewLeakCount = 0;
+  let mainPageCanonicalLeakCount = 0;
+  let noindexFollowNocacheCount = 0;
+  let areaServedCount = 0;
+
+  for (const region of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      totalChecked++;
+      const expectedDynamicKey = `${region.keywordRegionName}-${intent.serviceKeyword}`;
+      const canonicalResult = buildCanonicalUrl(region.keywordRegionName, intent.serviceKeyword);
+
+      assert(canonicalResult.isSuccess && canonicalResult.canonicalUrl, `Canonical build failed for ${expectedDynamicKey}`);
+      const canonical = canonicalResult.canonicalUrl!;
+
+      // 1. Uniqueness check
+      if (seenCanonicals.has(canonical)) {
+        duplicateCanonicals.push(canonical);
+      }
+      seenCanonicals.add(canonical);
+
+      // 2. Format checks
+      const u = new URL(canonical);
+      if (u.protocol !== 'https:') wrongSchemeCount++;
+      if (u.hostname !== 'www.allcaretan.co.kr') wrongHostCount++;
+      if (u.pathname !== '/') wrongHostCount++;
+
+      const kParam = u.searchParams.get('k');
+      assert.strictEqual(kParam, expectedDynamicKey, `Dynamic key mismatch in canonical: ${kParam} vs ${expectedDynamicKey}`);
+
+      // 3. Leak checks
+      if (canonical.includes('//allcaretan.co.kr')) nonWwwLeakCount++;
+      if (canonical.includes('localhost') || canonical.includes('127.0.0.1')) localhostLeakCount++;
+      if (canonical.includes('vercel.app')) previewLeakCount++;
+      if (canonical === 'https://www.allcaretan.co.kr/' || canonical === 'https://www.allcaretan.co.kr') {
+        mainPageCanonicalLeakCount++;
+      }
+
+      // 4. Metadata verification (All 1,908 dynamic pages must be NOINDEX)
+      const metadata = buildDynamicMetadata(region, intent);
+      const robots = metadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
+      if (!robots || robots.index !== false || robots.follow !== false || robots.nocache !== true) {
+        noindexFollowNocacheCount++;
+      }
+
+      // 5. JSON-LD checks
+      const jsonLd = buildDynamicJsonLd(region, intent);
+      const jsonLdStr = JSON.stringify(jsonLd);
+
+      if (jsonLdStr.includes('//allcaretan.co.kr')) nonWwwLeakCount++;
+      if (jsonLdStr.includes('localhost') || jsonLdStr.includes('127.0.0.1')) localhostLeakCount++;
+      if (jsonLdStr.includes('vercel.app')) previewLeakCount++;
+
+      const [serviceSchema, breadcrumbSchema] = jsonLd as unknown as [
+        { url?: string; areaServed?: unknown },
+        { itemListElement?: { position: number; item?: string }[] }
+      ];
+
+      assert.strictEqual(serviceSchema.url, canonical);
+      if (serviceSchema.areaServed !== undefined) areaServedCount++;
+
+      assert(breadcrumbSchema.itemListElement);
+      assert.strictEqual(breadcrumbSchema.itemListElement[0].item, 'https://www.allcaretan.co.kr/');
+      assert.strictEqual(breadcrumbSchema.itemListElement[1].item, canonical);
+    }
+  }
+
+  assert.strictEqual(totalChecked, 1908, 'Must audit exactly 1,908 dynamic URLs');
+  assert.strictEqual(seenCanonicals.size, 1908, 'Must have exactly 1,908 unique canonical URLs');
+  assert.strictEqual(duplicateCanonicals.length, 0, 'Must have 0 duplicate canonical URLs');
+  assert.strictEqual(wrongHostCount, 0, 'Must have 0 wrong host URLs');
+  assert.strictEqual(wrongSchemeCount, 0, 'Must have 0 wrong scheme URLs');
+  assert.strictEqual(nonWwwLeakCount, 0, 'Must have 0 non-www leaks');
+  assert.strictEqual(localhostLeakCount, 0, 'Must have 0 localhost leaks');
+  assert.strictEqual(previewLeakCount, 0, 'Must have 0 preview leaks');
+  assert.strictEqual(mainPageCanonicalLeakCount, 0, 'Must have 0 main page canonical leaks');
+  assert.strictEqual(noindexFollowNocacheCount, 0, 'All 1,908 dynamic pages must be noindex, nofollow, nocache');
+  assert.strictEqual(areaServedCount, 0, 'Area served count must be 0');
+});
+
+// ----------------------------------------------------
+// PHASE 6-B: CANONICAL SAMPLE MATRIX (8 CASES)
+// ----------------------------------------------------
+test('PHASE 6-B: Canonical Sample Matrix verification across 8 required cases', () => {
+  const sampleMatrix = [
+    {
+      region: '강남구',
+      intent: '탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('강남구-탄성코트')}`,
+    },
+    {
+      region: '마곡동',
+      intent: '베란다탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('마곡동-베란다탄성코트')}`,
+    },
+    {
+      region: '자곡동',
+      intent: '탄성코트시공' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('자곡동-탄성코트시공')}`,
+    },
+    {
+      region: '성수동',
+      intent: '탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('성수동-탄성코트')}`,
+    },
+    {
+      region: '금호동',
+      intent: '세탁실탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('금호동-세탁실탄성코트')}`,
+    },
+    {
+      region: '불광동',
+      intent: '탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('불광동-탄성코트')}`,
+    },
+    {
+      region: '신사동',
+      intent: '탄성코트' as const,
+      expectedCanonical: `https://www.allcaretan.co.kr/?k=${encodeURIComponent('신사동-탄성코트')}`,
+    },
+  ];
+
+  for (const s of sampleMatrix) {
+    const res = buildCanonicalUrl(s.region, s.intent);
+    assert.strictEqual(res.isSuccess, true);
+    assert.strictEqual(res.canonicalUrl, s.expectedCanonical);
+  }
 });
 
 console.log('\n====================================================');

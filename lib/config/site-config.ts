@@ -23,6 +23,14 @@ export interface SiteConfig {
   readonly asPolicy: string | null;
 }
 
+if (typeof process !== 'undefined' && process.loadEnvFile && !process.env.NEXT_PUBLIC_SITE_ORIGIN) {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // Ignore when running in environments without .env file
+  }
+}
+
 export const SITE_CONFIG: SiteConfig = {
   brandName: '올케어',
   brandNameEn: 'ALLCARE',

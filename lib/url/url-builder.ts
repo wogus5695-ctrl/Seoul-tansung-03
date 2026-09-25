@@ -166,7 +166,7 @@ export function buildCanonicalUrl(
     };
   }
 
-  const origin = siteOriginOverride ?? SITE_CONFIG.siteOrigin;
+  const origin = siteOriginOverride !== undefined ? siteOriginOverride : SITE_CONFIG.siteOrigin;
 
   if (!origin || origin.trim().length === 0) {
     return {

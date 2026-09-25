@@ -47,6 +47,9 @@ export const metadata: Metadata = {
   title: `${SITE_CONFIG.brandName} | ${SITE_CONFIG.businessCategory}`,
   description:
     '베란다와 세탁실의 기존 벽면 상태를 확인하고 필요한 작업 범위와 탄성코트 시공 정보를 안내하는 올케어입니다.',
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -61,6 +64,7 @@ export const metadata: Metadata = {
     title: `${SITE_CONFIG.brandName} | ${SITE_CONFIG.businessCategory}`,
     description:
       '베란다와 세탁실의 기존 벽면 상태를 확인하고 필요한 작업 범위와 탄성코트 시공 정보를 안내하는 올케어입니다.',
+    url: '/',
     images: [
       {
         url: '/images/allcare/og-thumbnail.jpg',
