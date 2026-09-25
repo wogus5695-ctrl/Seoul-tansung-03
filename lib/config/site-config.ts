@@ -75,6 +75,7 @@ export interface SiteConfig {
   readonly representativeName: string | null;
   readonly address: string | null;
   readonly asPolicy: string | null;
+  readonly naverSiteVerification: string | null;
 }
 
 if (typeof process !== 'undefined' && process.loadEnvFile && !process.env.NEXT_PUBLIC_SITE_ORIGIN) {
@@ -102,6 +103,7 @@ export const SITE_CONFIG: SiteConfig = {
   representativeName: '김재현',
   address: null, // 미제공 (임의 생성 금지)
   asPolicy: null,
+  naverSiteVerification: '5be6e2d1aa00ee4b34febe66bb5f81e88a8600bd',
 };
 
 /**

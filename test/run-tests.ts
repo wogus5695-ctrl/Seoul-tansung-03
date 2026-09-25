@@ -439,6 +439,9 @@ test('Site Config: Official business and phone configured while pending channels
 
   // Phone is active, so isContactConfigured is true
   assert.strictEqual(isContactConfigured(), true);
+
+  // Naver search advisor verification tag
+  assert.strictEqual(SITE_CONFIG.naverSiteVerification, '5be6e2d1aa00ee4b34febe66bb5f81e88a8600bd');
 });
 
 // ----------------------------------------------------
