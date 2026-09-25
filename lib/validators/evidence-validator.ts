@@ -2,7 +2,7 @@
  * Region Evidence Dataset Validator (Phase 6-C0C-1)
  *
  * Enforces strict validation on incoming region evidence items:
- * - Region ID must exist in approved production dataset
+ * - Region ID must exist in Known Production Region IDs (318 total: 317 Approved + 1 Collision Hold)
  * - Applicable intents must be valid ServiceKeywords
  * - Valid Tier ('TIER_A' | 'TIER_B' | 'TIER_C')
  * - Source Name and verifiedAt date required
@@ -53,7 +53,7 @@ export function validateRegionEvidenceItem(
     issues.push({
       evidenceId: item.evidenceId,
       code: 'UNKNOWN_REGION_ID',
-      message: `Region ID '${item.regionId}' does not exist in production regions dataset.`,
+      message: `Region ID '${item.regionId}' does not exist in known production region IDs (318 total).`,
     });
   }
 
