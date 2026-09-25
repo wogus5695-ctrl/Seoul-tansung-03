@@ -50,9 +50,20 @@ import {
   isPreviewOriginValid,
   evaluateProductionCanonicalGate,
   evaluatePublicationGate,
+  evaluateIntentPublicationGate,
   getPublicationOrigin,
   PublicationGateInput,
 } from '../lib/contracts/publication-gate';
+import {
+  PRODUCTION_REGION_EVIDENCE,
+  getRegionEvidence,
+  hasRegionEvidence,
+} from '../lib/data/region-evidence';
+import {
+  validateRegionEvidenceItem,
+  validateRegionEvidenceDataset,
+} from '../lib/validators/evidence-validator';
+import { RegionEvidenceItem } from '../lib/types/evidence';
 import { TEST_CLAIMS } from './fixtures/claims.fixture';
 import {
   SYNTHETIC_APPROVED_DISAMBIGUATED_REGIONS,
@@ -1356,7 +1367,7 @@ test('PHASE 6-B: evaluateProductionCanonicalGate evaluates readiness across orig
   );
 });
 
-test('PHASE 6-A: evaluatePublicationGate 11-Rule Gate Matrix & User Approval Lock', () => {
+test('PHASE 6-A / 6-C0C-1: evaluatePublicationGate 12-Rule Gate Matrix & User Approval Lock', () => {
   const baseValidInput: PublicationGateInput = {
     regionId: 'seoul-gangnam',
     regionApprovalStatus: 'APPROVED',
@@ -1370,9 +1381,10 @@ test('PHASE 6-A: evaluatePublicationGate 11-Rule Gate Matrix & User Approval Loc
     requiredAssetsValid: true,
     serviceAreaApproved: true,
     userPublicationApproval: true,
+    contentEvidenceEligible: true,
   };
 
-  // 1. All 11 pass -> INDEXABLE
+  // 1. All 12 pass -> INDEXABLE
   const passResult = evaluatePublicationGate(baseValidInput);
   assert.strictEqual(passResult.isIndexable, true);
   assert.strictEqual(passResult.targetPublicationState, 'INDEXABLE');
@@ -1444,6 +1456,11 @@ test('PHASE 6-A: evaluatePublicationGate 11-Rule Gate Matrix & User Approval Loc
   const stateFail = evaluatePublicationGate({ ...baseValidInput, publicationStateTransitionApproved: false });
   assert.strictEqual(stateFail.isIndexable, false);
   assert(stateFail.blockingReasons.some((r) => r.includes('STATE_TRANSITION_NOT_APPROVED')));
+
+  // 13. contentEvidenceEligible = false -> BLOCKED
+  const evidenceFail = evaluatePublicationGate({ ...baseValidInput, contentEvidenceEligible: false });
+  assert.strictEqual(evidenceFail.isIndexable, false);
+  assert(evidenceFail.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
 });
 
 test('PHASE 6-B: Canonical & Publication Test Matrix on 6 Representative URLs', () => {
@@ -1766,6 +1783,283 @@ test('PHASE 6-B5: Negative Origin Tests & Production SSOT Resolution', () => {
 
   // Invariant: SITE_CONFIG.siteOrigin must be strictly OFFICIAL_SITE_ORIGIN
   assert.strictEqual(SITE_CONFIG.siteOrigin, 'https://www.allcaretan.co.kr');
+});
+
+// ----------------------------------------------------
+// PHASE 6-C0C-1: REGION EVIDENCE INFRASTRUCTURE & PUBLICATION GATE TESTS
+// ----------------------------------------------------
+test('PHASE 6-C0C-1: Region Evidence Validator & Claim Guard Enforcement', () => {
+  const validFixture: RegionEvidenceItem = {
+    evidenceId: 'ev-test-bulgwang-01',
+    regionId: 'seoul-eunpyeong-bulgwang',
+    evidenceTier: 'TIER_A',
+    sourceType: 'ACTUAL_JOB_CASE',
+    sourceName: '올케어 시공 일지',
+    verifiedAt: '2026-03-15',
+    serviceIntentApplicability: ['탄성코트', '베란다탄성코트'],
+    caseDate: '2026-03-10',
+    caseType: '아파트 베란다 결로 보수 및 탄성코트 시공',
+    facts: {
+      housingType: '아파트',
+      complexName: '북한산힐스테이트 7차',
+      observedCondition: '외벽 모서리 부위 페인트 들뜸 및 박리 현상 확인',
+      workScope: '기존 들뜸 도막 스크래핑, 하부 퍼티 평탄화 및 탄성코트 뿜칠 도포',
+    },
+    imageAssets: ['/images/allcare/before-after/sample-01-after.jpg'],
+  };
+
+  // 1. Positive validation
+  const posIssues = validateRegionEvidenceItem(validFixture, PRODUCTION_REGIONS);
+  assert.strictEqual(posIssues.length, 0, `Valid fixture should have 0 issues, got: ${JSON.stringify(posIssues)}`);
+
+  const datasetResult = validateRegionEvidenceDataset([validFixture], PRODUCTION_REGIONS);
+  assert.strictEqual(datasetResult.isValid, true);
+  assert.strictEqual(datasetResult.issues.length, 0);
+
+  // 2. Negative: Unknown region ID
+  const unknownRegionIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-unknown-reg', regionId: 'seoul-nonexistent-dong' },
+    PRODUCTION_REGIONS
+  );
+  assert(unknownRegionIssues.some((i) => i.code === 'UNKNOWN_REGION_ID'));
+
+  // 3. Negative: Empty intent applicability
+  const emptyIntentIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-empty-intent', serviceIntentApplicability: [] },
+    PRODUCTION_REGIONS
+  );
+  assert(emptyIntentIssues.some((i) => i.code === 'EMPTY_INTENT_APPLICABILITY'));
+
+  // 4. Negative: Invalid Tier (e.g. TIER_D administrative metadata)
+  const invalidTierIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-invalid-tier', evidenceTier: 'TIER_D' as unknown as 'TIER_A' },
+    PRODUCTION_REGIONS
+  );
+  assert(invalidTierIssues.some((i) => i.code === 'INVALID_TIER'));
+
+  // 5. Negative: Missing source
+  const missingSourceIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-missing-src', sourceName: '   ' },
+    PRODUCTION_REGIONS
+  );
+  assert(missingSourceIssues.some((i) => i.code === 'MISSING_SOURCE'));
+
+  // 6. Negative: Invalid verified date format
+  const badDateIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-bad-date', verifiedAt: '2026/03/15' },
+    PRODUCTION_REGIONS
+  );
+  assert(badDateIssues.some((i) => i.code === 'INVALID_VERIFIED_DATE'));
+
+  // 7. Negative: Empty facts
+  const emptyFactsIssues = validateRegionEvidenceItem(
+    { ...validFixture, evidenceId: 'ev-empty-facts', facts: {} },
+    PRODUCTION_REGIONS
+  );
+  assert(emptyFactsIssues.some((i) => i.code === 'EMPTY_FACTS'));
+
+  // 8. Negative: Unverified claim in observedCondition / notes
+  const claimViolationIssues = validateRegionEvidenceItem(
+    {
+      ...validFixture,
+      evidenceId: 'ev-claim-violation',
+      facts: {
+        ...validFixture.facts,
+        observedCondition: '100% 곰팡이 영구 방지 보증 시공 구역',
+      },
+    },
+    PRODUCTION_REGIONS
+  );
+  assert(claimViolationIssues.some((i) => i.code === 'UNVERIFIED_CLAIM_IN_FACTS'));
+
+  // 9. Negative: Duplicate evidence IDs in dataset
+  const duplicateResult = validateRegionEvidenceDataset(
+    [validFixture, { ...validFixture, regionId: 'seoul-gangnam' }],
+    PRODUCTION_REGIONS
+  );
+  assert.strictEqual(duplicateResult.isValid, false);
+  assert(duplicateResult.issues.some((i) => i.code === 'DUPLICATE_EVIDENCE_ID'));
+
+  // 10. Negative: Invalid external/unauthorized image path
+  const badImageIssues = validateRegionEvidenceItem(
+    {
+      ...validFixture,
+      evidenceId: 'ev-bad-img',
+      imageAssets: ['https://external-unverified-site.com/photo.jpg'],
+    },
+    PRODUCTION_REGIONS
+  );
+  assert(badImageIssues.some((i) => i.code === 'INVALID_IMAGE_PATH'));
+});
+
+test('PHASE 6-C0C-1: Production Evidence Repository Zero-Contamination Invariant', () => {
+  // Invariant 1: Production evidence array is strictly empty at initialization
+  assert.strictEqual(
+    PRODUCTION_REGION_EVIDENCE.length,
+    0,
+    'PRODUCTION_REGION_EVIDENCE must have length 0 (Zero fake/placeholder data)'
+  );
+
+  // Invariant 2: Across all 318 production regions x 6 search intents, evidence count is 0
+  let totalPairsChecked = 0;
+  let pairsWithEvidence = 0;
+
+  for (const r of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      totalPairsChecked++;
+      if (hasRegionEvidence(r.id, intent.serviceKeyword)) {
+        pairsWithEvidence++;
+      }
+      const retrieved = getRegionEvidence(r.id, intent.serviceKeyword);
+      assert.strictEqual(retrieved.length, 0);
+    }
+  }
+
+  assert.strictEqual(totalPairsChecked, 1908, 'Must verify all 1,908 region-intent pairs');
+  assert.strictEqual(pairsWithEvidence, 0, 'Zero region-intent pairs may possess evidence in production SSOT');
+});
+
+test('PHASE 6-C0C-1: Full 1,908 Dynamic URL Publication Gate & Strict INDEXABLE = 0 Lock', () => {
+  // Invariant: Without verified local evidence, evaluateIntentPublicationGate MUST block INDEXABLE
+  // even under fully simulated technical and administrative approval.
+  let checkedCount = 0;
+  let indexableCount = 0;
+  let blockedByEvidenceCount = 0;
+
+  const simulatedApprovedBase = {
+    regionApprovalStatus: 'APPROVED' as const,
+    publicationStateTransitionApproved: true,
+    productionCanonicalReady: true,
+    businessSSOTValid: true,
+    claimGuardPass: true,
+    dynamicContentValid: true,
+    metadataValid: true,
+    internalLinksValid: true,
+    requiredAssetsValid: true,
+    serviceAreaApproved: true,
+    userPublicationApproval: true, // User approval simulated ON
+  };
+
+  for (const r of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      checkedCount++;
+      const gateResult = evaluateIntentPublicationGate(
+        r.id,
+        intent.serviceKeyword,
+        {
+          ...simulatedApprovedBase,
+          regionApprovalStatus: r.disambiguationStatus === 'REQUIRES_DISAMBIGUATION' ? 'COLLISION_HOLD' : 'APPROVED',
+        }
+      );
+
+      if (gateResult.isIndexable) {
+        indexableCount++;
+      }
+
+      assert.strictEqual(
+        gateResult.targetPublicationState,
+        'PUBLISHED_NOINDEX',
+        `Dynamic URL for ${r.id} / ${intent.serviceKeyword} must be PUBLISHED_NOINDEX`
+      );
+
+      if (gateResult.blockingReasons.some((reason) => reason.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE'))) {
+        blockedByEvidenceCount++;
+      }
+    }
+  }
+
+  assert.strictEqual(checkedCount, 1908);
+  assert.strictEqual(indexableCount, 0, 'INDEXABLE count across all 1,908 dynamic URLs must be strictly 0');
+  assert.strictEqual(
+    blockedByEvidenceCount,
+    1908,
+    'All 1,908 dynamic URLs must be blocked by CONTENT_EVIDENCE_NOT_ELIGIBLE'
+  );
+});
+
+test('PHASE 6-C0C-1: Pilot Region Evidence Publication Gate Simulation', () => {
+  // Verify that when real evidence is supplied for a specific region + intent keyword,
+  // ONLY that specific intent keyword can achieve INDEXABLE status (when user approval is true).
+  const syntheticPilotEvidence: RegionEvidenceItem = {
+    evidenceId: 'ev-pilot-bulgwang-01',
+    regionId: 'seoul-eunpyeong-bulgwang',
+    evidenceTier: 'TIER_A',
+    sourceType: 'ACTUAL_JOB_CASE',
+    sourceName: '올케어 시공 일지',
+    verifiedAt: '2026-03-25',
+    serviceIntentApplicability: ['탄성코트'], // Only '탄성코트' intent!
+    facts: {
+      housingType: '아파트',
+      complexName: '북한산힐스테이트 7차',
+      observedCondition: '외벽 모서리 부위 페인트 들뜸 확인',
+      workScope: '스크래핑 및 탄성코트 뿜칠 도포',
+    },
+    imageAssets: ['/images/allcare/before-after/sample-01-after.jpg'],
+  };
+
+  const pilotDataset = [syntheticPilotEvidence];
+
+  const baseInput = {
+    publicationStateTransitionApproved: true,
+    productionCanonicalReady: true,
+    businessSSOTValid: true,
+    claimGuardPass: true,
+    dynamicContentValid: true,
+    metadataValid: true,
+    internalLinksValid: true,
+    requiredAssetsValid: true,
+    serviceAreaApproved: true,
+    userPublicationApproval: true,
+  };
+
+  // 1. Matched intent ('탄성코트') -> INDEXABLE PASS
+  const matchedGate = evaluateIntentPublicationGate(
+    'seoul-eunpyeong-bulgwang',
+    '탄성코트',
+    { ...baseInput, regionApprovalStatus: 'APPROVED' },
+    pilotDataset
+  );
+  assert.strictEqual(matchedGate.isIndexable, true);
+  assert.strictEqual(matchedGate.targetPublicationState, 'INDEXABLE');
+  assert.strictEqual(matchedGate.blockingReasons.length, 0);
+
+  // 2. Unmatched intent on SAME region ('세탁실탄성코트') -> BLOCKED
+  const unmatchedIntentGate = evaluateIntentPublicationGate(
+    'seoul-eunpyeong-bulgwang',
+    '세탁실탄성코트',
+    { ...baseInput, regionApprovalStatus: 'APPROVED' },
+    pilotDataset
+  );
+  assert.strictEqual(unmatchedIntentGate.isIndexable, false);
+  assert.strictEqual(unmatchedIntentGate.targetPublicationState, 'PUBLISHED_NOINDEX');
+  assert(unmatchedIntentGate.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
+
+  // 3. Matched intent on DIFFERENT region ('강남구') -> BLOCKED
+  const differentRegionGate = evaluateIntentPublicationGate(
+    'seoul-gangnam',
+    '탄성코트',
+    { ...baseInput, regionApprovalStatus: 'APPROVED' },
+    pilotDataset
+  );
+  assert.strictEqual(differentRegionGate.isIndexable, false);
+  assert.strictEqual(differentRegionGate.targetPublicationState, 'PUBLISHED_NOINDEX');
+  assert(differentRegionGate.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
+
+  // 4. Collision Hold region even WITH evidence -> FATAL BLOCKED
+  const collisionWithEvidence: RegionEvidenceItem = {
+    ...syntheticPilotEvidence,
+    evidenceId: 'ev-pilot-sinsa-01',
+    regionId: 'seoul-eunpyeong-sinsa', // Collision hold
+  };
+  const collisionGate = evaluateIntentPublicationGate(
+    'seoul-eunpyeong-sinsa',
+    '탄성코트',
+    { ...baseInput, regionApprovalStatus: 'COLLISION_HOLD' },
+    [collisionWithEvidence]
+  );
+  assert.strictEqual(collisionGate.isIndexable, false);
+  assert.strictEqual(collisionGate.targetPublicationState, 'PUBLISHED_NOINDEX');
+  assert(collisionGate.blockingReasons.some((r) => r.includes('COLLISION_HOLD_REGION')));
 });
 
 console.log('\n====================================================');

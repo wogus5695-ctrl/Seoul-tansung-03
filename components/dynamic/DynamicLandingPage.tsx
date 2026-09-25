@@ -5,6 +5,7 @@ import { buildDynamicJsonLd } from '../../lib/seo/dynamic-metadata';
 import { DynamicHeroSection } from './DynamicHeroSection';
 import { IntentProblemSection } from './IntentProblemSection';
 import { DynamicBeforeAfterSection } from './DynamicBeforeAfterSection';
+import { RegionEvidenceSection } from './RegionEvidenceSection';
 import { IntentWorkGuideSection } from './IntentWorkGuideSection';
 import { RelatedIntentLinksSection } from './RelatedIntentLinksSection';
 import { DynamicFaqSection } from './DynamicFaqSection';
@@ -34,6 +35,9 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
 
       {/* 03 Before & After Visual Evidence */}
       <DynamicBeforeAfterSection />
+
+      {/* 03-B Verified Region Evidence (Phase 6-C0C-1) */}
+      <RegionEvidenceSection region={region} intent={intent} />
 
       {/* 04 Work Process & Decision Standards */}
       <IntentWorkGuideSection />

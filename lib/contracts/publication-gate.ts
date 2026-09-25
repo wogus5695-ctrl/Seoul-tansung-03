@@ -12,6 +12,8 @@ import { PublicationState } from '../types/regions';
 import { ServiceKeyword } from '../types/intents';
 import { buildCanonicalUrl } from '../url/url-builder';
 import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN, OFFICIAL_SITE_HOST } from '../config/site-config';
+import { hasRegionEvidence, PRODUCTION_REGION_EVIDENCE } from '../data/region-evidence';
+import { RegionEvidenceItem } from '../types/evidence';
 
 /**
  * Normalizes query string and pathname for canonical URLs:
@@ -179,6 +181,8 @@ export interface PublicationGateInput {
   readonly requiredAssetsValid: boolean;
   readonly serviceAreaApproved: boolean;
   readonly userPublicationApproval: boolean; // CRITICAL: Explicit user approval gate
+  readonly contentEvidenceEligible?: boolean; // Phase 6-C0C-1: Verified local content differentiation evidence
+  readonly serviceKeyword?: ServiceKeyword; // Optional intent context
 }
 
 export interface PublicationGateResult {
@@ -188,12 +192,14 @@ export interface PublicationGateResult {
 }
 
 /**
- * Strict Publication Gate (Phase 6-A Contract):
- * All 11 criteria must be satisfied to promote a region or URL to INDEXABLE.
+ * Strict Publication Gate (Phase 6-A / 6-C0C-1 Contract):
+ * All 12 criteria must be satisfied to promote a region or URL to INDEXABLE.
  *
- * SAFETY INVARIANT:
- * Even if all 10 technical criteria pass, if userPublicationApproval === false,
- * INDEXABLE promotion is strictly blocked.
+ * SAFETY INVARIANTS:
+ * 1. Even if all technical criteria pass, if userPublicationApproval === false,
+ *    INDEXABLE promotion is strictly blocked.
+ * 2. Even if user approves, if contentEvidenceEligible !== true (no verified Tier A/B/C evidence),
+ *    INDEXABLE promotion is strictly blocked to prevent mass template similarity penalties.
  */
 export function evaluatePublicationGate(input: PublicationGateInput): PublicationGateResult {
   const blockingReasons: string[] = [];
@@ -255,6 +261,12 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
     blockingReasons.push('USER_APPROVAL_PENDING: Explicit user publication approval is required for INDEXABLE status.');
   }
 
+  // 12. CRITICAL: Content Evidence Differentiation Gate (Phase 6-C0C-1)
+  // Dynamic page cannot be promoted to INDEXABLE without verified Tier A/B/C local evidence.
+  if (input.contentEvidenceEligible !== true) {
+    blockingReasons.push('CONTENT_EVIDENCE_NOT_ELIGIBLE: Verified region evidence (Tier A/B/C) is required for INDEXABLE status.');
+  }
+
   const isIndexable = blockingReasons.length === 0;
 
   return {
@@ -262,6 +274,25 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
     targetPublicationState: isIndexable ? 'INDEXABLE' : 'PUBLISHED_NOINDEX',
     blockingReasons,
   };
+}
+
+/**
+ * Evaluates publication gate for a specific region and service keyword,
+ * automatically looking up whether verified evidence exists in the evidence repository.
+ */
+export function evaluateIntentPublicationGate(
+  regionId: string,
+  serviceKeyword: ServiceKeyword,
+  baseInput: Omit<PublicationGateInput, 'regionId' | 'serviceKeyword' | 'contentEvidenceEligible'>,
+  dataset: readonly RegionEvidenceItem[] = PRODUCTION_REGION_EVIDENCE
+): PublicationGateResult {
+  const isEligible = hasRegionEvidence(regionId, serviceKeyword, dataset);
+  return evaluatePublicationGate({
+    ...baseInput,
+    regionId,
+    serviceKeyword,
+    contentEvidenceEligible: isEligible,
+  });
 }
 
 /**
