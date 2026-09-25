@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { RegionItem } from '../types/regions';
 import { SearchIntentItem } from '../types/intents';
-import { SITE_CONFIG } from '../config/site-config';
+import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../config/site-config';
 import { shouldEmitAreaServed } from '../contracts/regions-contract';
 import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
 
@@ -38,7 +38,7 @@ export function buildDynamicMetadata(
   const publicHref = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
 
   return {
-    metadataBase: new URL(siteOrigin || 'http://localhost:3000'),
+    metadataBase: new URL(siteOrigin || OFFICIAL_SITE_ORIGIN),
     title,
     description,
     alternates: {
@@ -91,8 +91,8 @@ export function buildDynamicJsonLd(
     intent.serviceKeyword,
     siteOrigin
   );
-  const cleanOrigin = siteOrigin ? siteOrigin.replace(/\/$/, '') : '';
-  const pageUrl = canonicalResult.canonicalUrl || (cleanOrigin ? `${cleanOrigin}${buildPublicHref(region.keywordRegionName, intent.serviceKeyword)}` : buildPublicHref(region.keywordRegionName, intent.serviceKeyword));
+  const cleanOrigin = siteOrigin ? siteOrigin.replace(/\/$/, '') : OFFICIAL_SITE_ORIGIN;
+  const pageUrl = canonicalResult.canonicalUrl || `${cleanOrigin}${buildPublicHref(region.keywordRegionName, intent.serviceKeyword)}`;
 
   const emitAreaServed = shouldEmitAreaServed(region);
 
@@ -127,7 +127,7 @@ export function buildDynamicJsonLd(
         '@type': 'ListItem',
         position: 1,
         name: '홈',
-        item: cleanOrigin ? `${cleanOrigin}/` : '/',
+        item: `${cleanOrigin}/`,
       },
       {
         '@type': 'ListItem',

@@ -4,7 +4,7 @@ import './globals.css';
 import { Header } from '../components/common/Header';
 import { Footer } from '../components/common/Footer';
 import { MobileFixedCTA } from '../components/common/MobileFixedCTA';
-import { SITE_CONFIG } from '../lib/config/site-config';
+import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../lib/config/site-config';
 
 const scoreDream = localFont({
   src: [
@@ -43,7 +43,7 @@ const scoreDream = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_CONFIG.siteOrigin || 'http://localhost:3000'),
+  metadataBase: new URL(SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN),
   title: `${SITE_CONFIG.brandName} | ${SITE_CONFIG.businessCategory}`,
   description:
     '베란다와 세탁실의 기존 벽면 상태를 확인하고 필요한 작업 범위와 탄성코트 시공 정보를 안내하는 올케어입니다.',

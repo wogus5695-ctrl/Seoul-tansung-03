@@ -11,7 +11,7 @@ import { ApprovalStatusType } from '../manifest/seoul-region-manifest';
 import { PublicationState } from '../types/regions';
 import { ServiceKeyword } from '../types/intents';
 import { buildCanonicalUrl } from '../url/url-builder';
-import { SITE_CONFIG } from '../config/site-config';
+import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN, OFFICIAL_SITE_HOST } from '../config/site-config';
 
 /**
  * Normalizes query string and pathname for canonical URLs:
@@ -58,8 +58,8 @@ export function normalizeCanonicalQuery(rawSearchOrPath: string): string {
   return `/?k=${normalizedEncodedKey}`;
 }
 
-export const OFFICIAL_PRODUCTION_HOST = 'www.allcaretan.co.kr';
-export const OFFICIAL_PRODUCTION_ORIGIN = 'https://www.allcaretan.co.kr';
+export const OFFICIAL_PRODUCTION_HOST = OFFICIAL_SITE_HOST;
+export const OFFICIAL_PRODUCTION_ORIGIN = OFFICIAL_SITE_ORIGIN;
 
 /**
  * Checks whether an origin is valid for preview/local environments.

@@ -12,7 +12,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { SITE_CONFIG, isContactConfigured } from '../lib/config/site-config';
+import { SITE_CONFIG, isContactConfigured, resolveSiteOrigin, OFFICIAL_SITE_ORIGIN } from '../lib/config/site-config';
 import { SEARCH_INTENTS, SERVICE_KEYWORDS } from '../lib/contracts/intents-contract';
 import {
   SEOUL_DONG_MANIFEST_RECORDS,
@@ -1730,6 +1730,39 @@ test('PHASE 6-B: Canonical Sample Matrix verification across 8 required cases', 
     assert.strictEqual(res.isSuccess, true);
     assert.strictEqual(res.canonicalUrl, s.expectedCanonical);
   }
+});
+
+// ----------------------------------------------------
+// PHASE 6-B5: NEGATIVE ORIGIN & PRODUCTION SSOT TESTS
+// ----------------------------------------------------
+test('PHASE 6-B5: Negative Origin Tests & Production SSOT Resolution', () => {
+  assert.strictEqual(OFFICIAL_SITE_ORIGIN, 'https://www.allcaretan.co.kr');
+
+  // Case A: ENV missing
+  assert.strictEqual(resolveSiteOrigin(undefined), 'https://www.allcaretan.co.kr');
+  assert.strictEqual(resolveSiteOrigin(null), 'https://www.allcaretan.co.kr');
+  assert.strictEqual(resolveSiteOrigin(''), 'https://www.allcaretan.co.kr');
+
+  // Case B: ENV = valid official origin
+  assert.strictEqual(resolveSiteOrigin('https://www.allcaretan.co.kr'), 'https://www.allcaretan.co.kr');
+  assert.strictEqual(resolveSiteOrigin('https://www.allcaretan.co.kr/'), 'https://www.allcaretan.co.kr');
+
+  // Case C: ENV = http://localhost:3000
+  assert.strictEqual(resolveSiteOrigin('http://localhost:3000'), 'https://www.allcaretan.co.kr');
+  assert.strictEqual(resolveSiteOrigin('http://127.0.0.1:3000'), 'https://www.allcaretan.co.kr');
+
+  // Case D: ENV = Vercel preview domain
+  assert.strictEqual(resolveSiteOrigin('https://seoul-tansung-03.vercel.app'), 'https://www.allcaretan.co.kr');
+  assert.strictEqual(resolveSiteOrigin('https://preview.allcaretan.co.kr'), 'https://www.allcaretan.co.kr');
+
+  // Case E: ENV = http://www.allcaretan.co.kr (HTTP insecure)
+  assert.strictEqual(resolveSiteOrigin('http://www.allcaretan.co.kr'), 'https://www.allcaretan.co.kr');
+
+  // Case F: ENV = non-www https://allcaretan.co.kr
+  assert.strictEqual(resolveSiteOrigin('https://allcaretan.co.kr'), 'https://www.allcaretan.co.kr');
+
+  // Invariant: SITE_CONFIG.siteOrigin must be strictly OFFICIAL_SITE_ORIGIN
+  assert.strictEqual(SITE_CONFIG.siteOrigin, 'https://www.allcaretan.co.kr');
 });
 
 console.log('\n====================================================');
