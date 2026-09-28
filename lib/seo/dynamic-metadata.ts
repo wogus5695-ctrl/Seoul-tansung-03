@@ -5,6 +5,8 @@ import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../config/site-config';
 import { shouldEmitAreaServed } from '../contracts/regions-contract';
 import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
 
+import { isPilotIndexableKey } from '../contracts/publication-gate';
+
 /**
  * Builds SSR Metadata for a dynamic keyword landing page.
  *
@@ -12,7 +14,8 @@ import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
  * - Title strictly starts with Exact Dynamic Keyword: {keywordRegionName} {serviceKeyword}
  * - Meta Description strictly starts with Exact Dynamic Keyword
  * - Canonical is built using the hardened buildCanonicalUrl contract
- * - Test fixture and draft regions strictly emit NOINDEX
+ * - Phase 6-C1: Exactly 5 Pilot Dynamic URLs on the publication allowlist emit index, follow
+ * - All other 1,903 URLs strictly emit NOINDEX
  */
 export function buildDynamicMetadata(
   region: RegionItem,
@@ -29,11 +32,9 @@ export function buildDynamicMetadata(
     siteOrigin
   );
 
-  // In Phase 4-A, all test fixtures and unverified regions must be NOINDEX
-  const isProductionIndexable =
-    process.env.NODE_ENV === 'production' &&
-    region.publicationState === 'INDEXABLE' &&
-    canonicalResult.isSuccess;
+  // Phase 6-C1: Exactly 5 Pilot Dynamic URLs achieve INDEXABLE status (index, follow)
+  const isAllowlistedPilot = isPilotIndexableKey(region.keywordRegionName, intent.serviceKeyword);
+  const isProductionIndexable = isAllowlistedPilot && canonicalResult.isSuccess;
 
   const publicHref = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
 

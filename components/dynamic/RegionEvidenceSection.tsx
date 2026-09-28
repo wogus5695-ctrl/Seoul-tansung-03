@@ -243,9 +243,12 @@ export function RegionEvidenceSection({ region, intent }: RegionEvidenceSectionP
                   </div>
                 )}
 
-                {/* Data Note Disclaimer */}
-                <div className="text-[11px] text-[#8C8375] text-right border-t border-[#F0EAE1] pt-3">
-                  ※ 본 지표는 한국부동산원 공동주택 식별정보(2026.08) 공개 데이터 등록 기준입니다.
+                {/* Data Note Disclaimer & Hub Return Link */}
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#8C8375] border-t border-[#F0EAE1] pt-3">
+                  <a href="/sitemap-seoul" className="hover:underline font-semibold text-[#6B755D]">
+                    서울 지역 안내 &rarr;
+                  </a>
+                  <span>※ 본 지표는 한국부동산원 공동주택 식별정보(2026.08) 공개 데이터 등록 기준입니다.</span>
                 </div>
               </div>
             );

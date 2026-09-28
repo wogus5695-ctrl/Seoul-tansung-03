@@ -53,6 +53,7 @@ import {
   evaluateIntentPublicationGate,
   getPublicationOrigin,
   PublicationGateInput,
+  PILOT_INDEXABLE_KEYS,
 } from '../lib/contracts/publication-gate';
 import {
   PRODUCTION_REGION_EVIDENCE,
@@ -1382,6 +1383,7 @@ test('PHASE 6-A / 6-C0C-1: evaluatePublicationGate 12-Rule Gate Matrix & User Ap
     serviceAreaApproved: true,
     userPublicationApproval: true,
     contentEvidenceEligible: true,
+    publicationAllowlist: true,
   };
 
   // 1. All 12 pass -> INDEXABLE
@@ -1699,7 +1701,7 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   assert.strictEqual(localhostLeakCount, 0, 'Must have 0 localhost leaks');
   assert.strictEqual(previewLeakCount, 0, 'Must have 0 preview leaks');
   assert.strictEqual(mainPageCanonicalLeakCount, 0, 'Must have 0 main page canonical leaks');
-  assert.strictEqual(noindexFollowNocacheCount, 0, 'All 1,908 dynamic pages must be noindex, nofollow, nocache');
+  assert.strictEqual(noindexFollowNocacheCount, 5, 'Exactly 5 pilot dynamic pages are indexable');
   assert.strictEqual(areaServedCount, 0, 'Area served count must be 0');
 });
 
@@ -2027,7 +2029,70 @@ test('PHASE 6-C0C-2B: Full 1,908 Dynamic URL Strict INDEXABLE = 0 Lock', () => {
   assert.strictEqual(indexableCount, 0, 'INDEXABLE count across all 1,908 dynamic URLs must be strictly 0');
 });
 
-test('PHASE 6-C0C-1: Pilot Region Evidence Publication Gate Simulation', () => {
+test('PHASE 6-C1: Exact 5 Pilot Dynamic URLs Indexability & 1,903 NOINDEX Lock', () => {
+  let indexableCount = 0;
+  let noindexCount = 0;
+
+  const baseInput = {
+    publicationStateTransitionApproved: true,
+    productionCanonicalReady: true,
+    businessSSOTValid: true,
+    claimGuardPass: true,
+    dynamicContentValid: true,
+    metadataValid: true,
+    internalLinksValid: true,
+    requiredAssetsValid: true,
+    serviceAreaApproved: true,
+    userPublicationApproval: true, // User approval active in Phase 6-C1
+  };
+
+  const indexableDynamicKeys: string[] = [];
+
+  for (const r of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      const gateRes = evaluateIntentPublicationGate(r.id, intent.serviceKeyword, {
+        ...baseInput,
+        regionApprovalStatus: r.disambiguationStatus === 'REQUIRES_DISAMBIGUATION' ? 'COLLISION_HOLD' : 'APPROVED',
+      });
+
+      if (gateRes.isIndexable) {
+        indexableCount++;
+        indexableDynamicKeys.push(`${r.keywordRegionName}-${intent.serviceKeyword}`);
+      } else {
+        noindexCount++;
+      }
+    }
+  }
+
+  assert.strictEqual(indexableCount, 5, 'Indexable count must be EXACTLY 5 pilot dynamic URLs');
+  assert.strictEqual(noindexCount, 1903, 'NOINDEX count must be EXACTLY 1,903 dynamic URLs');
+  assert.deepStrictEqual(indexableDynamicKeys.sort(), [...PILOT_INDEXABLE_KEYS].sort());
+});
+
+test('PHASE 6-C1: Sitemap Inclusion Contract & 0 NOINDEX Leakage', () => {
+  // Invariant: Sitemap contains strictly 7 URLs (2 static + 5 pilot dynamic URLs)
+  const origin = OFFICIAL_SITE_ORIGIN;
+  const sitemapUrls = [
+    `${origin}/`,
+    `${origin}/sitemap-seoul`,
+    ...PILOT_INDEXABLE_KEYS.map((key) => `${origin}/?k=${encodeURIComponent(key)}`),
+  ];
+
+  assert.strictEqual(sitemapUrls.length, 7, 'Sitemap URL count must be exactly 7');
+
+  const dynamicSitemapUrls = sitemapUrls.filter((u) => u.includes('/?k='));
+  assert.strictEqual(dynamicSitemapUrls.length, 5, 'Dynamic sitemap URLs must be exactly 5');
+
+  // Verify zero leak of collision hold (seoul-eunpyeong-sinsa / 신사동) or other intents
+  for (const url of sitemapUrls) {
+    assert(!url.includes('신사동'), 'Sitemap must not contain collision hold region (신사동)');
+    assert(!url.includes('탄성코트시공'), 'Sitemap must not contain non-pilot intent (탄성코트시공)');
+    assert(!url.includes('localhost'), 'Sitemap must not contain localhost');
+    assert(url.startsWith('https://www.allcaretan.co.kr'), 'Sitemap URLs must use production origin');
+  }
+});
+
+test('PHASE 6-C1: Pilot Region Evidence Publication Gate Simulation', () => {
   // Verify that when real evidence is supplied for a specific region + intent keyword,
   // ONLY that specific intent keyword can achieve INDEXABLE status (when user approval is true).
   const syntheticPilotEvidence: RegionEvidenceItem = {
@@ -2082,7 +2147,7 @@ test('PHASE 6-C0C-1: Pilot Region Evidence Publication Gate Simulation', () => {
   );
   assert.strictEqual(unmatchedIntentGate.isIndexable, false);
   assert.strictEqual(unmatchedIntentGate.targetPublicationState, 'PUBLISHED_NOINDEX');
-  assert(unmatchedIntentGate.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
+  assert(unmatchedIntentGate.blockingReasons.some((r) => r.includes('NOT_ON_PUBLICATION_ALLOWLIST')));
 
   // 3. Matched intent on DIFFERENT region ('강남구') -> BLOCKED
   const differentRegionGate = evaluateIntentPublicationGate(

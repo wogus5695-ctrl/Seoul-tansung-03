@@ -168,6 +168,23 @@ export function evaluateProductionCanonicalGate(
   };
 }
 
+export const PILOT_INDEXABLE_KEYS: readonly string[] = [
+  '강남구-탄성코트',
+  '불광동-탄성코트',
+  '마곡동-탄성코트',
+  '성수동-탄성코트',
+  '창신동-탄성코트',
+];
+
+/**
+ * Checks whether a specific region keyword + service keyword pair is on the explicit publication allowlist.
+ */
+export function isPilotIndexableKey(keywordRegionName: string, serviceKeyword: ServiceKeyword): boolean {
+  if (!keywordRegionName || !serviceKeyword) return false;
+  const dynamicKey = `${keywordRegionName}-${serviceKeyword}`;
+  return PILOT_INDEXABLE_KEYS.includes(dynamicKey);
+}
+
 export interface PublicationGateInput {
   readonly regionId: string;
   readonly regionApprovalStatus: ApprovalStatusType;
@@ -182,6 +199,7 @@ export interface PublicationGateInput {
   readonly serviceAreaApproved: boolean;
   readonly userPublicationApproval: boolean; // CRITICAL: Explicit user approval gate
   readonly contentEvidenceEligible?: boolean; // Phase 6-C0C-1: Verified local content differentiation evidence
+  readonly publicationAllowlist?: boolean; // Phase 6-C1: Explicit 5-URL Pilot Allowlist
   readonly serviceKeyword?: ServiceKeyword; // Optional intent context
 }
 
@@ -192,14 +210,16 @@ export interface PublicationGateResult {
 }
 
 /**
- * Strict Publication Gate (Phase 6-A / 6-C0C-1 Contract):
- * All 12 criteria must be satisfied to promote a region or URL to INDEXABLE.
+ * Strict Publication Gate (Phase 6-A / 6-C0C-1 / 6-C1 Contract):
+ * All 13 criteria must be satisfied to promote a region or URL to INDEXABLE.
  *
  * SAFETY INVARIANTS:
  * 1. Even if all technical criteria pass, if userPublicationApproval === false,
  *    INDEXABLE promotion is strictly blocked.
  * 2. Even if user approves, if contentEvidenceEligible !== true (no verified Tier A/B/C evidence),
  *    INDEXABLE promotion is strictly blocked to prevent mass template similarity penalties.
+ * 3. Even if evidence exists, if publicationAllowlist !== true (not in PILOT_INDEXABLE_KEYS),
+ *    INDEXABLE promotion is strictly blocked to restrict indexing to the exact 5 pilot URLs.
  */
 export function evaluatePublicationGate(input: PublicationGateInput): PublicationGateResult {
   const blockingReasons: string[] = [];
@@ -262,9 +282,13 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
   }
 
   // 12. CRITICAL: Content Evidence Differentiation Gate (Phase 6-C0C-1)
-  // Dynamic page cannot be promoted to INDEXABLE without verified Tier A/B/C local evidence.
   if (input.contentEvidenceEligible !== true) {
     blockingReasons.push('CONTENT_EVIDENCE_NOT_ELIGIBLE: Verified region evidence (Tier A/B/C) is required for INDEXABLE status.');
+  }
+
+  // 13. CRITICAL: Publication Allowlist Gate (Phase 6-C1)
+  if (input.publicationAllowlist !== true) {
+    blockingReasons.push('NOT_ON_PUBLICATION_ALLOWLIST: Only approved pilot dynamic URLs on the explicit publication allowlist may achieve INDEXABLE status.');
   }
 
   const isIndexable = blockingReasons.length === 0;
@@ -278,20 +302,31 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
 
 /**
  * Evaluates publication gate for a specific region and service keyword,
- * automatically looking up whether verified evidence exists in the evidence repository.
+ * automatically looking up whether verified evidence exists in the evidence repository
+ * and verifying whether the URL key is on the explicit publication allowlist.
  */
 export function evaluateIntentPublicationGate(
   regionId: string,
   serviceKeyword: ServiceKeyword,
-  baseInput: Omit<PublicationGateInput, 'regionId' | 'serviceKeyword' | 'contentEvidenceEligible'>,
+  baseInput: Omit<PublicationGateInput, 'regionId' | 'serviceKeyword' | 'contentEvidenceEligible' | 'publicationAllowlist'>,
   dataset: readonly RegionEvidenceItem[] = PRODUCTION_REGION_EVIDENCE
 ): PublicationGateResult {
   const isEligible = hasRegionEvidence(regionId, serviceKeyword, dataset);
+  let keywordRegionName = '';
+  if (regionId === 'seoul-gangnam-gu' || regionId === 'seoul-gangnam') keywordRegionName = '강남구';
+  else if (regionId === 'seoul-eunpyeong-bulgwang') keywordRegionName = '불광동';
+  else if (regionId === 'seoul-gangseo-마곡동' || regionId === 'seoul-gangseo-magok') keywordRegionName = '마곡동';
+  else if (regionId === 'seoul-seongdong-성수동' || regionId === 'seoul-seongdong-seongsu') keywordRegionName = '성수동';
+  else if (regionId === 'seoul-jongno-창신동' || regionId === 'seoul-jongno-changsin') keywordRegionName = '창신동';
+
+  const isOnAllowlist = keywordRegionName ? isPilotIndexableKey(keywordRegionName, serviceKeyword) : false;
+
   return evaluatePublicationGate({
     ...baseInput,
     regionId,
     serviceKeyword,
     contentEvidenceEligible: isEligible,
+    publicationAllowlist: isOnAllowlist,
   });
 }
 
