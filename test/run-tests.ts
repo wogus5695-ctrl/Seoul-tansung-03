@@ -1892,41 +1892,100 @@ test('PHASE 6-C0C-1: Region Evidence Validator & Claim Guard Enforcement', () =>
   assert(badImageIssues.some((i) => i.code === 'INVALID_IMAGE_PATH'));
 });
 
-test('PHASE 6-C0C-1: Production Evidence Repository Zero-Contamination Invariant', () => {
-  // Invariant 1: Production evidence array is strictly empty at initialization
+test('PHASE 6-C0C-2B: Production Evidence Repository 5 Pilot Records Invariant', () => {
+  // Invariant 1: PRODUCTION_REGION_EVIDENCE length is strictly 5
   assert.strictEqual(
     PRODUCTION_REGION_EVIDENCE.length,
-    0,
-    'PRODUCTION_REGION_EVIDENCE must have length 0 (Zero fake/placeholder data)'
+    5,
+    'PRODUCTION_REGION_EVIDENCE must have length 5 (Exactly 5 pilot regions)'
   );
 
-  // Invariant 2: Across all 318 production regions x 6 search intents, evidence count is 0
-  let totalPairsChecked = 0;
-  let pairsWithEvidence = 0;
+  const PILOT_REGION_IDS = [
+    'seoul-gangnam-gu',
+    'seoul-eunpyeong-bulgwang',
+    'seoul-gangseo-마곡동',
+    'seoul-seongdong-성수동',
+    'seoul-jongno-창신동',
+  ];
 
+  const evidenceRegionIds = PRODUCTION_REGION_EVIDENCE.map((item) => item.regionId);
+  assert.deepStrictEqual(evidenceRegionIds, PILOT_REGION_IDS);
+
+  // Invariant 2: Non-pilot regions (313 regions) have 0 evidence
+  let nonPilotPairsWithEvidence = 0;
   for (const r of PRODUCTION_REGIONS) {
-    for (const intent of SEARCH_INTENTS) {
-      totalPairsChecked++;
-      if (hasRegionEvidence(r.id, intent.serviceKeyword)) {
-        pairsWithEvidence++;
+    if (!PILOT_REGION_IDS.includes(r.id)) {
+      for (const intent of SEARCH_INTENTS) {
+        if (hasRegionEvidence(r.id, intent.serviceKeyword)) {
+          nonPilotPairsWithEvidence++;
+        }
       }
-      const retrieved = getRegionEvidence(r.id, intent.serviceKeyword);
-      assert.strictEqual(retrieved.length, 0);
     }
   }
+  assert.strictEqual(nonPilotPairsWithEvidence, 0, 'Non-pilot regions must have 0 evidence');
 
-  assert.strictEqual(totalPairsChecked, 1908, 'Must verify all 1,908 region-intent pairs');
-  assert.strictEqual(pairsWithEvidence, 0, 'Zero region-intent pairs may possess evidence in production SSOT');
+  // Invariant 3: Collision Hold region (seoul-eunpyeong-sinsa) has 0 evidence
+  assert.strictEqual(getRegionEvidence('seoul-eunpyeong-sinsa').length, 0);
+
+  // Invariant 4: Dataset validation passes cleanly
+  const datasetValidation = validateRegionEvidenceDataset(PRODUCTION_REGION_EVIDENCE, PRODUCTION_REGIONS);
+  assert.strictEqual(datasetValidation.isValid, true, `Dataset issues: ${JSON.stringify(datasetValidation.issues)}`);
 });
 
-test('PHASE 6-C0C-1: Full 1,908 Dynamic URL Publication Gate & Strict INDEXABLE = 0 Lock', () => {
-  // Invariant: Without verified local evidence, evaluateIntentPublicationGate MUST block INDEXABLE
-  // even under fully simulated technical and administrative approval.
+test('PHASE 6-C0C-2B: Data Contract Test for Exact 5 Pilot Numerical Facts', () => {
+  // 1. 강남구
+  const gangnam = getRegionEvidence('seoul-gangnam-gu')[0];
+  assert(gangnam && gangnam.facts.publicHousingMetrics);
+  const gMetrics = gangnam.facts.publicHousingMetrics!;
+  assert.strictEqual(gMetrics.registeredUnits, 4421);
+  assert.strictEqual(gMetrics.validApprovalDates, 4385);
+  assert.strictEqual(gMetrics.ageBuckets['20to29'] + gMetrics.ageBuckets['30plus'], 3038);
+  assert.strictEqual(gMetrics.share20Plus, 69.3);
+
+  // 2. 불광동
+  const bulgwang = getRegionEvidence('seoul-eunpyeong-bulgwang')[0];
+  assert(bulgwang && bulgwang.facts.publicHousingMetrics);
+  const bMetrics = bulgwang.facts.publicHousingMetrics!;
+  assert.strictEqual(bMetrics.registeredUnits, 1447);
+  assert.strictEqual(bMetrics.validApprovalDates, 1442);
+  assert.strictEqual(bMetrics.ageBuckets['20to29'] + bMetrics.ageBuckets['30plus'], 949);
+  assert.strictEqual(bMetrics.share20Plus, 65.8);
+
+  // 3. 마곡동
+  const magok = getRegionEvidence('seoul-gangseo-마곡동')[0];
+  assert(magok && magok.facts.publicHousingMetrics);
+  const mMetrics = magok.facts.publicHousingMetrics!;
+  assert.strictEqual(mMetrics.registeredUnits, 95);
+  assert.strictEqual(mMetrics.validApprovalDates, 94);
+  assert.strictEqual(mMetrics.ageBuckets['20to29'] + mMetrics.ageBuckets['30plus'], 46);
+  assert.strictEqual(mMetrics.share20Plus, 48.9);
+
+  // 4. 성수동
+  const seongsu = getRegionEvidence('seoul-seongdong-성수동')[0];
+  assert(seongsu && seongsu.facts.publicHousingMetrics);
+  const sMetrics = seongsu.facts.publicHousingMetrics!;
+  assert.strictEqual(sMetrics.registeredUnits, 315);
+  assert.strictEqual(sMetrics.validApprovalDates, 315);
+  assert.strictEqual(sMetrics.ageBuckets['20to29'] + sMetrics.ageBuckets['30plus'], 186);
+  assert.strictEqual(sMetrics.share20Plus, 59.0);
+
+  // 5. 창신동
+  const changsin = getRegionEvidence('seoul-jongno-창신동')[0];
+  assert(changsin && changsin.facts.publicHousingMetrics);
+  const cMetrics = changsin.facts.publicHousingMetrics!;
+  assert.strictEqual(cMetrics.registeredUnits, 274);
+  assert.strictEqual(cMetrics.validApprovalDates, 273);
+  assert.strictEqual(cMetrics.ageBuckets['20to29'] + cMetrics.ageBuckets['30plus'], 253);
+  assert.strictEqual(cMetrics.share20Plus, 92.7);
+});
+
+test('PHASE 6-C0C-2B: Full 1,908 Dynamic URL Strict INDEXABLE = 0 Lock', () => {
+  // Invariant: Without explicit userPublicationApproval (userPublicationApproval = false),
+  // ALL 1,908 dynamic URLs remain PUBLISHED_NOINDEX (INDEXABLE count = 0).
   let checkedCount = 0;
   let indexableCount = 0;
-  let blockedByEvidenceCount = 0;
 
-  const simulatedApprovedBase = {
+  const defaultGateInput = {
     regionApprovalStatus: 'APPROVED' as const,
     publicationStateTransitionApproved: true,
     productionCanonicalReady: true,
@@ -1937,7 +1996,7 @@ test('PHASE 6-C0C-1: Full 1,908 Dynamic URL Publication Gate & Strict INDEXABLE 
     internalLinksValid: true,
     requiredAssetsValid: true,
     serviceAreaApproved: true,
-    userPublicationApproval: true, // User approval simulated ON
+    userPublicationApproval: false, // Strict Lock: false in Phase 6-C0C-2B
   };
 
   for (const r of PRODUCTION_REGIONS) {
@@ -1947,7 +2006,7 @@ test('PHASE 6-C0C-1: Full 1,908 Dynamic URL Publication Gate & Strict INDEXABLE 
         r.id,
         intent.serviceKeyword,
         {
-          ...simulatedApprovedBase,
+          ...defaultGateInput,
           regionApprovalStatus: r.disambiguationStatus === 'REQUIRES_DISAMBIGUATION' ? 'COLLISION_HOLD' : 'APPROVED',
         }
       );
@@ -1961,20 +2020,11 @@ test('PHASE 6-C0C-1: Full 1,908 Dynamic URL Publication Gate & Strict INDEXABLE 
         'PUBLISHED_NOINDEX',
         `Dynamic URL for ${r.id} / ${intent.serviceKeyword} must be PUBLISHED_NOINDEX`
       );
-
-      if (gateResult.blockingReasons.some((reason) => reason.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE'))) {
-        blockedByEvidenceCount++;
-      }
     }
   }
 
   assert.strictEqual(checkedCount, 1908);
   assert.strictEqual(indexableCount, 0, 'INDEXABLE count across all 1,908 dynamic URLs must be strictly 0');
-  assert.strictEqual(
-    blockedByEvidenceCount,
-    1908,
-    'All 1,908 dynamic URLs must be blocked by CONTENT_EVIDENCE_NOT_ELIGIBLE'
-  );
 });
 
 test('PHASE 6-C0C-1: Pilot Region Evidence Publication Gate Simulation', () => {

@@ -31,6 +31,32 @@ export interface RegionEvidenceFacts {
   readonly publicMetric?: string;
   /** Concrete verified notes (strictly zero unverified claims) */
   readonly notes?: readonly string[];
+  /** Phase 6-C0C-2B Structured Public Housing Metrics */
+  readonly publicHousingMetrics?: {
+    readonly registeredUnits: number;
+    readonly households: number;
+    readonly housingTypes: {
+      readonly apartment: number;
+      readonly rowHouse: number;
+      readonly multiFamily: number;
+      readonly unknown: number;
+    };
+    readonly validApprovalDates: number;
+    readonly missingOrInvalidApprovalDates: number;
+    readonly ageBuckets: {
+      readonly under10: number;
+      readonly '10to19': number;
+      readonly '20to29': number;
+      readonly '30plus': number;
+    };
+    readonly share20Plus: number;
+    readonly mappingConfidence: 'HIGH' | 'MEDIUM' | 'LOW' | 'UNMATCHED';
+    readonly dataQuality: 'HIGH' | 'MEDIUM' | 'LOW' | 'INSUFFICIENT';
+  };
+  /** Data limitation note */
+  readonly limitationNote?: string;
+  /** Intent-specific decision guidance checkpoints */
+  readonly intentCheckpoints?: Partial<Record<ServiceKeyword, string>>;
 }
 
 export interface RegionEvidenceItem {
