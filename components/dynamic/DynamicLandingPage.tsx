@@ -5,7 +5,6 @@ import { buildDynamicJsonLd } from '../../lib/seo/dynamic-metadata';
 import { HeroSection } from '../sections/HeroSection';
 import { WallCheckSection } from '../sections/WallCheckSection';
 import { BeforeAfterSection } from '../sections/BeforeAfterSection';
-import { RegionEvidenceSection } from './RegionEvidenceSection';
 import { ResidentialSpacesSection } from '../sections/ResidentialSpacesSection';
 import { DecisionGuideSection } from '../sections/DecisionGuideSection';
 import { HowAllcareWorksSection } from '../sections/HowAllcareWorksSection';
@@ -38,9 +37,6 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
       {/* 04 BEFORE & AFTER */}
       <BeforeAfterSection showDisclaimer />
 
-      {/* 04-B Verified Region Evidence (Tier-C pilot data, Zero-DOM for non-pilot regions) */}
-      <RegionEvidenceSection region={region} intent={intent} />
-
       {/* 05 RESIDENTIAL SPACES */}
       <ResidentialSpacesSection />
 
@@ -61,3 +57,4 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
     </main>
   );
 }
+
