@@ -5,8 +5,6 @@ import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../config/site-config';
 import { shouldEmitAreaServed } from '../contracts/regions-contract';
 import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
 
-import { isPilotIndexableKey } from '../contracts/publication-gate';
-
 /**
  * Builds SSR Metadata for a dynamic keyword landing page.
  *
@@ -32,9 +30,10 @@ export function buildDynamicMetadata(
     siteOrigin
   );
 
-  // Phase 6-C1: Exactly 5 Pilot Dynamic URLs achieve INDEXABLE status (index, follow)
-  const isAllowlistedPilot = isPilotIndexableKey(region.keywordRegionName, intent.serviceKeyword);
-  const isProductionIndexable = isAllowlistedPilot && canonicalResult.isSuccess;
+  // Phase 6-C2: All 317 Approved Seoul Regions (1,902 Dynamic URLs) achieve INDEXABLE status (index, follow)
+  // Collision Hold region (seoul-eunpyeong-sinsa) strictly emits noindex, nofollow, nocache
+  const isCollisionHold = region.id === 'seoul-eunpyeong-sinsa' || region.publicationState === 'PUBLISHED_NOINDEX';
+  const isProductionIndexable = !isCollisionHold && canonicalResult.isSuccess;
 
   const publicHref = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
 

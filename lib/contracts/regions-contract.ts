@@ -31,10 +31,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 2. 중구
   {
@@ -51,10 +51,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 3. 용산구
   {
@@ -71,10 +71,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 4. 성동구
   {
@@ -91,10 +91,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 5. 광진구
   {
@@ -111,10 +111,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 6. 동대문구
   {
@@ -131,10 +131,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 7. 중랑구
   {
@@ -151,10 +151,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 8. 성북구
   {
@@ -171,10 +171,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 9. 강북구
   {
@@ -191,10 +191,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 10. 도봉구
   {
@@ -211,10 +211,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 11. 노원구
   {
@@ -231,10 +231,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 12. 은평구 (Reconciled from Pilot)
   {
@@ -251,10 +251,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 13. 서대문구
   {
@@ -271,10 +271,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 14. 마포구
   {
@@ -291,10 +291,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 15. 양천구
   {
@@ -311,10 +311,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 16. 강서구
   {
@@ -331,10 +331,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 17. 구로구
   {
@@ -351,10 +351,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 18. 금천구
   {
@@ -371,10 +371,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 19. 영등포구
   {
@@ -391,10 +391,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 20. 동작구
   {
@@ -411,10 +411,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 21. 관악구
   {
@@ -431,10 +431,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 22. 서초구
   {
@@ -451,10 +451,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 23. 강남구
   {
@@ -471,10 +471,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 24. 송파구
   {
@@ -491,10 +491,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 25. 강동구
   {
@@ -511,10 +511,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 26. 불광동 (Pilot DONG)
   {
@@ -531,10 +531,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     nearbyRegionIds: [],
     disambiguationStatus: 'NOT_REQUIRED',
     source: 'production',
-    rolloutStage: 'pilot',
+    rolloutStage: 'full',
     isSyntheticFixture: false,
-    publicationState: 'PUBLISHED_NOINDEX',
-    isServiceAreaApproved: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
   },
   // 27. 신사동 (Pilot DONG, Collision Hold)
   {

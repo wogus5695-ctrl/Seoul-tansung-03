@@ -281,15 +281,11 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
     blockingReasons.push('USER_APPROVAL_PENDING: Explicit user publication approval is required for INDEXABLE status.');
   }
 
-  // 12. CRITICAL: Content Evidence Differentiation Gate (Phase 6-C0C-1)
-  if (input.contentEvidenceEligible !== true) {
-    blockingReasons.push('CONTENT_EVIDENCE_NOT_ELIGIBLE: Verified region evidence (Tier A/B/C) is required for INDEXABLE status.');
-  }
+  // 12. Content Evidence (Phase 6-C2: Optional for approved regions, non-blocking)
+  // Tier-C Evidence enriches content but is not a mandatory gate for approved regions in full rollout.
 
-  // 13. CRITICAL: Publication Allowlist Gate (Phase 6-C1)
-  if (input.publicationAllowlist !== true) {
-    blockingReasons.push('NOT_ON_PUBLICATION_ALLOWLIST: Only approved pilot dynamic URLs on the explicit publication allowlist may achieve INDEXABLE status.');
-  }
+  // 13. Publication Allowlist (Phase 6-C2: Full Approved Rollout allows all approved regions)
+  // All 317 approved regions are permitted for indexing; Collision Hold regions remain strictly blocked by Rule #1.
 
   const isIndexable = blockingReasons.length === 0;
 
@@ -301,9 +297,9 @@ export function evaluatePublicationGate(input: PublicationGateInput): Publicatio
 }
 
 /**
- * Evaluates publication gate for a specific region and service keyword,
- * automatically looking up whether verified evidence exists in the evidence repository
- * and verifying whether the URL key is on the explicit publication allowlist.
+ * Evaluates publication gate for a specific region and service keyword in Phase 6-C2.
+ * All 317 Approved Seoul regions achieve INDEXABLE status for all 6 intents when user approval is true.
+ * Collision Hold regions (e.g. seoul-eunpyeong-sinsa) remain strictly PUBLISHED_NOINDEX.
  */
 export function evaluateIntentPublicationGate(
   regionId: string,
@@ -312,21 +308,15 @@ export function evaluateIntentPublicationGate(
   dataset: readonly RegionEvidenceItem[] = PRODUCTION_REGION_EVIDENCE
 ): PublicationGateResult {
   const isEligible = hasRegionEvidence(regionId, serviceKeyword, dataset);
-  let keywordRegionName = '';
-  if (regionId === 'seoul-gangnam-gu' || regionId === 'seoul-gangnam') keywordRegionName = '강남구';
-  else if (regionId === 'seoul-eunpyeong-bulgwang') keywordRegionName = '불광동';
-  else if (regionId === 'seoul-gangseo-마곡동' || regionId === 'seoul-gangseo-magok') keywordRegionName = '마곡동';
-  else if (regionId === 'seoul-seongdong-성수동' || regionId === 'seoul-seongdong-seongsu') keywordRegionName = '성수동';
-  else if (regionId === 'seoul-jongno-창신동' || regionId === 'seoul-jongno-changsin') keywordRegionName = '창신동';
-
-  const isOnAllowlist = keywordRegionName ? isPilotIndexableKey(keywordRegionName, serviceKeyword) : false;
+  const isCollisionHold = regionId === 'seoul-eunpyeong-sinsa';
 
   return evaluatePublicationGate({
     ...baseInput,
     regionId,
     serviceKeyword,
+    regionApprovalStatus: isCollisionHold ? 'COLLISION_HOLD' : baseInput.regionApprovalStatus || 'APPROVED',
     contentEvidenceEligible: isEligible,
-    publicationAllowlist: isOnAllowlist,
+    publicationAllowlist: !isCollisionHold,
   });
 }
 

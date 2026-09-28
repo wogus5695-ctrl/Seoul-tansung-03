@@ -53,7 +53,6 @@ import {
   evaluateIntentPublicationGate,
   getPublicationOrigin,
   PublicationGateInput,
-  PILOT_INDEXABLE_KEYS,
 } from '../lib/contracts/publication-gate';
 import {
   PRODUCTION_REGION_EVIDENCE,
@@ -471,14 +470,11 @@ test('Production Dataset Policy: Production regions array has exactly 318 region
   const dongRegions = PRODUCTION_REGIONS.filter((r) => r.regionType === 'DONG');
   assert.strictEqual(dongRegions.length, 293);
 
-  // All 318 regions are PUBLISHED_NOINDEX and not service area approved
-  for (const r of PRODUCTION_REGIONS) {
-    assert.strictEqual(r.source, 'production');
-    assert.strictEqual(r.rolloutStage, 'pilot');
-    assert.strictEqual(r.isSyntheticFixture, false);
-    assert.strictEqual(r.publicationState, 'PUBLISHED_NOINDEX');
-    assert.strictEqual(r.isServiceAreaApproved, false);
-  }
+  // 317 approved regions are INDEXABLE, 1 collision hold region is PUBLISHED_NOINDEX
+  const approvedCount = PRODUCTION_REGIONS.filter((r) => r.publicationState === 'INDEXABLE' && r.isServiceAreaApproved === true).length;
+  const holdCount = PRODUCTION_REGIONS.filter((r) => r.publicationState === 'PUBLISHED_NOINDEX' && r.isServiceAreaApproved === false).length;
+  assert.strictEqual(approvedCount, 317);
+  assert.strictEqual(holdCount, 1);
 });
 
 // ----------------------------------------------------
@@ -1459,10 +1455,10 @@ test('PHASE 6-A / 6-C0C-1: evaluatePublicationGate 12-Rule Gate Matrix & User Ap
   assert.strictEqual(stateFail.isIndexable, false);
   assert(stateFail.blockingReasons.some((r) => r.includes('STATE_TRANSITION_NOT_APPROVED')));
 
-  // 13. contentEvidenceEligible = false -> BLOCKED
-  const evidenceFail = evaluatePublicationGate({ ...baseValidInput, contentEvidenceEligible: false });
-  assert.strictEqual(evidenceFail.isIndexable, false);
-  assert(evidenceFail.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
+  // 13. collisionHold = true -> BLOCKED
+  const collisionFail = evaluatePublicationGate({ ...baseValidInput, regionApprovalStatus: 'COLLISION_HOLD' });
+  assert.strictEqual(collisionFail.isIndexable, false);
+  assert(collisionFail.blockingReasons.some((r) => r.includes('COLLISION_HOLD_REGION')));
 });
 
 test('PHASE 6-B: Canonical & Publication Test Matrix on 6 Representative URLs', () => {
@@ -1594,7 +1590,7 @@ test('PHASE 6-A2: Full 1,908 Dynamic URL Schema & Business SSOT exhaustive audit
       // 3. Fake Address Check: must be undefined
       if (serviceSchema.provider.address !== undefined) fakeAddressCount++;
 
-      // 4. areaServed Gate Check: must be 0 emitted across all 1,908 URLs
+      // 4. areaServed Gate Check: 1,902 emitted for approved indexable regions, 0 for collision hold
       if (serviceSchema.areaServed !== undefined) areaServedCount++;
 
       // 5. Negative Text Search: '이정우' or '010-9822-2630' must be 0
@@ -1605,7 +1601,7 @@ test('PHASE 6-A2: Full 1,908 Dynamic URL Schema & Business SSOT exhaustive audit
   }
 
   assert.strictEqual(auditedUrlCount, 1908, 'Must audit exactly 1,908 URLs (318 regions x 6 intents)');
-  assert.strictEqual(areaServedCount, 0, 'Emitted areaServed count across all 1,908 URLs must be strictly 0');
+  assert.strictEqual(areaServedCount, 1902, 'Emitted areaServed count across approved 317 regions x 6 intents must be 1,902');
   assert.strictEqual(wrongBusinessNameCount, 0, 'Wrong business name count must be 0');
   assert.strictEqual(wrongPhoneCount, 0, 'Wrong phone count must be 0');
   assert.strictEqual(localBusinessCount, 0, 'LocalBusiness subtype count must be 0');
@@ -1628,6 +1624,7 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   let localhostLeakCount = 0;
   let previewLeakCount = 0;
   let mainPageCanonicalLeakCount = 0;
+  let indexableCount = 0;
   let noindexFollowNocacheCount = 0;
   let areaServedCount = 0;
 
@@ -1663,10 +1660,12 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
         mainPageCanonicalLeakCount++;
       }
 
-      // 4. Metadata verification (All 1,908 dynamic pages must be NOINDEX)
+      // 4. Metadata verification (1,902 approved dynamic pages are INDEXABLE, 6 collision hold pages are NOINDEX)
       const metadata = buildDynamicMetadata(region, intent);
       const robots = metadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
-      if (!robots || robots.index !== false || robots.follow !== false || robots.nocache !== true) {
+      if (robots && robots.index === true && robots.follow === true) {
+        indexableCount++;
+      } else if (robots && robots.index === false && robots.follow === false && robots.nocache === true) {
         noindexFollowNocacheCount++;
       }
 
@@ -1701,8 +1700,9 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   assert.strictEqual(localhostLeakCount, 0, 'Must have 0 localhost leaks');
   assert.strictEqual(previewLeakCount, 0, 'Must have 0 preview leaks');
   assert.strictEqual(mainPageCanonicalLeakCount, 0, 'Must have 0 main page canonical leaks');
-  assert.strictEqual(noindexFollowNocacheCount, 5, 'Exactly 5 pilot dynamic pages are indexable');
-  assert.strictEqual(areaServedCount, 0, 'Area served count must be 0');
+  assert.strictEqual(indexableCount, 1902, 'Exactly 1,902 approved dynamic pages are indexable');
+  assert.strictEqual(noindexFollowNocacheCount, 6, 'Exactly 6 collision hold dynamic pages are NOINDEX');
+  assert.strictEqual(areaServedCount, 1902, 'Area served count must be 1,902');
 });
 
 // ----------------------------------------------------
@@ -2029,90 +2029,9 @@ test('PHASE 6-C0C-2B: Full 1,908 Dynamic URL Strict INDEXABLE = 0 Lock', () => {
   assert.strictEqual(indexableCount, 0, 'INDEXABLE count across all 1,908 dynamic URLs must be strictly 0');
 });
 
-test('PHASE 6-C1: Exact 5 Pilot Dynamic URLs Indexability & 1,903 NOINDEX Lock', () => {
+test('PHASE 6-C2: 1,902 Approved Dynamic URLs Indexability & 6 Collision Hold NOINDEX Lock', () => {
   let indexableCount = 0;
   let noindexCount = 0;
-
-  const baseInput = {
-    publicationStateTransitionApproved: true,
-    productionCanonicalReady: true,
-    businessSSOTValid: true,
-    claimGuardPass: true,
-    dynamicContentValid: true,
-    metadataValid: true,
-    internalLinksValid: true,
-    requiredAssetsValid: true,
-    serviceAreaApproved: true,
-    userPublicationApproval: true, // User approval active in Phase 6-C1
-  };
-
-  const indexableDynamicKeys: string[] = [];
-
-  for (const r of PRODUCTION_REGIONS) {
-    for (const intent of SEARCH_INTENTS) {
-      const gateRes = evaluateIntentPublicationGate(r.id, intent.serviceKeyword, {
-        ...baseInput,
-        regionApprovalStatus: r.disambiguationStatus === 'REQUIRES_DISAMBIGUATION' ? 'COLLISION_HOLD' : 'APPROVED',
-      });
-
-      if (gateRes.isIndexable) {
-        indexableCount++;
-        indexableDynamicKeys.push(`${r.keywordRegionName}-${intent.serviceKeyword}`);
-      } else {
-        noindexCount++;
-      }
-    }
-  }
-
-  assert.strictEqual(indexableCount, 5, 'Indexable count must be EXACTLY 5 pilot dynamic URLs');
-  assert.strictEqual(noindexCount, 1903, 'NOINDEX count must be EXACTLY 1,903 dynamic URLs');
-  assert.deepStrictEqual(indexableDynamicKeys.sort(), [...PILOT_INDEXABLE_KEYS].sort());
-});
-
-test('PHASE 6-C1: Sitemap Inclusion Contract & 0 NOINDEX Leakage', () => {
-  // Invariant: Sitemap contains strictly 7 URLs (2 static + 5 pilot dynamic URLs)
-  const origin = OFFICIAL_SITE_ORIGIN;
-  const sitemapUrls = [
-    `${origin}/`,
-    `${origin}/sitemap-seoul`,
-    ...PILOT_INDEXABLE_KEYS.map((key) => `${origin}/?k=${encodeURIComponent(key)}`),
-  ];
-
-  assert.strictEqual(sitemapUrls.length, 7, 'Sitemap URL count must be exactly 7');
-
-  const dynamicSitemapUrls = sitemapUrls.filter((u) => u.includes('/?k='));
-  assert.strictEqual(dynamicSitemapUrls.length, 5, 'Dynamic sitemap URLs must be exactly 5');
-
-  // Verify zero leak of collision hold (seoul-eunpyeong-sinsa / 신사동) or other intents
-  for (const url of sitemapUrls) {
-    assert(!url.includes('신사동'), 'Sitemap must not contain collision hold region (신사동)');
-    assert(!url.includes('탄성코트시공'), 'Sitemap must not contain non-pilot intent (탄성코트시공)');
-    assert(!url.includes('localhost'), 'Sitemap must not contain localhost');
-    assert(url.startsWith('https://www.allcaretan.co.kr'), 'Sitemap URLs must use production origin');
-  }
-});
-
-test('PHASE 6-C1: Pilot Region Evidence Publication Gate Simulation', () => {
-  // Verify that when real evidence is supplied for a specific region + intent keyword,
-  // ONLY that specific intent keyword can achieve INDEXABLE status (when user approval is true).
-  const syntheticPilotEvidence: RegionEvidenceItem = {
-    evidenceId: 'ev-pilot-bulgwang-01',
-    regionId: 'seoul-eunpyeong-bulgwang',
-    evidenceTier: 'TIER_A',
-    sourceType: 'ACTUAL_JOB_CASE',
-    sourceName: '올케어 시공 일지',
-    verifiedAt: '2026-03-25',
-    serviceIntentApplicability: ['탄성코트'], // Only '탄성코트' intent!
-    facts: {
-      housingType: '아파트',
-      complexName: '북한산힐스테이트 7차',
-      observedCondition: '외벽 모서리 부위 페인트 들뜸 확인',
-      workScope: '스크래핑 및 탄성코트 뿜칠 도포',
-    },
-    imageAssets: ['/images/allcare/before-after/sample-01-after.jpg'],
-  };
-
-  const pilotDataset = [syntheticPilotEvidence];
 
   const baseInput = {
     publicationStateTransitionApproved: true,
@@ -2127,50 +2046,92 @@ test('PHASE 6-C1: Pilot Region Evidence Publication Gate Simulation', () => {
     userPublicationApproval: true,
   };
 
-  // 1. Matched intent ('탄성코트') -> INDEXABLE PASS
-  const matchedGate = evaluateIntentPublicationGate(
-    'seoul-eunpyeong-bulgwang',
-    '탄성코트',
-    { ...baseInput, regionApprovalStatus: 'APPROVED' },
-    pilotDataset
-  );
-  assert.strictEqual(matchedGate.isIndexable, true);
-  assert.strictEqual(matchedGate.targetPublicationState, 'INDEXABLE');
-  assert.strictEqual(matchedGate.blockingReasons.length, 0);
+  for (const r of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      const isCollision = r.id === 'seoul-eunpyeong-sinsa';
+      const gateRes = evaluateIntentPublicationGate(r.id, intent.serviceKeyword, {
+        ...baseInput,
+        regionApprovalStatus: isCollision ? 'COLLISION_HOLD' : 'APPROVED',
+      });
 
-  // 2. Unmatched intent on SAME region ('세탁실탄성코트') -> BLOCKED
-  const unmatchedIntentGate = evaluateIntentPublicationGate(
-    'seoul-eunpyeong-bulgwang',
-    '세탁실탄성코트',
-    { ...baseInput, regionApprovalStatus: 'APPROVED' },
-    pilotDataset
-  );
-  assert.strictEqual(unmatchedIntentGate.isIndexable, false);
-  assert.strictEqual(unmatchedIntentGate.targetPublicationState, 'PUBLISHED_NOINDEX');
-  assert(unmatchedIntentGate.blockingReasons.some((r) => r.includes('NOT_ON_PUBLICATION_ALLOWLIST')));
+      if (gateRes.isIndexable) {
+        indexableCount++;
+      } else {
+        noindexCount++;
+      }
+    }
+  }
 
-  // 3. Matched intent on DIFFERENT region ('강남구') -> BLOCKED
-  const differentRegionGate = evaluateIntentPublicationGate(
-    'seoul-gangnam',
-    '탄성코트',
-    { ...baseInput, regionApprovalStatus: 'APPROVED' },
-    pilotDataset
-  );
-  assert.strictEqual(differentRegionGate.isIndexable, false);
-  assert.strictEqual(differentRegionGate.targetPublicationState, 'PUBLISHED_NOINDEX');
-  assert(differentRegionGate.blockingReasons.some((r) => r.includes('CONTENT_EVIDENCE_NOT_ELIGIBLE')));
+  assert.strictEqual(indexableCount, 1902, 'Indexable count must be EXACTLY 1,902 approved dynamic URLs');
+  assert.strictEqual(noindexCount, 6, 'NOINDEX count must be EXACTLY 6 collision hold dynamic URLs');
+});
 
-  // 4. Collision Hold region even WITH evidence -> FATAL BLOCKED
-  const collisionWithEvidence: RegionEvidenceItem = {
-    ...syntheticPilotEvidence,
-    evidenceId: 'ev-pilot-sinsa-01',
-    regionId: 'seoul-eunpyeong-sinsa', // Collision hold
+test('PHASE 6-C2: Sitemap Inclusion Contract (1,904 Total URLs: 1 Main + 1 Hub + 1,902 Dynamic)', () => {
+  const origin = OFFICIAL_SITE_ORIGIN;
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+
+  const dynamicUrls: string[] = [];
+  for (const r of approvedRegions) {
+    for (const intent of SEARCH_INTENTS) {
+      const href = buildPublicHref(r.keywordRegionName, intent.serviceKeyword);
+      dynamicUrls.push(`${origin}${href}`);
+    }
+  }
+
+  const sitemapUrls = [`${origin}/`, `${origin}/sitemap-seoul`, ...dynamicUrls];
+
+  assert.strictEqual(sitemapUrls.length, 1904, 'Sitemap URL count must be exactly 1,904 (1 Main + 1 Hub + 1,902 Dynamic)');
+  assert.strictEqual(dynamicUrls.length, 1902, 'Dynamic sitemap URLs must be exactly 1,902');
+
+  // Verify zero leak of collision hold (seoul-eunpyeong-sinsa / 신사동)
+  for (const url of sitemapUrls) {
+    assert(!url.includes('신사동'), 'Sitemap must not contain collision hold region (신사동)');
+    assert(!url.includes('localhost'), 'Sitemap must not contain localhost');
+    assert(url.startsWith('https://www.allcaretan.co.kr'), 'Sitemap URLs must use production origin');
+  }
+});
+
+test('PHASE 6-C2: Full Approved Seoul Rollout Publication Gate Simulation', () => {
+  const baseInput = {
+    publicationStateTransitionApproved: true,
+    productionCanonicalReady: true,
+    businessSSOTValid: true,
+    claimGuardPass: true,
+    dynamicContentValid: true,
+    metadataValid: true,
+    internalLinksValid: true,
+    requiredAssetsValid: true,
+    serviceAreaApproved: true,
+    userPublicationApproval: true,
   };
+
+  // 1. Approved region ('seoul-eunpyeong-bulgwang') -> INDEXABLE PASS
+  const bulgwangGate = evaluateIntentPublicationGate(
+    'seoul-eunpyeong-bulgwang',
+    '탄성코트',
+    { ...baseInput, regionApprovalStatus: 'APPROVED' }
+  );
+  assert.strictEqual(bulgwangGate.isIndexable, true);
+  assert.strictEqual(bulgwangGate.targetPublicationState, 'INDEXABLE');
+  assert.strictEqual(bulgwangGate.blockingReasons.length, 0);
+
+  // 2. Approved region ('seoul-gangnam-gu') -> INDEXABLE PASS
+  const gangnamGate = evaluateIntentPublicationGate(
+    'seoul-gangnam-gu',
+    '세탁실탄성코트',
+    { ...baseInput, regionApprovalStatus: 'APPROVED' }
+  );
+  assert.strictEqual(gangnamGate.isIndexable, true);
+  assert.strictEqual(gangnamGate.targetPublicationState, 'INDEXABLE');
+  assert.strictEqual(gangnamGate.blockingReasons.length, 0);
+
+  // 3. Collision Hold region ('seoul-eunpyeong-sinsa') -> FATAL BLOCKED
   const collisionGate = evaluateIntentPublicationGate(
     'seoul-eunpyeong-sinsa',
     '탄성코트',
-    { ...baseInput, regionApprovalStatus: 'COLLISION_HOLD' },
-    [collisionWithEvidence]
+    { ...baseInput, regionApprovalStatus: 'COLLISION_HOLD' }
   );
   assert.strictEqual(collisionGate.isIndexable, false);
   assert.strictEqual(collisionGate.targetPublicationState, 'PUBLISHED_NOINDEX');
