@@ -67,7 +67,11 @@ const CASES: readonly CaseItem[] = [
   },
 ];
 
-export function BeforeAfterSection() {
+interface BeforeAfterSectionProps {
+  showDisclaimer?: boolean;
+}
+
+export function BeforeAfterSection({ showDisclaimer = false }: BeforeAfterSectionProps = {}) {
   const [activeCaseId, setActiveCaseId] = useState<string>('case-01');
   const [activeMobileIndex, setActiveMobileIndex] = useState<number>(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -264,6 +268,12 @@ export function BeforeAfterSection() {
             </div>
           </div>
         </div>
+
+        {showDisclaimer && (
+          <p className="text-[11px] text-[#756E61] text-center border-t border-[#E7D9C1]/40 pt-4">
+            ※ 위 시공 사진은 올케어 제공 시공 전·후 사진이며, 현장 조건 및 벽면 상태에 따라 실제 작업 결과는 차이가 있을 수 있습니다.
+          </p>
+        )}
       </Container>
     </section>
   );

@@ -74,3 +74,4 @@ export function ResidentialSpacesSection() {
     </section>
   );
 }
+

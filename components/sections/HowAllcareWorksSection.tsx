@@ -30,6 +30,8 @@ const WORK_STEPS = [
 ];
 
 export function HowAllcareWorksSection() {
+  const steps = WORK_STEPS;
+
   return (
     <section
       aria-labelledby="how-works-heading"
@@ -61,7 +63,7 @@ export function HowAllcareWorksSection() {
           <div className="lg:hidden absolute top-6 bottom-6 left-5 w-0.5 bg-[#4F5844] z-0" />
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-4 relative z-10">
-            {WORK_STEPS.map((step) => (
+            {steps.map((step) => (
               <div
                 key={step.step}
                 className="flex lg:flex-col items-start lg:items-center text-left lg:text-center gap-4 lg:gap-3.5"
@@ -97,3 +99,4 @@ export function HowAllcareWorksSection() {
     </section>
   );
 }
+

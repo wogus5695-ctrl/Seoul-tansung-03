@@ -1,32 +1,85 @@
 import React from 'react';
+import Link from 'next/link';
 import { Container } from '../layout/Container';
 import { HeroSlider } from '../ui/HeroSlider';
 import { isContactConfigured, SITE_CONFIG } from '../../lib/config/site-config';
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
 
-export function HeroSection() {
+interface DynamicHeroProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
+}
+
+interface HeroSectionProps {
+  dynamic?: DynamicHeroProps;
+}
+
+export function HeroSection({ dynamic }: HeroSectionProps = {}) {
   const hasContact = isContactConfigured();
   const isDev = process.env.NODE_ENV !== 'production';
+
+  const exactKeyword = dynamic
+    ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
+    : undefined;
 
   return (
     <section aria-labelledby="hero-heading" className="w-full py-16 sm:py-24 lg:py-28 overflow-hidden">
       <Container>
+        {dynamic && exactKeyword && (
+          <nav aria-label="브레드크럼" className="mb-6 sm:mb-8">
+            <ol className="flex items-center gap-2 text-xs text-[#756E61]">
+              <li>
+                <Link href="/" className="hover:text-[#3E443B] transition-colors">
+                  홈
+                </Link>
+              </li>
+              <li aria-hidden="true" className="text-[#A89F91]">/</li>
+              <li aria-current="page" className="font-semibold text-[#3E443B]">
+                {exactKeyword}
+              </li>
+            </ol>
+          </nav>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 items-center">
           {/* Text Content (PC 42% / MO Order: Eyebrow -> H1 -> Description -> CTA -> Slider) */}
           <div className="lg:col-span-5 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E7D9C1]/50 text-xs font-semibold text-[#5C5549] tracking-wider uppercase">
-              <span>{SITE_CONFIG.brandNameEn} ELASTIC COATING</span>
+              <span>
+                {dynamic
+                  ? `${dynamic.region.keywordRegionName} 시공 안내 · ${SITE_CONFIG.brandNameEn}`
+                  : `${SITE_CONFIG.brandNameEn} ELASTIC COATING`}
+              </span>
             </div>
 
             <h1
               id="hero-heading"
               className="text-token-display text-[#3E443B] font-bold tracking-tight text-balance leading-tight"
             >
-              공간의 상태부터 확인하는<br className="hidden sm:inline" /> {SITE_CONFIG.brandName} 탄성코트
+              {dynamic && exactKeyword ? (
+                exactKeyword
+              ) : (
+                <>
+                  공간의 상태부터 확인하는<br className="hidden sm:inline" /> {SITE_CONFIG.brandName} 탄성코트
+                </>
+              )}
             </h1>
 
-            <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">
-              베란다와 세탁실의 벽면 상태를 먼저 살펴보고 필요한 작업 범위부터 정직하게 안내합니다.
-            </p>
+            {dynamic ? (
+              <div className="space-y-3">
+                <p className="text-token-h3 text-[#3E443B]/90 font-medium leading-relaxed text-pretty">
+                  {dynamic.intent.heroIntroTemplate(dynamic.region.keywordRegionName)}
+                </p>
+                <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">
+                  {dynamic.intent.userIntent}
+                </p>
+              </div>
+            ) : (
+              <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">
+                베란다와 세탁실의 벽면 상태를 먼저 살펴보고 필요한 작업 범위부터 정직하게 안내합니다.
+              </p>
+            )}
 
             {/* CTA Container */}
             {hasContact ? (
@@ -72,3 +125,4 @@ export function HeroSection() {
     </section>
   );
 }
+

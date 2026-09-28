@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { Container } from '../layout/Container';
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
 
 const CHECK_POINTS = [
   {
@@ -25,7 +27,20 @@ const CHECK_POINTS = [
   },
 ];
 
-export function WallCheckSection() {
+interface DynamicWallCheckProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
+}
+
+interface WallCheckSectionProps {
+  dynamic?: DynamicWallCheckProps;
+}
+
+export function WallCheckSection({ dynamic }: WallCheckSectionProps = {}) {
+  const exactKeyword = dynamic
+    ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
+    : undefined;
+
   return (
     <section
       aria-labelledby="wall-check-heading"
@@ -54,7 +69,9 @@ export function WallCheckSection() {
             id="wall-check-heading"
             className="text-token-display font-bold text-[#F5F3EE] text-balance leading-tight"
           >
-            이런 벽면 상태가 보이시나요?
+            {dynamic && exactKeyword
+              ? `${exactKeyword} 시공 전 이런 벽면 상태를 확인하세요`
+              : '이런 벽면 상태가 보이시나요?'}
           </h2>
           <p className="text-token-body text-[#E7D9C1]/90 max-w-xl text-pretty leading-relaxed">
             같은 탄성코트 시공이라도 기존 벽면 상태에 따라 필요한 작업 범위가 달라질 수 있습니다.
@@ -81,3 +98,4 @@ export function WallCheckSection() {
     </section>
   );
 }
+

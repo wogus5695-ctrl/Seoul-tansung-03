@@ -2,10 +2,25 @@ import React from 'react';
 import Image from 'next/image';
 import { Container } from '../layout/Container';
 import { isContactConfigured, SITE_CONFIG } from '../../lib/config/site-config';
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
 
-export function FinalCtaSection() {
+interface DynamicFinalCtaProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
+}
+
+interface FinalCtaSectionProps {
+  dynamic?: DynamicFinalCtaProps;
+}
+
+export function FinalCtaSection({ dynamic }: FinalCtaSectionProps = {}) {
   const hasContact = isContactConfigured();
   const isDev = process.env.NODE_ENV !== 'production';
+
+  const exactKeyword = dynamic
+    ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
+    : undefined;
 
   return (
     <section
@@ -35,7 +50,13 @@ export function FinalCtaSection() {
           id="final-cta-heading"
           className="text-token-h1 text-[#F5F3EE] font-semibold tracking-[-0.025em] break-keep text-balance max-w-lg mx-auto"
         >
-          우리 집 벽면 상태부터<br className="hidden sm:inline" /> 확인해보세요
+          {dynamic && exactKeyword ? (
+            `${exactKeyword}가 필요하다면 현재 벽면 상태부터 확인해보세요`
+          ) : (
+            <>
+              우리 집 벽면 상태부터<br className="hidden sm:inline" /> 확인해보세요
+            </>
+          )}
         </h2>
 
         <p className="text-token-body text-[#E7D9C1]/90 max-w-lg mx-auto leading-relaxed text-pretty">
@@ -78,3 +99,4 @@ export function FinalCtaSection() {
     </section>
   );
 }
+

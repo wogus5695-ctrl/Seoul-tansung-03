@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Container } from '../layout/Container';
 
+import { IntentFaqItem } from '../../lib/types/intents';
+
 interface FaqItem {
   id: string;
   question: string;
@@ -42,8 +44,12 @@ const MAIN_FAQS: FaqItem[] = [
   },
 ];
 
-export function FaqSection() {
-  const [openId, setOpenId] = useState<string | null>('main-faq-1');
+interface FaqSectionProps {
+  items?: readonly (FaqItem | IntentFaqItem)[];
+}
+
+export function FaqSection({ items = MAIN_FAQS }: FaqSectionProps = {}) {
+  const [openId, setOpenId] = useState<string | null>(items[0]?.id || null);
 
   const toggleFaq = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
@@ -65,7 +71,7 @@ export function FaqSection() {
         </div>
 
         <div className="space-y-3">
-          {MAIN_FAQS.map((faq) => {
+          {items.map((faq) => {
             const isOpen = openId === faq.id;
             return (
               <div
@@ -106,3 +112,4 @@ export function FaqSection() {
     </section>
   );
 }
+

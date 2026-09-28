@@ -1,5 +1,7 @@
 import React from 'react';
 import { Container } from '../layout/Container';
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
 
 const DECISION_STEPS = [
   {
@@ -24,7 +26,20 @@ const DECISION_STEPS = [
   },
 ];
 
-export function DecisionGuideSection() {
+interface DynamicDecisionProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
+}
+
+interface DecisionGuideSectionProps {
+  dynamic?: DynamicDecisionProps;
+}
+
+export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}) {
+  const exactKeyword = dynamic
+    ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
+    : undefined;
+
   return (
     <section aria-labelledby="decision-heading" className="w-full py-16 sm:py-24 bg-[#FAF8F5] border-y border-[#E7D9C1]">
       <Container className="space-y-12">
@@ -74,10 +89,13 @@ export function DecisionGuideSection() {
 
         <div className="text-center pt-2">
           <p className="text-xs text-[#5C5549] max-w-md mx-auto">
-            ※ 올케어는 일률적인 평수 기준이 아닌, 실제 벽면 상태와 보수 소요에 근거하여 합리적인 작업 범위를 제안합니다.
+            {dynamic && exactKeyword
+              ? `※ ${exactKeyword} 작업도 지역명만으로 작업 범위를 정하지 않고 실제 벽면 상태와 작업 환경을 확인한 뒤 필요한 범위를 판단합니다.`
+              : '※ 올케어는 일률적인 평수 기준이 아닌, 실제 벽면 상태와 보수 소요에 근거하여 합리적인 작업 범위를 제안합니다.'}
           </p>
         </div>
       </Container>
     </section>
   );
 }
+
