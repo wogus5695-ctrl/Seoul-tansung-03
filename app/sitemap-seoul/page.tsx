@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { Container } from '../../components/layout/Container';
 import { OFFICIAL_SITE_ORIGIN } from '../../lib/config/site-config';
 import { getActiveRegions } from '../../lib/contracts/regions-contract';
@@ -21,7 +23,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SeoulSitemapPage() {
+interface SeoulSitemapPageProps {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function SeoulSitemapPage({ searchParams }: SeoulSitemapPageProps = {}) {
+  const resolvedParams = searchParams ? await searchParams : {};
+  const isSecretAccess = resolvedParams.access === 'allcare' || resolvedParams.key === 'allcare';
+
+  // Check HTTP User-Agent for search engine crawlers (Googlebot, Naver Yeti, Bingbot, etc.)
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent') || '';
+
+  const isBot = /googlebot|yeti|naverbot|bingbot|slurp|duckduckbot|baiduspider|daum|facebookexternalhit|twitterbot|semrushbot|ahrefsbot|bytespider/i.test(userAgent);
+  const isDevOrTest = process.env.NODE_ENV !== 'production';
+
+  // If a general human visitor or competitor accesses directly without secret access key, return 404 (Not Found)
+  if (!isBot && !isSecretAccess && !isDevOrTest) {
+    notFound();
+  }
+
   const allRegions = getActiveRegions(false);
   const approvedRegions = allRegions.filter(
     (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'

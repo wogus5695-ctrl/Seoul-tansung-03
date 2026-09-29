@@ -54,11 +54,8 @@ export function Footer() {
           {SITE_CONFIG.address && (
             <p>소재지: {SITE_CONFIG.address}</p>
           )}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E7D9C1]/40">
+          <div className="pt-2 border-t border-[#E7D9C1]/40 text-center sm:text-left">
             <p>© {new Date().getFullYear()} {SITE_CONFIG.businessName} ({SITE_CONFIG.brandNameEn}). All rights reserved. 본 사이트의 모든 콘텐츠 및 시공 자산은 올케어의 지적 재산입니다.</p>
-            <a href="/sitemap-seoul" className="hover:underline font-semibold text-[#6B755D] whitespace-nowrap">
-              서울 탄성코트 지역 안내
-            </a>
           </div>
         </div>
       </Container>
