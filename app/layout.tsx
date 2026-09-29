@@ -51,6 +51,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   verification: {
+    google: SITE_CONFIG.googleSiteVerification,
     other: {
       'naver-site-verification': SITE_CONFIG.naverSiteVerification || '5be6e2d1aa00ee4b34febe66bb5f81e88a8600bd',
     },
