@@ -4,6 +4,9 @@ import { SearchIntentItem } from '../types/intents';
 import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../config/site-config';
 import { shouldEmitAreaServed } from '../contracts/regions-contract';
 import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
+import { buildDynamicTitle } from '../contracts/intents-contract';
+
+export { buildDynamicTitle };
 
 /**
  * Builds SSR Metadata for a dynamic keyword landing page.

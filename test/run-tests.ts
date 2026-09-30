@@ -26,7 +26,7 @@ import {
   validateInternalIdUniqueness,
   validatePublicDynamicKeyUniqueness,
 } from '../lib/contracts/regions-contract';
-import { buildDynamicMetadata, buildDynamicJsonLd } from '../lib/seo/dynamic-metadata';
+import { buildDynamicMetadata, buildDynamicJsonLd, buildDynamicTitle } from '../lib/seo/dynamic-metadata';
 import {
   evaluateImageProductionReadiness,
   evaluateMainVisualReadiness,
@@ -2205,6 +2205,54 @@ test('PHASE 6-E2: 1,902 Approved Dynamic URLs Prefix, Uniqueness & 6-Intent CTR 
   }
 
   assert.strictEqual(seenTitles.size, 1902);
+  assert.strictEqual(seenDescriptions.size, 1902);
+});
+
+// ----------------------------------------------------
+// PHASE 6-E3A: SHORT TITLE NORMALIZATION & METADATA CONSISTENCY QA
+// ----------------------------------------------------
+test('PHASE 6-E3A: 1,902 Dynamic Titles Short Format, OG/JSON-LD Sync & Zero Duplicate QA', () => {
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+  assert.strictEqual(approvedRegions.length, 317);
+
+  const seenTitles = new Set<string>();
+  const seenDescriptions = new Set<string>();
+
+  for (const region of approvedRegions) {
+    for (const intent of SEARCH_INTENTS) {
+      const exactKeyword = `${region.keywordRegionName} ${intent.serviceKeyword}`;
+      const expectedTitle = buildDynamicTitle(region.keywordRegionName, intent.serviceKeyword);
+
+      // 1. Title exact match: `${region} ${serviceKeyword} | 올케어`
+      assert.strictEqual(expectedTitle, `${exactKeyword} | 올케어`);
+
+      const meta = buildDynamicMetadata(region, intent, SITE_CONFIG.siteOrigin);
+      const titleStr = typeof meta.title === 'string' ? meta.title : String(meta.title || '');
+      const descStr = typeof meta.description === 'string' ? meta.description : String(meta.description || '');
+
+      assert.strictEqual(titleStr, expectedTitle);
+
+      // 2. OG Title & Description Sync
+      assert.strictEqual(meta.openGraph?.title, expectedTitle);
+      assert.strictEqual(meta.openGraph?.description, descStr);
+
+      // 3. JSON-LD Description Sync
+      const jsonLd = buildDynamicJsonLd(region, intent, SITE_CONFIG.siteOrigin);
+      const serviceSchema = jsonLd.find((item: Record<string, unknown>) => item['@type'] === 'Service') as Record<string, unknown>;
+      assert.strictEqual(serviceSchema.name, exactKeyword);
+      assert.strictEqual(serviceSchema.description, descStr);
+
+      // Title & Description Uniqueness
+      seenTitles.add(titleStr);
+      seenDescriptions.add(descStr);
+    }
+  }
+
+  // B. Title Duplicate = 0
+  assert.strictEqual(seenTitles.size, 1902);
+  // C. Description Duplicate = 0 across 1,902
   assert.strictEqual(seenDescriptions.size, 1902);
 });
 
