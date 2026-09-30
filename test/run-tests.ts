@@ -2138,6 +2138,76 @@ test('PHASE 6-C2: Full Approved Seoul Rollout Publication Gate Simulation', () =
   assert(collisionGate.blockingReasons.some((r) => r.includes('COLLISION_HOLD_REGION')));
 });
 
+// ----------------------------------------------------
+// PHASE 6-E2: NAVER SERP CTR COPY OPTIMIZATION & PREFIX CONTRACT
+// ----------------------------------------------------
+test('PHASE 6-E2: 1,902 Approved Dynamic URLs Prefix, Uniqueness & 6-Intent CTR Copy QA', () => {
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+  assert.strictEqual(approvedRegions.length, 317);
+
+  const seenTitles = new Set<string>();
+  const seenDescriptions = new Set<string>();
+
+  for (const region of approvedRegions) {
+    for (const intent of SEARCH_INTENTS) {
+      const exactKeyword = `${region.keywordRegionName} ${intent.serviceKeyword}`;
+      const meta = buildDynamicMetadata(region, intent, SITE_CONFIG.siteOrigin);
+      const titleStr = typeof meta.title === 'string' ? meta.title : String(meta.title || '');
+      const descStr = typeof meta.description === 'string' ? meta.description : String(meta.description || '');
+
+      // 1. Title Prefix Contract
+      assert(
+        titleStr.startsWith(exactKeyword),
+        `Title [${titleStr}] must start with exact keyword [${exactKeyword}]`
+      );
+
+      // 2. Description Prefix Contract
+      assert(
+        descStr.startsWith(exactKeyword),
+        `Description [${descStr}] must start with exact keyword [${exactKeyword}]`
+      );
+
+      // 3. OG Title Prefix Contract
+      const ogTitle = (meta.openGraph?.title as string) || '';
+      assert(
+        ogTitle.startsWith(exactKeyword),
+        `OG Title [${ogTitle}] must start with exact keyword [${exactKeyword}]`
+      );
+
+      // 4. OG Description Prefix Contract
+      const ogDesc = (meta.openGraph?.description as string) || '';
+      assert(
+        ogDesc.startsWith(exactKeyword),
+        `OG Description [${ogDesc}] must start with exact keyword [${exactKeyword}]`
+      );
+
+      // 5. H1 Contract
+      const h1 = intent.h1Template(region.keywordRegionName);
+      assert.strictEqual(h1, exactKeyword, `H1 [${h1}] must equal exact keyword [${exactKeyword}]`);
+
+      // 6. Hero Intro Prefix Contract
+      const heroIntro = intent.heroIntroTemplate(region.keywordRegionName);
+      assert(
+        heroIntro.startsWith(exactKeyword),
+        `Hero Intro [${heroIntro}] must start with exact keyword [${exactKeyword}]`
+      );
+
+      // 7. Title Uniqueness
+      assert(!seenTitles.has(titleStr), `Duplicate Title found across approved set: ${titleStr}`);
+      seenTitles.add(titleStr);
+
+      // 8. Description Uniqueness
+      assert(!seenDescriptions.has(descStr), `Duplicate Description found: ${descStr}`);
+      seenDescriptions.add(descStr);
+    }
+  }
+
+  assert.strictEqual(seenTitles.size, 1902);
+  assert.strictEqual(seenDescriptions.size, 1902);
+});
+
 console.log('\n====================================================');
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log('====================================================\n');
@@ -2145,3 +2215,4 @@ console.log('====================================================\n');
 if (failCount > 0) {
   process.exit(1);
 }
+

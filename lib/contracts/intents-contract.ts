@@ -29,12 +29,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '외벽 접점부 습기 흔적과 작업 범위 판단',
     ],
     problemH2Template: (region) => `${region} 탄성코트, 시공 전 어떤 벽면 상태를 먼저 살펴봐야 할까요?`,
-    titleTemplate: (region) => `${region} 탄성코트 현장 벽면 점검 및 시공 안내 | 올케어`,
+    titleTemplate: (region) => `${region} 탄성코트 | 벽면 상태·시공 범위 확인 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 탄성코트 시공 전, 기존 도막의 들뜸과 균열, 벽면 오염 및 습기 흔적을 먼저 살펴 필요한 작업 범위를 안내합니다.`,
+      `${region} 탄성코트, 기존 도막이 들뜨거나 시공이 필요하신가요? 벽면의 균열·오염·습기 흔적을 먼저 확인하고 필요한 작업 범위를 안내합니다.`,
     h1Template: (region) => `${region} 탄성코트`,
     heroIntroTemplate: (region) =>
-      `${region} 탄성코트 시공 전, 베란다 벽면의 들뜸과 균열, 습기 흔적을 살펴 필요한 작업 범위부터 정직하게 확인합니다.`,
+      `${region} 탄성코트 시공 전, 기존 도막의 들뜸과 균열·오염 상태를 살펴 필요한 작업 범위부터 확인합니다.`,
     faqItems: [
       {
         id: 'ec-faq-1',
@@ -83,12 +83,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '탄성코트 작업 단계와 마감 후 관리 안내',
     ],
     problemH2Template: (region) => `${region} 탄성코트시공, 단계별 기본 공정과 준비 사항은 무엇일까요?`,
-    titleTemplate: (region) => `${region} 탄성코트시공 작업 공정 및 바탕면 준비 안내 | 올케어`,
+    titleTemplate: (region) => `${region} 탄성코트시공 | 시공 순서·밑작업 확인 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 탄성코트시공 순서와 준비 과정이 궁금하신가요? 시설물 보양부터 바탕면 정리, 탄성코트 작업과 환기 요령까지의 단계별 공정을 안내합니다.`,
+      `${region} 탄성코트시공, 시공 순서와 밑작업 과정이 궁금하신가요? 시설물 보양부터 들뜬 도막 정리, 균열 보수와 탄성코트 작업 순서를 안내합니다.`,
     h1Template: (region) => `${region} 탄성코트시공`,
     heroIntroTemplate: (region) =>
-      `${region} 탄성코트시공 과정에서 확인해야 할 시설물 보양과 바탕면 정리, 기본 작업 단계를 안내합니다.`,
+      `${region} 탄성코트시공 작업 전, 시설물 보양과 바탕면 정리·균열 보수 등 필요한 시공 순서를 먼저 확인합니다.`,
     faqItems: [
       {
         id: 'eci-faq-1',
@@ -137,12 +137,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '우수관 주변 등 좁은 틈새 작업 조건 검토',
     ],
     problemH2Template: (region) => `${region} 베란다탄성코트, 창호 주변과 외벽 접점의 확인 포인트는 무엇일까요?`,
-    titleTemplate: (region) => `${region} 베란다탄성코트 창호 주변 및 외벽 접점 점검 | 올케어`,
+    titleTemplate: (region) => `${region} 베란다탄성코트 | 창호·벽면 상태 확인 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 베란다탄성코트 작업을 위해 창호 주변 틈새와 외벽 접점부의 습기 흔적, 도막 상태를 꼼꼼히 확인하고 시공 정보를 제공합니다.`,
+      `${region} 베란다탄성코트, 창호 주변이나 베란다 벽면 상태가 신경 쓰이시나요? 창틀 접점·외벽 코너·기존 도막의 습기 흔적과 작업 전 확인 항목을 안내합니다.`,
     h1Template: (region) => `${region} 베란다탄성코트`,
     heroIntroTemplate: (region) =>
-      `${region} 베란다탄성코트 시공 전, 외벽과 맞닿는 코너 부위와 창호 주변의 습기 흔적부터 꼼꼼히 확인합니다.`,
+      `${region} 베란다탄성코트 시공 전, 창호 주변과 외벽 코너의 도막·습기 흔적을 살펴 작업이 필요한 구간을 확인합니다.`,
     faqItems: [
       {
         id: 'bec-faq-1',
@@ -191,12 +191,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '환기창 크기와 공기 흐름에 따른 건조 환경 확인',
     ],
     problemH2Template: (region) => `${region} 세탁실탄성코트, 대형 가전 공간과 배관 주변의 점검 기준은 무엇일까요?`,
-    titleTemplate: (region) => `${region} 세탁실탄성코트 배관 주변 및 가전 공간 점검 | 올케어`,
+    titleTemplate: (region) => `${region} 세탁실탄성코트 | 배관·가전 공간 시공 체크 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 세탁실탄성코트는 좁은 배관 틈새와 대형 가전 설치 공간, 환기 환경을 고려하여 맞춤 작업 계획을 수립합니다.`,
+      `${region} 세탁실탄성코트, 배관 주변이나 세탁기·건조기 설치 공간이 걱정되시나요? 좁은 배관 벽면과 가전 주변 공간의 도막 상태·습기 흔적·작업 조건을 확인합니다.`,
     h1Template: (region) => `${region} 세탁실탄성코트`,
     heroIntroTemplate: (region) =>
-      `${region} 세탁실탄성코트 작업은 대형 가전이 놓이는 자리와 좁은 배관 벽면의 상태를 사전에 확인하여 계획합니다.`,
+      `${region} 세탁실탄성코트 작업 전, 배관 주변과 세탁기·건조기 설치 공간의 벽면 상태를 살펴 작업 조건을 확인합니다.`,
     faqItems: [
       {
         id: 'lec-faq-1',
@@ -245,12 +245,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '시공 대상 공간(발코니, 다용도실 등)의 상태 확인',
     ],
     problemH2Template: (region) => `${region} 아파트탄성코트, 신축·구축 세대별 일정과 작업 범위는 어떻게 다를까요?`,
-    titleTemplate: (region) => `${region} 아파트탄성코트 입주 전후 벽면 점검 및 일정 안내 | 올케어`,
+    titleTemplate: (region) => `${region} 아파트탄성코트 | 입주 전·재시공 체크 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 아파트탄성코트 일정을 준비 중이신가요? 신축 입주 전 공실 점검부터 구축 세대 노후 도막 정리까지 세대별 작업 기준을 안내합니다.`,
+      `${region} 아파트탄성코트, 입주 전이나 재시공을 준비하고 계신가요? 신축 공실부터 구축 아파트까지 기존 도막 상태와 필요한 작업 범위를 확인해 안내합니다.`,
     h1Template: (region) => `${region} 아파트탄성코트`,
     heroIntroTemplate: (region) =>
-      `${region} 아파트탄성코트 시공은 첫 입주 세대의 공실 점검부터 연식이 있는 아파트의 노후 도막 정리까지 세대별 상황에 맞춰 진행됩니다.`,
+      `${region} 아파트탄성코트 시공 전, 입주 전 공실이나 기존 아파트의 도막 상태를 살펴 필요한 작업 범위를 확인합니다.`,
     faqItems: [
       {
         id: 'aec-faq-1',
@@ -299,12 +299,12 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
       '시공 후 환기 및 도막 관리 안내 여부 확인',
     ],
     problemH2Template: (region) => `${region} 탄성코트업체, 상담 전 확인해야 할 필수 기준과 견적 항목은 무엇일까요?`,
-    titleTemplate: (region) => `${region} 탄성코트업체 시공 범위 확인 및 견적 기준 안내 | 올케어`,
+    titleTemplate: (region) => `${region} 탄성코트업체 | 시공 범위·견적 기준 확인 | 올케어`,
     descriptionTemplate: (region) =>
-      `${region} 탄성코트업체 선정 시 필수 확인 사항인 사업자 정보, 바탕면 보수 포함 여부, 투명한 견적 기준을 정리해 드립니다.`,
+      `${region} 탄성코트업체, 어떤 업체에 맡겨야 할지 고민하고 계신가요? 밑작업 포함 여부와 시공 범위, 견적 확인 기준과 상담 전 체크사항을 안내합니다.`,
     h1Template: (region) => `${region} 탄성코트업체`,
     heroIntroTemplate: (region) =>
-      `${region} 탄성코트업체 선택 전, 시공 범위와 밑작업 포함 여부, 상담 시 확인해야 할 기본 사항을 투명하게 안내합니다.`,
+      `${region} 탄성코트업체 선택 전, 밑작업 포함 여부와 시공 범위·견적 기준을 상담 전에 확인할 수 있도록 안내합니다.`,
     faqItems: [
       {
         id: 'ecc-faq-1',
