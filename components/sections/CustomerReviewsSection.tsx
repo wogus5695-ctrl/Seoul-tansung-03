@@ -218,7 +218,7 @@ export function CustomerReviewsSection() {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="lg:col-span-8 relative w-full overflow-hidden select-none"
+            className="lg:col-span-8 relative w-full overflow-hidden select-none lg:h-[436px]"
           >
             {/* Card Track */}
             <div
@@ -234,17 +234,18 @@ export function CustomerReviewsSection() {
                   : `translateX(calc(-${currentIndex} * (100% + 1rem)))`,
               }}
             >
-              {CUSTOMER_REVIEWS.map((review: CustomerReview, idx: number) => {
+              {[...CUSTOMER_REVIEWS, CUSTOMER_REVIEWS[0]].map((review: CustomerReview, idx: number) => {
+                const reviewIndex = idx % totalReviews;
                 const isActive = idx === currentIndex;
-                const isNextActive = isDesktop && idx === (currentIndex + 1) % totalReviews;
+                const isNextActive = isDesktop && idx === currentIndex + 1;
                 const isVisibleInDOM = isActive || isNextActive;
 
                 return (
                   <article
-                    key={review.id}
+                    key={idx === totalReviews ? `wrap-${review.id}` : review.id}
                     role="group"
                     aria-roledescription="slide"
-                    aria-label={`${totalReviews}개 중 ${idx + 1}번째 후기`}
+                    aria-label={`${totalReviews}개 중 ${reviewIndex + 1}번째 후기`}
                     aria-hidden={!isVisibleInDOM}
                     className={`w-full flex-shrink-0 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-3 ${
                       isDesktop ? 'h-[210px]' : 'min-h-[220px]'

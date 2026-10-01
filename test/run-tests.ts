@@ -2364,6 +2364,34 @@ test('Phase 6-F3: Component UI removes legacy system IDs & footer labels; enforc
   assert(!stringifiedJsonLd.includes('reviewCount'), 'JSON-LD must NOT contain reviewCount');
 });
 
+test('Phase 6-F3A: Customer Reviews Carousel enforces Desktop exactly 2 cards & Mobile exactly 1 card viewport constraints', () => {
+  const componentContent = fs.readFileSync(path.resolve('components/sections/CustomerReviewsSection.tsx'), 'utf-8');
+
+  // 1. Enforces desktop height lock lg:h-[436px] for exactly 2 cards (2 * 210px + 16px gap = 436px)
+  assert(
+    componentContent.includes('lg:h-[436px]'),
+    'Carousel viewport must contain lg:h-[436px] to constrain desktop view to exactly 2 cards'
+  );
+
+  // 2. Enforces circular track mapping for seamless 2-card rendering at end of dataset
+  assert(
+    componentContent.includes('[...CUSTOMER_REVIEWS, CUSTOMER_REVIEWS[0]]'),
+    'Carousel track must render circular dataset [...CUSTOMER_REVIEWS, CUSTOMER_REVIEWS[0]]'
+  );
+
+  // 3. Enforces card height h-[210px] for desktop viewport calculation
+  assert(
+    componentContent.includes("isDesktop ? 'h-[210px]' : 'min-h-[220px]'"),
+    'Card height must preserve h-[210px] on desktop'
+  );
+
+  // 4. Enforces overflow-hidden on carousel viewport region
+  assert(
+    componentContent.includes('overflow-hidden'),
+    'Carousel viewport must enforce overflow-hidden'
+  );
+});
+
 console.log('\n====================================================');
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log('====================================================\n');
