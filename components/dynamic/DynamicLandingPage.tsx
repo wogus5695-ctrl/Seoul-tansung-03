@@ -8,6 +8,7 @@ import { BeforeAfterSection } from '../sections/BeforeAfterSection';
 import { ResidentialSpacesSection } from '../sections/ResidentialSpacesSection';
 import { DecisionGuideSection } from '../sections/DecisionGuideSection';
 import { HowAllcareWorksSection } from '../sections/HowAllcareWorksSection';
+import { CustomerReviewsSection } from '../sections/CustomerReviewsSection';
 import { FaqSection } from '../sections/FaqSection';
 import { RelatedIntentLinksSection } from './RelatedIntentLinksSection';
 import { FinalCtaSection } from '../sections/FinalCtaSection';
@@ -46,7 +47,10 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
       {/* 07 WORK TIMELINE */}
       <HowAllcareWorksSection />
 
-      {/* 08 FAQ (Intent-specific FAQs with Main Accordion UI) */}
+      {/* 08 CUSTOMER REVIEWS */}
+      <CustomerReviewsSection />
+
+      {/* 09 FAQ (Intent-specific FAQs with Main Accordion UI) */}
       <FaqSection items={intent.faqItems} />
 
       {/* 08-B Related Search Intent Compact Internal Links */}

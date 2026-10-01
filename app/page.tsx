@@ -10,6 +10,7 @@ import { BeforeAfterSection } from '../components/sections/BeforeAfterSection';
 import { ResidentialSpacesSection } from '../components/sections/ResidentialSpacesSection';
 import { DecisionGuideSection } from '../components/sections/DecisionGuideSection';
 import { HowAllcareWorksSection } from '../components/sections/HowAllcareWorksSection';
+import { CustomerReviewsSection } from '../components/sections/CustomerReviewsSection';
 import { FaqSection } from '../components/sections/FaqSection';
 import { FinalCtaSection } from '../components/sections/FinalCtaSection';
 
@@ -65,7 +66,10 @@ export default async function Page({ searchParams }: PageProps) {
         {/* 07 HOW ALLCARE WORKS (Cohesive Timeline on Deep Olive - Merged Standard, Process & Trust) */}
         <HowAllcareWorksSection />
 
-        {/* 08 FAQ (5 Purchase-Decision Questions) */}
+        {/* 08 CUSTOMER REVIEWS (Shared Section) */}
+        <CustomerReviewsSection />
+
+        {/* 09 FAQ (5 Purchase-Decision Questions) */}
         <FaqSection />
 
         {/* 09 FINAL CONSULTATION (Background Visual CTA) */}

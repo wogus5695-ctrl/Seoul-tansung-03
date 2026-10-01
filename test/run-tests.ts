@@ -70,6 +70,7 @@ import {
   SYNTHETIC_COLLISION_REGIONS,
   TEST_REGIONS,
 } from './fixtures/regions.fixture';
+import { CUSTOMER_REVIEWS } from '../lib/data/customer-reviews';
 
 /**
  * RFC 2606 / RFC 6761 Reserved Test-Only Origins.
@@ -2284,6 +2285,123 @@ test('PHASE 6-E4: 1,902 Dynamic Titles (A/S 보장), Meta Description (A/S 보�
   const intentDescTemplates = SEARCH_INTENTS.map((i) => i.descriptionTemplate('테스트동'));
   const uniqueTemplates = new Set(intentDescTemplates);
   assert.strictEqual(uniqueTemplates.size, 6);
+});
+
+// ----------------------------------------------------
+// PHASE 6-F2B: FINAL APPROVED CUSTOMER REVIEWS CONTRACT TESTS
+// ----------------------------------------------------
+test('Phase 6-F2B: Customer Reviews Dataset SSOT contains 9 final approved user reviews (0 TEMP fixtures)', () => {
+  // 1. Dataset Count = 9
+  assert.strictEqual(CUSTOMER_REVIEWS.length, 9, 'CUSTOMER_REVIEWS dataset must contain exactly 9 reviews');
+
+  // 2. Unique Review IDs = 9
+  const reviewIds = new Set(CUSTOMER_REVIEWS.map((r) => r.id));
+  assert.strictEqual(reviewIds.size, 9, 'All 9 review IDs must be unique');
+
+  // 3. 0 TEMP Fixture IDs remaining
+  const tempCount = CUSTOMER_REVIEWS.filter((r) => r.id.startsWith('review-test-')).length;
+  assert.strictEqual(tempCount, 0, 'Zero TEMP review-test- IDs must remain in production');
+
+  // 4. Final IDs are review-01 through review-09
+  for (let i = 1; i <= 9; i++) {
+    const expectedId = `review-0${i}`;
+    assert(reviewIds.has(expectedId), `Dataset must contain final approved ID ${expectedId}`);
+  }
+
+  // 5. Structural fields and content assertions
+  for (const r of CUSTOMER_REVIEWS) {
+    assert(r.category.length > 0, `Review category must not be empty for ${r.id}`);
+    assert(r.headline.length >= 15, `Review headline must be substantial for ${r.id}`);
+    assert(r.body.length >= 50, `Review body must be substantial for ${r.id}`);
+
+    // Negative Assertions: Zero customer names, locations, ratings
+    const anyRecord = r as unknown as Record<string, unknown>;
+    assert.strictEqual(anyRecord.customerName, undefined);
+    assert.strictEqual(anyRecord.location, undefined);
+    assert.strictEqual(anyRecord.rating, undefined);
+    assert.strictEqual(anyRecord.reviewSource, undefined);
+  }
+});
+
+test('Phase 6-F2B: Zero equipment terms, Zero forbidden claims, Zero Review JSON-LD Schema', () => {
+  // 6. Equipment / Furniture misunderstanding guard (0 occurrences across all reviews)
+  const FORBIDDEN_EQUIPMENT_TERMS = [
+    '세탁기',
+    '건조기',
+    '냉장고',
+    '대형 가전',
+    '가전 주변',
+    '가전 뒤쪽',
+    '물건이 있어도 작업',
+    '짐이 있어도 작업',
+    '옮기지 않아도 시공',
+  ];
+
+  // 7. Forbidden marketing / claim terms (0 occurrences across all reviews)
+  const FORBIDDEN_CLAIM_TERMS = [
+    '완벽',
+    '100%',
+    '영구',
+    '절대',
+    '무조건',
+    '최고',
+    '1위',
+    '최저가',
+    '무상 A/S',
+    '평생 A/S',
+    '결로 해결',
+    '곰팡이 완전 제거',
+    '누수 차단',
+    '박리 재발 없음',
+  ];
+
+  for (const r of CUSTOMER_REVIEWS) {
+    const textPool = `${r.headline} ${r.body}`;
+
+    for (const term of FORBIDDEN_EQUIPMENT_TERMS) {
+      assert(
+        !textPool.includes(term),
+        `Review [${r.id}] must not contain equipment implication term [${term}]`
+      );
+    }
+
+    for (const term of FORBIDDEN_CLAIM_TERMS) {
+      assert(
+        !textPool.includes(term),
+        `Review [${r.id}] must not contain forbidden claim term [${term}]`
+      );
+    }
+  }
+
+  // 8. Main & Dynamic Page Composition verification (files import CustomerReviewsSection)
+  const mainPageContent = fs.readFileSync(path.resolve('app/page.tsx'), 'utf-8');
+  const dynamicPageContent = fs.readFileSync(path.resolve('components/dynamic/DynamicLandingPage.tsx'), 'utf-8');
+
+  assert(mainPageContent.includes('CustomerReviewsSection'), 'app/page.tsx must compose CustomerReviewsSection');
+  assert(dynamicPageContent.includes('CustomerReviewsSection'), 'DynamicLandingPage.tsx must compose CustomerReviewsSection');
+
+  // 9. Shared component position: HowAllcareWorksSection -> CustomerReviewsSection -> FaqSection
+  const mainHowIdx = mainPageContent.indexOf('HowAllcareWorksSection');
+  const mainRevIdx = mainPageContent.indexOf('CustomerReviewsSection');
+  const mainFaqIdx = mainPageContent.indexOf('FaqSection');
+  assert(mainHowIdx < mainRevIdx && mainRevIdx < mainFaqIdx, 'Main page must place CustomerReviewsSection between Work Timeline and FAQ');
+
+  const dynHowIdx = dynamicPageContent.indexOf('HowAllcareWorksSection');
+  const dynRevIdx = dynamicPageContent.indexOf('CustomerReviewsSection');
+  const dynFaqIdx = dynamicPageContent.indexOf('FaqSection');
+  assert(dynHowIdx < dynRevIdx && dynRevIdx < dynFaqIdx, 'Dynamic page must place CustomerReviewsSection between Work Timeline and FAQ');
+
+  // 10. JSON-LD Verification: Zero Review Schema, Zero AggregateRating Schema
+  const activeRegions = getActiveRegions(true);
+  const testRegion = activeRegions[0];
+  const testIntent = SEARCH_INTENTS[0];
+  const jsonLd = buildDynamicJsonLd(testRegion, testIntent, SITE_CONFIG.siteOrigin);
+  const stringifiedJsonLd = JSON.stringify(jsonLd);
+
+  assert(!stringifiedJsonLd.includes('"@type":"Review"'), 'JSON-LD must NOT contain Review schema');
+  assert(!stringifiedJsonLd.includes('"@type":"AggregateRating"'), 'JSON-LD must NOT contain AggregateRating schema');
+  assert(!stringifiedJsonLd.includes('ratingValue'), 'JSON-LD must NOT contain ratingValue');
+  assert(!stringifiedJsonLd.includes('reviewCount'), 'JSON-LD must NOT contain reviewCount');
 });
 
 console.log('\n====================================================');
