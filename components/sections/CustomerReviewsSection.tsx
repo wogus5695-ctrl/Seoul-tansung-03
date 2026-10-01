@@ -147,7 +147,7 @@ export function CustomerReviewsSection() {
               고객이 전하는 올케어 시공 후기
             </h2>
             <p className="text-token-body text-[#5C5549] leading-relaxed">
-              상담과 시공 과정에서 자주 들었던 고객 의견을 이해하기 쉽게 재구성했습니다.
+              상담과 시공 과정에서 자주 들었던 고객 의견을 바탕으로 후기 형식으로 재구성했습니다.
             </p>
           </div>
 
@@ -198,11 +198,6 @@ export function CustomerReviewsSection() {
               <p className="text-xs sm:text-sm text-[#5C5549] leading-relaxed pt-2 border-t border-[#E7D9C1]/60">
                 상담과 시공 과정에서 전달받은 고객 의견을 바탕으로 구성한 만족 후기입니다.
               </p>
-            </div>
-
-            <div className="pt-3 border-t border-[#E7D9C1]/40 flex items-center justify-between text-[11px] text-[#A89F91] font-medium">
-              <span>기준: 재구성 후기 콘텐츠</span>
-              <span className="font-mono text-[10px] uppercase">ALLCARE REVIEW</span>
             </div>
           </div>
 
@@ -259,9 +254,6 @@ export function CustomerReviewsSection() {
                           <span className="text-xs font-semibold text-[#3E443B]">
                             {review.regionLabel} · {review.maskedName} 고객님
                           </span>
-                          <span className="text-[10px] font-medium text-[#756E61] bg-[#F4F1EB] border border-[#E7D9C1]/60 px-2 py-0.5 rounded-md">
-                            {review.disclosureLabel}
-                          </span>
                         </div>
 
                         {/* Speech Bubble / Quote Icon (Decorative) */}
@@ -275,15 +267,10 @@ export function CustomerReviewsSection() {
                         </svg>
                       </div>
 
-                      {/* Category Tag & Headline */}
-                      <div className="space-y-1 pt-1">
-                        <span className="inline-block text-[11px] font-semibold text-[#5C5549] bg-[#E7D9C1]/50 px-2.5 py-0.5 rounded-md">
-                          {review.category}
-                        </span>
-                        <h3 className="text-base sm:text-lg font-bold text-[#3E443B] leading-snug">
-                          {review.headline}
-                        </h3>
-                      </div>
+                      {/* Headline */}
+                      <h3 className="text-base sm:text-lg font-bold text-[#3E443B] leading-snug pt-1">
+                        {review.headline}
+                      </h3>
 
                       {/* Body Copy */}
                       <p className="text-sm text-[#5C5549] leading-relaxed line-clamp-3 sm:line-clamp-none">

@@ -2320,7 +2320,7 @@ test('Phase 6-F3: Component UI removes legacy system IDs & footer labels; enforc
   assert(!componentContent.includes('<span>{review.id}</span>'), 'Component JSX must NOT render system review ID to user UI text');
   assert(!componentContent.includes('ALLCARE CUSTOMER EXPERIENCE'), 'Component JSX must NOT render legacy ALLCARE CUSTOMER EXPERIENCE label');
   assert(componentContent.includes('4.9'), 'Component JSX must render 4.9 summary score');
-  assert(componentContent.includes('재구성 후기 콘텐츠'), 'Component JSX must render disclosure note for summary score');
+  assert(!componentContent.includes('기준: 재구성 후기 콘텐츠'), 'Component JSX must NOT render summary card disclosure footer');
 
   // 5. Equipment / Furniture misunderstanding guard (0 occurrences across all reviews)
   const FORBIDDEN_EQUIPMENT_TERMS = [
@@ -2390,6 +2390,40 @@ test('Phase 6-F3A: Customer Reviews Carousel enforces Desktop exactly 2 cards & 
     componentContent.includes('overflow-hidden'),
     'Carousel viewport must enforce overflow-hidden'
   );
+});
+
+test('Phase 6-F3B: Review Card Cleanup enforces 0 Category Tags, 0 Per-card Badges, 0 Summary Footer Copy & 1 Section Disclosure', () => {
+  const componentContent = fs.readFileSync(path.resolve('components/sections/CustomerReviewsSection.tsx'), 'utf-8');
+
+  // 1. Category Tag removed (0 visible tags)
+  assert(
+    !componentContent.includes('{review.category}'),
+    'Component JSX must NOT render category tag'
+  );
+
+  // 2. Per-card "재구성 후기" Badge removed (0 visible badges)
+  assert(
+    !componentContent.includes('{review.disclosureLabel}'),
+    'Component JSX must NOT render per-card disclosure badge'
+  );
+
+  // 3. Left summary card footer copy removed
+  assert(
+    !componentContent.includes('기준: 재구성 후기 콘텐츠'),
+    'Component JSX must NOT render summary card footer copy'
+  );
+
+  // 4. Section-level disclosure preserved (1 time under section header)
+  assert(
+    componentContent.includes('상담과 시공 과정에서 자주 들었던 고객 의견을 바탕으로 후기 형식으로 재구성했습니다.'),
+    'Component JSX must render single section-level transparency disclosure in Section Description'
+  );
+
+  // 5. Preserves customer satisfaction score 4.9 & star ratings
+  assert(componentContent.includes('4.9'), 'Component JSX must preserve 4.9 score');
+  assert(componentContent.includes('StarRatingRow'), 'Component JSX must preserve star ratings');
+  assert(componentContent.includes('review.regionLabel'), 'Component JSX must preserve reviewer region label');
+  assert(componentContent.includes('review.maskedName'), 'Component JSX must preserve reviewer masked name');
 });
 
 console.log('\n====================================================');
