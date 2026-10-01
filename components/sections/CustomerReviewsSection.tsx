@@ -20,6 +20,26 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
+function StarRatingRow({ count = 5 }: { count?: number }) {
+  return (
+    <div
+      className="flex items-center gap-1 text-[#E5A93C]"
+      aria-label={`고객 만족 후기 별점 ${count}개`}
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <svg
+          key={i}
+          className="w-4 h-4 fill-current"
+          viewBox="0 0 20 20"
+          aria-hidden="true"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 export function CustomerReviewsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -41,7 +61,7 @@ export function CustomerReviewsSection() {
   // Responsive breakpoint detector
   useEffect(() => {
     const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 640);
+      setIsDesktop(window.innerWidth >= 1024);
     };
     checkDesktop();
     window.addEventListener('resize', checkDesktop);
@@ -113,7 +133,7 @@ export function CustomerReviewsSection() {
       aria-labelledby="customer-reviews-heading"
       className="w-full py-16 sm:py-24 bg-[#F4F1EB] border-y border-[#E7D9C1]/70"
     >
-      <Container className="space-y-10 sm:space-y-14 max-w-6xl">
+      <Container className="space-y-10 sm:space-y-12 max-w-6xl">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-2 max-w-2xl text-left">
@@ -124,14 +144,14 @@ export function CustomerReviewsSection() {
               id="customer-reviews-heading"
               className="text-token-h1 text-[#3E443B] text-balance leading-tight"
             >
-              시공 과정에서 자주 들은 이야기
+              고객이 전하는 올케어 시공 후기
             </h2>
             <p className="text-token-body text-[#5C5549] leading-relaxed">
               상담과 시공 과정에서 자주 들었던 고객 의견을 이해하기 쉽게 재구성했습니다.
             </p>
           </div>
 
-          {/* Desktop/Tablet Controls Header */}
+          {/* Controls Header */}
           <div className="hidden sm:flex items-center gap-3">
             <div className="flex items-center gap-2">
               <button
@@ -154,63 +174,125 @@ export function CustomerReviewsSection() {
           </div>
         </div>
 
-        {/* Carousel Region */}
-        <div
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="올케어 고객 후기 슬라이더"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          className="relative w-full overflow-hidden select-none"
-        >
-          {/* Card Track (Renders all 9 review cards in SSR HTML) */}
-          <div
-            aria-live={isAutoPlayingActive ? 'off' : 'polite'}
-            className="flex transition-transform duration-500 ease-in-out gap-6"
-            style={{
-              transform: `translateX(calc(-${currentIndex} * (${isDesktop ? '50% + 0.75rem' : '100% + 1.5rem'})))`,
-            }}
-          >
-            {CUSTOMER_REVIEWS.map((review: CustomerReview, idx: number) => {
-              const isActive = idx === currentIndex;
-              return (
-                <article
-                  key={review.id}
-                  role="group"
-                  aria-roledescription="slide"
-                  aria-label={`${totalReviews}개 중 ${idx + 1}번째 후기`}
-                  aria-hidden={!isActive && (!isDesktop || idx !== (currentIndex + 1) % totalReviews)}
-                  className="w-full sm:w-[calc(50%-0.75rem)] flex-shrink-0 bg-[#FAF8F5] p-6 sm:p-8 rounded-xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-4 min-h-[220px]"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="inline-block text-[11px] font-bold text-[#5C5549] bg-[#E7D9C1]/50 px-2.5 py-1 rounded-md">
-                        {review.category}
-                      </span>
-                      <span className="text-xs font-mono font-medium text-[#A89F91]">
-                        0{idx + 1} / 0{totalReviews}
-                      </span>
-                    </div>
-                    <h3 className="text-base sm:text-lg font-bold text-[#3E443B] leading-snug">
-                      {review.headline}
-                    </h3>
-                    <p className="text-sm sm:text-base text-[#5C5549] leading-relaxed">
-                      {review.body}
-                    </p>
-                  </div>
+        {/* Main Section Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+          {/* LEFT: Customer Satisfaction Summary Card (33% width on Desktop) */}
+          <div className="lg:col-span-4 bg-[#FAF8F5] p-6 sm:p-8 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <span className="inline-block text-xs font-bold text-[#5C5549] bg-[#E7D9C1]/50 px-3 py-1 rounded-md uppercase tracking-wider">
+                고객 만족도
+              </span>
 
-                  <div className="pt-2 border-t border-[#E7D9C1]/40 flex items-center justify-between text-[11px] text-[#A89F91]">
-                    <span>ALLCARE CUSTOMER EXPERIENCE</span>
-                    <span className="font-mono">{review.id}</span>
-                  </div>
-                </article>
-              );
-            })}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-extrabold text-[#3E443B] font-mono tracking-tight">
+                    4.9
+                  </span>
+                  <span className="text-lg font-semibold text-[#A89F91] font-mono">
+                    / 5.0
+                  </span>
+                </div>
+                <StarRatingRow count={5} />
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#5C5549] leading-relaxed pt-2 border-t border-[#E7D9C1]/60">
+                상담과 시공 과정에서 전달받은 고객 의견을 바탕으로 구성한 만족 후기입니다.
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-[#E7D9C1]/40 flex items-center justify-between text-[11px] text-[#A89F91] font-medium">
+              <span>기준: 재구성 후기 콘텐츠</span>
+              <span className="font-mono text-[10px] uppercase">ALLCARE REVIEW</span>
+            </div>
+          </div>
+
+          {/* RIGHT: Review Cards Carousel (67% width on Desktop) */}
+          <div
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="올케어 고객 후기 슬라이더"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="lg:col-span-8 relative w-full overflow-hidden select-none"
+          >
+            {/* Card Track */}
+            <div
+              aria-live={isAutoPlayingActive ? 'off' : 'polite'}
+              className={`flex ${
+                isDesktop
+                  ? 'flex-col gap-4 transition-transform duration-500 ease-in-out'
+                  : 'flex-row gap-4 transition-transform duration-500 ease-in-out'
+              }`}
+              style={{
+                transform: isDesktop
+                  ? `translateY(calc(-${currentIndex} * (210px + 1rem)))`
+                  : `translateX(calc(-${currentIndex} * (100% + 1rem)))`,
+              }}
+            >
+              {CUSTOMER_REVIEWS.map((review: CustomerReview, idx: number) => {
+                const isActive = idx === currentIndex;
+                const isNextActive = isDesktop && idx === (currentIndex + 1) % totalReviews;
+                const isVisibleInDOM = isActive || isNextActive;
+
+                return (
+                  <article
+                    key={review.id}
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${totalReviews}개 중 ${idx + 1}번째 후기`}
+                    aria-hidden={!isVisibleInDOM}
+                    className={`w-full flex-shrink-0 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-3 ${
+                      isDesktop ? 'h-[210px]' : 'min-h-[220px]'
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      {/* Top Header Line: Stars, Meta, Speech Bubble Icon */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <StarRatingRow count={review.rating} />
+                          <span className="text-xs font-semibold text-[#3E443B]">
+                            {review.regionLabel} · {review.maskedName} 고객님
+                          </span>
+                          <span className="text-[10px] font-medium text-[#756E61] bg-[#F4F1EB] border border-[#E7D9C1]/60 px-2 py-0.5 rounded-md">
+                            {review.disclosureLabel}
+                          </span>
+                        </div>
+
+                        {/* Speech Bubble / Quote Icon (Decorative) */}
+                        <svg
+                          className="w-5 h-5 text-[#A3B18A]/70 shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path d="M4.5 3.75a3 3 0 00-3 3v9a3 3 0 003 3h2.25v3.19a.75.75 0 001.248.563L11.59 18.75h7.91a3 3 0 003-3v-9a3 3 0 00-3-3h-15z" />
+                        </svg>
+                      </div>
+
+                      {/* Category Tag & Headline */}
+                      <div className="space-y-1 pt-1">
+                        <span className="inline-block text-[11px] font-semibold text-[#5C5549] bg-[#E7D9C1]/50 px-2.5 py-0.5 rounded-md">
+                          {review.category}
+                        </span>
+                        <h3 className="text-base sm:text-lg font-bold text-[#3E443B] leading-snug">
+                          {review.headline}
+                        </h3>
+                      </div>
+
+                      {/* Body Copy */}
+                      <p className="text-sm text-[#5C5549] leading-relaxed line-clamp-3 sm:line-clamp-none">
+                        {review.body}
+                      </p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
 
