@@ -24,8 +24,8 @@ const WORK_STEPS = [
   },
   {
     step: '05',
-    title: '마감 확인',
-    desc: '보양재를 정돈하고 도막 부착 상태 검수 후 환기 요령을 안내합니다.',
+    title: '마감 확인 · A/S 안내',
+    desc: '보양재를 정리하고 도막 상태를 확인한 뒤, 관리 방법과 시공 후 A/S 적용 기준을 안내합니다.',
   },
 ];
 
@@ -47,10 +47,10 @@ export function HowAllcareWorksSection() {
             id="how-works-heading"
             className="text-token-h1 font-semibold text-[#F5F3EE] text-balance leading-tight"
           >
-            확인부터 마감까지, 이렇게 진행합니다
+            확인부터 마감·A/S까지, 이렇게 진행합니다
           </h2>
           <p className="text-token-body text-[#E7D9C1]/90 max-w-xl mx-auto leading-relaxed">
-            시공 전 점검 기준과 실제 작업 흐름을 투명하게 안내합니다.
+            시공 전 점검부터 실제 작업과 마감 확인까지 진행 과정을 안내하고, 시공 후 A/S 보장 기준도 함께 안내합니다.
           </p>
         </div>
 

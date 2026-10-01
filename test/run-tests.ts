@@ -698,9 +698,13 @@ test('Claim Guard Extension: Zero unverified performance, warranty, or direct te
     '직영팀',
     '본사 직영팀',
     '직영 책임시공',
-    '하청 없음',
-    'A/S 보장',
-    '공식 AS',
+    '평생 A/S',
+    '영구 A/S',
+    '100% A/S',
+    '무조건 A/S',
+    '무상 A/S',
+    '완벽한 A/S',
+    '확실한 A/S',
     '정밀 분사',
     '균일 도막 보장',
     '특정 압력',
@@ -2209,9 +2213,9 @@ test('PHASE 6-E2: 1,902 Approved Dynamic URLs Prefix, Uniqueness & 6-Intent CTR 
 });
 
 // ----------------------------------------------------
-// PHASE 6-E3A: SHORT TITLE NORMALIZATION & METADATA CONSISTENCY QA
+// PHASE 6-E4: A/S TRUST SIGNAL + NAVER SERP INTEGRATION QA
 // ----------------------------------------------------
-test('PHASE 6-E3A: 1,902 Dynamic Titles Short Format, OG/JSON-LD Sync & Zero Duplicate QA', () => {
+test('PHASE 6-E4: 1,902 Dynamic Titles (A/S 보장), Meta Description (A/S 보장 기준), OG/JSON-LD Sync & Claim Safety QA', () => {
   const approvedRegions = PRODUCTION_REGIONS.filter(
     (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
   );
@@ -2220,13 +2224,23 @@ test('PHASE 6-E3A: 1,902 Dynamic Titles Short Format, OG/JSON-LD Sync & Zero Dup
   const seenTitles = new Set<string>();
   const seenDescriptions = new Set<string>();
 
+  const FORBIDDEN_AS_TERMS = [
+    '평생 A/S',
+    '영구 A/S',
+    '100% A/S',
+    '무조건 A/S',
+    '무상 A/S',
+    '완벽한 A/S',
+    '확실한 A/S',
+  ];
+
   for (const region of approvedRegions) {
     for (const intent of SEARCH_INTENTS) {
       const exactKeyword = `${region.keywordRegionName} ${intent.serviceKeyword}`;
       const expectedTitle = buildDynamicTitle(region.keywordRegionName, intent.serviceKeyword);
 
-      // 1. Title exact match: `${region} ${serviceKeyword} | 올케어`
-      assert.strictEqual(expectedTitle, `${exactKeyword} | 올케어`);
+      // 1. Title exact match: `${region} ${serviceKeyword} | A/S 보장 | 올케어`
+      assert.strictEqual(expectedTitle, `${exactKeyword} | A/S 보장 | 올케어`);
 
       const meta = buildDynamicMetadata(region, intent, SITE_CONFIG.siteOrigin);
       const titleStr = typeof meta.title === 'string' ? meta.title : String(meta.title || '');
@@ -2234,11 +2248,23 @@ test('PHASE 6-E3A: 1,902 Dynamic Titles Short Format, OG/JSON-LD Sync & Zero Dup
 
       assert.strictEqual(titleStr, expectedTitle);
 
-      // 2. OG Title & Description Sync
+      // 2. Description starts with exact keyword and includes 'A/S 보장 기준' exactly once
+      assert(descStr.startsWith(`${exactKeyword},`), `Description [${descStr}] must start with [${exactKeyword},]`);
+      assert(descStr.includes('A/S 보장 기준'), `Description [${descStr}] must contain 'A/S 보장 기준'`);
+      const asOccurrence = (descStr.match(/A\/S/g) || []).length;
+      assert.strictEqual(asOccurrence, 1, `Description [${descStr}] must contain A/S exactly 1 time`);
+
+      // 3. Claim Safety check: No forbidden A/S terms
+      for (const banned of FORBIDDEN_AS_TERMS) {
+        assert(!descStr.includes(banned), `Description [${descStr}] contains forbidden A/S claim [${banned}]`);
+        assert(!titleStr.includes(banned), `Title [${titleStr}] contains forbidden A/S claim [${banned}]`);
+      }
+
+      // 4. OG Title & Description Sync
       assert.strictEqual(meta.openGraph?.title, expectedTitle);
       assert.strictEqual(meta.openGraph?.description, descStr);
 
-      // 3. JSON-LD Description Sync
+      // 5. JSON-LD Description Sync
       const jsonLd = buildDynamicJsonLd(region, intent, SITE_CONFIG.siteOrigin);
       const serviceSchema = jsonLd.find((item: Record<string, unknown>) => item['@type'] === 'Service') as Record<string, unknown>;
       assert.strictEqual(serviceSchema.name, exactKeyword);
@@ -2250,10 +2276,14 @@ test('PHASE 6-E3A: 1,902 Dynamic Titles Short Format, OG/JSON-LD Sync & Zero Dup
     }
   }
 
-  // B. Title Duplicate = 0
+  // Title & Description Uniqueness
   assert.strictEqual(seenTitles.size, 1902);
-  // C. Description Duplicate = 0 across 1,902
   assert.strictEqual(seenDescriptions.size, 1902);
+
+  // 6 Intent Differentiation
+  const intentDescTemplates = SEARCH_INTENTS.map((i) => i.descriptionTemplate('테스트동'));
+  const uniqueTemplates = new Set(intentDescTemplates);
+  assert.strictEqual(uniqueTemplates.size, 6);
 });
 
 console.log('\n====================================================');

@@ -16,7 +16,7 @@
 import { SearchIntentId, SearchIntentItem, ServiceKeyword } from '../types/intents';
 
 export function buildDynamicTitle(keywordRegionName: string, serviceKeyword: string): string {
-  return `${keywordRegionName} ${serviceKeyword} | 올케어`;
+  return `${keywordRegionName} ${serviceKeyword} | A/S 보장 | 올케어`;
 }
 
 export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
@@ -35,7 +35,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 탄성코트, 시공 전 어떤 벽면 상태를 먼저 살펴봐야 할까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '탄성코트'),
     descriptionTemplate: (region) =>
-      `${region} 탄성코트, 기존 도막이 들뜨거나 시공이 필요하신가요? 벽면의 균열·오염·습기 흔적을 먼저 확인하고 필요한 작업 범위를 안내합니다.`,
+      `${region} 탄성코트, 기존 도막이 들뜨거나 시공이 필요하신가요? 벽면 상태와 필요한 작업 범위부터 시공 후 A/S 보장 기준까지 안내합니다.`,
     h1Template: (region) => `${region} 탄성코트`,
     heroIntroTemplate: (region) =>
       `${region} 탄성코트 시공 전, 기존 도막의 들뜸과 균열·오염 상태를 살펴 필요한 작업 범위부터 확인합니다.`,
@@ -89,7 +89,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 탄성코트시공, 단계별 기본 공정과 준비 사항은 무엇일까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '탄성코트시공'),
     descriptionTemplate: (region) =>
-      `${region} 탄성코트시공, 시공 순서와 밑작업 과정이 궁금하신가요? 시설물 보양부터 들뜬 도막 정리, 균열 보수와 탄성코트 작업 순서를 안내합니다.`,
+      `${region} 탄성코트시공, 시공 순서와 밑작업 과정이 궁금하신가요? 보양·바탕면 정리·균열 보수 과정과 시공 후 A/S 보장 기준을 안내합니다.`,
     h1Template: (region) => `${region} 탄성코트시공`,
     heroIntroTemplate: (region) =>
       `${region} 탄성코트시공 작업 전, 시설물 보양과 바탕면 정리·균열 보수 등 필요한 시공 순서를 먼저 확인합니다.`,
@@ -143,7 +143,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 베란다탄성코트, 창호 주변과 외벽 접점의 확인 포인트는 무엇일까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '베란다탄성코트'),
     descriptionTemplate: (region) =>
-      `${region} 베란다탄성코트, 창호 주변이나 베란다 벽면 상태가 신경 쓰이시나요? 창틀 접점·외벽 코너·기존 도막의 습기 흔적과 작업 전 확인 항목을 안내합니다.`,
+      `${region} 베란다탄성코트, 창호 주변이나 베란다 벽면 상태가 신경 쓰이시나요? 작업 전 확인 항목과 시공 후 A/S 보장 기준을 함께 안내합니다.`,
     h1Template: (region) => `${region} 베란다탄성코트`,
     heroIntroTemplate: (region) =>
       `${region} 베란다탄성코트 시공 전, 창호 주변과 외벽 코너의 도막·습기 흔적을 살펴 작업이 필요한 구간을 확인합니다.`,
@@ -197,7 +197,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 세탁실탄성코트, 대형 가전 공간과 배관 주변의 점검 기준은 무엇일까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '세탁실탄성코트'),
     descriptionTemplate: (region) =>
-      `${region} 세탁실탄성코트, 배관 주변이나 세탁기·건조기 설치 공간이 걱정되시나요? 좁은 배관 벽면과 가전 주변 공간의 도막 상태·습기 흔적·작업 조건을 확인합니다.`,
+      `${region} 세탁실탄성코트, 배관 주변이나 세탁기·건조기 공간이 걱정되시나요? 작업 조건과 필요한 시공 범위, 시공 후 A/S 보장 기준을 안내합니다.`,
     h1Template: (region) => `${region} 세탁실탄성코트`,
     heroIntroTemplate: (region) =>
       `${region} 세탁실탄성코트 작업 전, 배관 주변과 세탁기·건조기 설치 공간의 벽면 상태를 살펴 작업 조건을 확인합니다.`,
@@ -251,7 +251,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 아파트탄성코트, 신축·구축 세대별 일정과 작업 범위는 어떻게 다를까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '아파트탄성코트'),
     descriptionTemplate: (region) =>
-      `${region} 아파트탄성코트, 입주 전이나 재시공을 준비하고 계신가요? 신축 공실부터 구축 아파트까지 기존 도막 상태와 필요한 작업 범위를 확인해 안내합니다.`,
+      `${region} 아파트탄성코트, 입주 전이나 재시공을 준비하고 계신가요? 기존 도막 상태와 작업 범위부터 시공 후 A/S 보장 기준까지 확인해보세요.`,
     h1Template: (region) => `${region} 아파트탄성코트`,
     heroIntroTemplate: (region) =>
       `${region} 아파트탄성코트 시공 전, 입주 전 공실이나 기존 아파트의 도막 상태를 살펴 필요한 작업 범위를 확인합니다.`,
@@ -305,7 +305,7 @@ export const SEARCH_INTENTS: readonly SearchIntentItem[] = [
     problemH2Template: (region) => `${region} 탄성코트업체, 상담 전 확인해야 할 필수 기준과 견적 항목은 무엇일까요?`,
     titleTemplate: (region) => buildDynamicTitle(region, '탄성코트업체'),
     descriptionTemplate: (region) =>
-      `${region} 탄성코트업체, 어떤 업체에 맡겨야 할지 고민하고 계신가요? 밑작업 포함 여부와 시공 범위, 견적 확인 기준과 상담 전 체크사항을 안내합니다.`,
+      `${region} 탄성코트업체, 어떤 업체에 맡겨야 할지 고민하고 계신가요? 시공 범위와 견적 기준부터 시공 후 A/S 보장 기준까지 확인해보세요.`,
     h1Template: (region) => `${region} 탄성코트업체`,
     heroIntroTemplate: (region) =>
       `${region} 탄성코트업체 선택 전, 밑작업 포함 여부와 시공 범위·견적 기준을 상담 전에 확인할 수 있도록 안내합니다.`,
