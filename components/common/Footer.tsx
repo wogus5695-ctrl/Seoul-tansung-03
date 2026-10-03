@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { SITE_CONFIG } from '../../lib/config/site-config';
 import { Container } from '../layout/Container';
 
@@ -41,6 +42,12 @@ export function Footer() {
                 <span>문의전화 {SITE_CONFIG.phone}</span>
               </a>
             )}
+            <Link
+              href="/sitemap-seoul"
+              className="text-xs font-medium text-[#6B755D] hover:text-[#3E443B] underline underline-offset-2 transition-colors pt-1"
+            >
+              서울 지역별 탄성코트 안내
+            </Link>
           </div>
         </div>
 

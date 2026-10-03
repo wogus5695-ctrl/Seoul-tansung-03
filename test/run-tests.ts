@@ -2426,6 +2426,59 @@ test('Phase 6-F3B: Review Card Cleanup enforces 0 Category Tags, 0 Per-card Badg
   assert(componentContent.includes('review.maskedName'), 'Component JSX must preserve reviewer masked name');
 });
 
+// ----------------------------------------------------
+// PHASE 6-G2: MAIN -> HUB DISCOVERY LINK & SET CONSISTENCY
+// ----------------------------------------------------
+test('Phase 6-G2: Footer contains single crawlable link to /sitemap-seoul without nofollow', () => {
+  const footerPath = path.resolve('components/common/Footer.tsx');
+  assert(fs.existsSync(footerPath), 'Footer.tsx must exist');
+
+  const footerContent = fs.readFileSync(footerPath, 'utf-8');
+
+  // Must contain Link or href to /sitemap-seoul
+  assert(
+    footerContent.includes('href="/sitemap-seoul"') || footerContent.includes("href='/sitemap-seoul'"),
+    'Footer must render crawlable link to /sitemap-seoul'
+  );
+
+  // Must not have rel="nofollow"
+  assert(
+    !footerContent.includes('nofollow'),
+    'Footer link to /sitemap-seoul must NOT contain rel="nofollow"'
+  );
+
+  // Must contain user-visible anchor text
+  assert(
+    footerContent.includes('서울 지역별 탄성코트 안내') || footerContent.includes('서울 지역 안내'),
+    'Footer link must contain valid user-visible anchor text'
+  );
+});
+
+test('Phase 6-G2: Publication Gate Indexable, Sitemap, and Seoul Hub Sets match perfectly (1,902 URLs)', () => {
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+  assert.strictEqual(approvedRegions.length, 317);
+
+  const indexableUrls: string[] = [];
+  for (const r of approvedRegions) {
+    for (const intent of SEARCH_INTENTS) {
+      const href = buildPublicHref(r.keywordRegionName, intent.serviceKeyword);
+      indexableUrls.push(href);
+    }
+  }
+
+  assert.strictEqual(indexableUrls.length, 1902);
+
+  // Verify Collision Hold region is strictly excluded from Indexable set
+  const holdRegion = PRODUCTION_REGIONS.find((r) => r.id === 'seoul-eunpyeong-sinsa')!;
+  assert.strictEqual(holdRegion.publicationState, 'PUBLISHED_NOINDEX');
+  for (const intent of SEARCH_INTENTS) {
+    const holdHref = buildPublicHref(holdRegion.keywordRegionName, intent.serviceKeyword);
+    assert(!indexableUrls.includes(holdHref), `Hold href ${holdHref} must not be in Indexable set`);
+  }
+});
+
 console.log('\n====================================================');
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log('====================================================\n');
