@@ -90,6 +90,7 @@ export default async function Page({ searchParams }: PageProps) {
   // 4. Render SSR Dynamic Landing Page
   return (
     <DynamicLandingPage
+      key={rawKey}
       region={validation.region}
       intent={validation.intent}
     />

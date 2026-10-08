@@ -2,6 +2,7 @@ import React from 'react';
 import { RegionItem } from '../../lib/types/regions';
 import { SearchIntentItem } from '../../lib/types/intents';
 import { buildDynamicJsonLd } from '../../lib/seo/dynamic-metadata';
+import { DynamicTitleSync } from './DynamicTitleSync';
 import { HeroSection } from '../sections/HeroSection';
 import { WallCheckSection } from '../sections/WallCheckSection';
 import { BeforeAfterSection } from '../sections/BeforeAfterSection';
@@ -23,6 +24,12 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
 
   return (
     <main className="flex-1 flex flex-col">
+      {/* Dynamic Browser Tab Title Client-Side Synchronization (Phase 6-G2A) */}
+      <DynamicTitleSync
+        keywordRegionName={region.keywordRegionName}
+        serviceKeyword={intent.serviceKeyword}
+      />
+
       {/* JSON-LD Structured Data (Service, BreadcrumbList, FAQPage) */}
       <script
         type="application/ld+json"

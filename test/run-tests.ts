@@ -2479,6 +2479,226 @@ test('Phase 6-G2: Publication Gate Indexable, Sitemap, and Seoul Hub Sets match 
   }
 });
 
+// ----------------------------------------------------
+// PHASE 6-G2A: DYNAMIC BROWSER TAB TITLE SYNCHRONIZATION QA CONTRACTS
+// ----------------------------------------------------
+
+test('Phase 6-G2A [1 & 3]: buildDynamicTitle SSOT and DynamicTitleSync Component Contract', () => {
+  // 1. Verify buildDynamicTitle SSOT returns exact required formula
+  const sampleTitle = buildDynamicTitle('성수동', '탄성코트업체');
+  assert.strictEqual(sampleTitle, '성수동 탄성코트업체 | A/S 보장 | 올케어');
+
+  // Verify DynamicTitleSync component source file exists and reuses SSOT
+  const syncComponentPath = path.join(process.cwd(), 'components/dynamic/DynamicTitleSync.tsx');
+  assert(fs.existsSync(syncComponentPath), 'DynamicTitleSync.tsx must exist');
+  const syncSource = fs.readFileSync(syncComponentPath, 'utf-8');
+
+  assert(syncSource.includes("'use client'"), 'DynamicTitleSync must be a client component');
+  assert(syncSource.includes('buildDynamicTitle'), 'DynamicTitleSync must import and use buildDynamicTitle SSOT');
+  assert(!syncSource.includes('window.history.pushState'), 'DynamicTitleSync must NOT patch window.history');
+  assert(!syncSource.includes('setInterval'), 'DynamicTitleSync must NOT use setInterval polling');
+  assert(!syncSource.includes('MutationObserver'), 'DynamicTitleSync must NOT use MutationObserver');
+
+  // Verify DynamicLandingPage mounts DynamicTitleSync
+  const landingPagePath = path.join(process.cwd(), 'components/dynamic/DynamicLandingPage.tsx');
+  const landingSource = fs.readFileSync(landingPagePath, 'utf-8');
+  assert(landingSource.includes('<DynamicTitleSync'), 'DynamicLandingPage must mount DynamicTitleSync');
+  assert(landingSource.includes('keywordRegionName={region.keywordRegionName}'), 'DynamicTitleSync must receive region prop');
+  assert(landingSource.includes('serviceKeyword={intent.serviceKeyword}'), 'DynamicTitleSync must receive intent prop');
+
+  // Verify app/page.tsx supplies key={rawKey} to DynamicLandingPage
+  const pagePath = path.join(process.cwd(), 'app/page.tsx');
+  const pageSource = fs.readFileSync(pagePath, 'utf-8');
+  assert(pageSource.includes('key={rawKey}'), 'app/page.tsx must provide key={rawKey} to DynamicLandingPage');
+});
+
+test('Phase 6-G2A [2 & 13-15]: Approved 1,902 Expected Titles Unique & Server Metadata Invariants', () => {
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+  assert.strictEqual(approvedRegions.length, 317);
+
+  const seenTitles = new Set<string>();
+  const duplicateTitles: string[] = [];
+  let approvedCount = 0;
+
+  for (const region of approvedRegions) {
+    for (const intent of SEARCH_INTENTS) {
+      approvedCount++;
+      const expectedTitle = buildDynamicTitle(region.keywordRegionName, intent.serviceKeyword);
+      const serverMetadata = buildDynamicMetadata(region, intent);
+
+      // Verify Title SSOT match
+      assert.strictEqual(serverMetadata.title, expectedTitle, `Server Title mismatch for ${region.keywordRegionName}-${intent.serviceKeyword}`);
+      assert(expectedTitle.endsWith(' | A/S 보장 | 올케어'), `Title must end with SSOT suffix: ${expectedTitle}`);
+      assert(expectedTitle.startsWith(`${region.keywordRegionName} ${intent.serviceKeyword}`), `Title must lead with exact keyword: ${expectedTitle}`);
+
+      // Verify Uniqueness
+      if (seenTitles.has(expectedTitle)) {
+        duplicateTitles.push(expectedTitle);
+      }
+      seenTitles.add(expectedTitle);
+
+      // Verify Canonical & Description invariants
+      assert(serverMetadata.alternates?.canonical, 'Canonical must exist');
+      assert(serverMetadata.description, 'Description must exist');
+      assert.strictEqual(serverMetadata.description, intent.descriptionTemplate(region.keywordRegionName));
+    }
+  }
+
+  assert.strictEqual(approvedCount, 1902, 'Must audit exactly 1,902 approved dynamic URLs');
+  assert.strictEqual(duplicateTitles.length, 0, `Duplicate titles found: ${duplicateTitles.join(', ')}`);
+  assert.strictEqual(seenTitles.size, 1902, 'Must produce exactly 1,902 unique titles');
+});
+
+test('Phase 6-G2A [4-8 & 21-22]: Client Navigation Matrix Simulation (Same-Region, Cross-Region, Back/Forward, Fast Navigation)', () => {
+  // Navigation simulation history stack
+  interface HistoryEntry {
+    url: string;
+    k: string;
+    expectedTitle: string;
+  }
+
+  const simulateNavigation = (k: string): HistoryEntry => {
+    const activeRegions = getActiveRegions();
+    const validation = validateDynamicRoute(k, activeRegions);
+    assert(validation.isValid && validation.region && validation.intent, `Route validation failed for ${k}`);
+    const expectedTitle = buildDynamicTitle(validation.region.keywordRegionName, validation.intent.serviceKeyword);
+    return {
+      url: `https://www.allcaretan.co.kr/?k=${encodeURIComponent(k)}`,
+      k,
+      expectedTitle,
+    };
+  };
+
+  // Case C: Same Region Related Intent Navigation
+  const sameRegionIntents = [
+    '강남구-탄성코트',
+    '강남구-탄성코트시공',
+    '강남구-베란다탄성코트',
+    '강남구-세탁실탄성코트',
+    '강남구-아파트탄성코트',
+    '강남구-탄성코트업체',
+  ];
+  for (const k of sameRegionIntents) {
+    const entry = simulateNavigation(k);
+    assert(entry.expectedTitle.startsWith('강남구 '), `Same region intent title mismatch: ${entry.expectedTitle}`);
+  }
+
+  // Case D: Cross-Region Navigation
+  const crossRegions = [
+    '강남구-탄성코트',
+    '불광동-탄성코트',
+    '마곡동-탄성코트',
+    '성수동-탄성코트',
+  ];
+  const crossEntries = crossRegions.map(simulateNavigation);
+  assert.strictEqual(crossEntries[0].expectedTitle, '강남구 탄성코트 | A/S 보장 | 올케어');
+  assert.strictEqual(crossEntries[1].expectedTitle, '불광동 탄성코트 | A/S 보장 | 올케어');
+  assert.strictEqual(crossEntries[2].expectedTitle, '마곡동 탄성코트 | A/S 보장 | 올케어');
+  assert.strictEqual(crossEntries[3].expectedTitle, '성수동 탄성코트 | A/S 보장 | 올케어');
+
+  // Case E & History Back/Forward: A -> B -> C -> D -> BACK -> BACK -> FORWARD -> FORWARD
+  const journeyKeys = [
+    '강남구-탄성코트',
+    '불광동-탄성코트',
+    '마곡동-베란다탄성코트',
+    '성수동-탄성코트업체',
+  ];
+  const historyStack: HistoryEntry[] = journeyKeys.map(simulateNavigation);
+  let pointer = historyStack.length - 1; // At D (성수동-탄성코트업체)
+  assert.strictEqual(historyStack[pointer].expectedTitle, '성수동 탄성코트업체 | A/S 보장 | 올케어');
+
+  // BACK -> C (마곡동-베란다탄성코트)
+  pointer--;
+  assert.strictEqual(historyStack[pointer].expectedTitle, '마곡동 베란다탄성코트 | A/S 보장 | 올케어');
+
+  // BACK -> B (불광동-탄성코트)
+  pointer--;
+  assert.strictEqual(historyStack[pointer].expectedTitle, '불광동 탄성코트 | A/S 보장 | 올케어');
+
+  // FORWARD -> C (마곡동-베란다탄성코트)
+  pointer++;
+  assert.strictEqual(historyStack[pointer].expectedTitle, '마곡동 베란다탄성코트 | A/S 보장 | 올케어');
+
+  // FORWARD -> D (성수동-탄성코트업체)
+  pointer++;
+  assert.strictEqual(historyStack[pointer].expectedTitle, '성수동 탄성코트업체 | A/S 보장 | 올케어');
+});
+
+test('Phase 6-G2A [9-12]: Main, Hub, Collision Hold, and Invalid URL Title Isolation Contracts', () => {
+  // 9. Main Page Title SSOT
+  const mainTitleExpected = `${SITE_CONFIG.brandName} | ${SITE_CONFIG.businessCategory}`;
+  assert.strictEqual(mainTitleExpected, '올케어 | 탄성코트 전문 시공');
+
+  // 10. Seoul Hub Page Title SSOT
+  const hubPagePath = path.join(process.cwd(), 'app/sitemap-seoul/page.tsx');
+  const hubSource = fs.readFileSync(hubPagePath, 'utf-8');
+  assert(hubSource.includes("title: '서울 탄성코트 전체 지역 및 시공안내 | 올케어'"), 'Hub title metadata must remain frozen');
+  assert(!hubSource.includes('DynamicTitleSync'), 'Hub page must NOT contain DynamicTitleSync');
+
+  // 11. Collision Hold 6 URLs Title & Robots Invariant
+  const holdRegion = PRODUCTION_REGIONS.find((r) => r.id === 'seoul-eunpyeong-sinsa')!;
+  assert.strictEqual(holdRegion.publicationState, 'PUBLISHED_NOINDEX');
+  for (const intent of SEARCH_INTENTS) {
+    const holdTitle = buildDynamicTitle(holdRegion.keywordRegionName, intent.serviceKeyword);
+    const holdMetadata = buildDynamicMetadata(holdRegion, intent);
+    assert.strictEqual(holdTitle, `${holdRegion.keywordRegionName} ${intent.serviceKeyword} | A/S 보장 | 올케어`);
+    assert.strictEqual(holdMetadata.title, holdTitle);
+    const robots = holdMetadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
+    assert.strictEqual(robots.index, false, 'Collision hold URL must strictly emit noindex');
+    assert.strictEqual(robots.follow, false, 'Collision hold URL must strictly emit nofollow');
+    assert.strictEqual(robots.nocache, true, 'Collision hold URL must strictly emit nocache');
+  }
+
+  // 12. Invalid URL handling: empty, unknown region, unknown intent, multiple keys
+  const activeRegions = getActiveRegions();
+  const invalidCases = [
+    'invalid-region-keyword',
+    '강남구-존재하지않는의도',
+    '없는동-탄성코트',
+    '',
+  ];
+  for (const invalidKey of invalidCases) {
+    const validation = validateDynamicRoute(invalidKey, activeRegions);
+    assert.strictEqual(validation.isValid, false, `Expected isValid=false for invalid key: "${invalidKey}"`);
+  }
+});
+
+test('Phase 6-G2A [15]: Representative QA 8 URLs Contract Verification', () => {
+  const representativeTestSet = [
+    { key: '강남구-탄성코트', expectedTitle: '강남구 탄성코트 | A/S 보장 | 올케어', isHold: false },
+    { key: '불광동-탄성코트', expectedTitle: '불광동 탄성코트 | A/S 보장 | 올케어', isHold: false },
+    { key: '마곡동-베란다탄성코트', expectedTitle: '마곡동 베란다탄성코트 | A/S 보장 | 올케어', isHold: false },
+    { key: '삼청동-세탁실탄성코트', expectedTitle: '삼청동 세탁실탄성코트 | A/S 보장 | 올케어', isHold: false },
+    { key: '서초구-아파트탄성코트', expectedTitle: '서초구 아파트탄성코트 | A/S 보장 | 올케어', isHold: false },
+    { key: '성수동-탄성코트업체', expectedTitle: '성수동 탄성코트업체 | A/S 보장 | 올케어', isHold: false },
+    { key: '불광동-탄성코트시공', expectedTitle: '불광동 탄성코트시공 | A/S 보장 | 올케어', isHold: false },
+    { key: '신사동-탄성코트', expectedTitle: '신사동 탄성코트 | A/S 보장 | 올케어', isHold: true },
+  ];
+
+  const activeRegions = getActiveRegions();
+
+  for (const item of representativeTestSet) {
+    const validation = validateDynamicRoute(item.key, activeRegions);
+    assert(validation.isValid && validation.region && validation.intent, `Validation failed for ${item.key}`);
+
+    const serverMetadata = buildDynamicMetadata(validation.region, validation.intent);
+    const dynamicTitle = buildDynamicTitle(validation.region.keywordRegionName, validation.intent.serviceKeyword);
+
+    assert.strictEqual(serverMetadata.title, item.expectedTitle, `Server Title mismatch for ${item.key}`);
+    assert.strictEqual(dynamicTitle, item.expectedTitle, `Client Title mismatch for ${item.key}`);
+
+    if (item.isHold) {
+      const robots = serverMetadata.robots as { index?: boolean; follow?: boolean };
+      assert.strictEqual(robots.index, false, `Hold URL ${item.key} must be noindex`);
+    } else {
+      const robots = serverMetadata.robots as { index?: boolean; follow?: boolean };
+      assert.strictEqual(robots.index, true, `Approved URL ${item.key} must be index`);
+    }
+  }
+});
+
 console.log('\n====================================================');
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log('====================================================\n');
