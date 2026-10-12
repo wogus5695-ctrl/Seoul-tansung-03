@@ -2,6 +2,7 @@ import React from 'react';
 import { Container } from '../layout/Container';
 import { RegionItem } from '../../lib/types/regions';
 import { SearchIntentItem } from '../../lib/types/intents';
+import { getLocalInsight } from '../../lib/data/pilot-local-insights';
 
 const DECISION_STEPS = [
   {
@@ -39,6 +40,10 @@ export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}
   const exactKeyword = dynamic
     ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
     : undefined;
+
+  const insight = dynamic
+    ? getLocalInsight(dynamic.region.id, dynamic.intent.serviceKeyword)
+    : null;
 
   return (
     <section aria-labelledby="decision-heading" className="w-full py-16 sm:py-24 bg-[#FAF8F5] border-y border-[#E7D9C1]">
@@ -94,6 +99,37 @@ export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}
               : '※ 올케어는 일률적인 평수 기준이 아닌, 실제 벽면 상태와 보수 소요에 근거하여 합리적인 작업 범위를 제안합니다.'}
           </p>
         </div>
+
+        {/* Phase 6-H1A Pilot Local Insight Supporting Block (Strict Zero-DOM if insight is null) */}
+        {insight && (
+          <div
+            data-testid="local-insight-block"
+            className="pt-8 border-t border-[#E7D9C1] max-w-2xl mx-auto space-y-3 text-left"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[11px] font-semibold text-[#6B755D] tracking-wider uppercase">
+                지역 참고 정보
+              </span>
+              <span className="text-[11px] text-[#8C8375]">
+                {insight.sourceLabel}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-[#3E443B] leading-relaxed">
+              {insight.factText}
+            </p>
+            <p className="text-[11px] sm:text-xs text-[#756E61] leading-relaxed">
+              {insight.limitationText}
+            </p>
+            <div className="bg-[#F5F2EB] p-3.5 rounded-lg border border-[#E7D9C1] text-xs sm:text-sm text-[#3E443B] leading-relaxed space-y-1">
+              <span className="font-bold text-[#4F5844] block text-xs">
+                시공 전 점검 안내
+              </span>
+              <p className="text-[#3E443B]">
+                {insight.checkpointText}
+              </p>
+            </div>
+          </div>
+        )}
       </Container>
     </section>
   );

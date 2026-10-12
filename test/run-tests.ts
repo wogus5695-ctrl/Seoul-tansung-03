@@ -71,6 +71,10 @@ import {
   TEST_REGIONS,
 } from './fixtures/regions.fixture';
 import { CUSTOMER_REVIEWS } from '../lib/data/customer-reviews';
+import {
+  PILOT_LOCAL_INSIGHT_PROFILES,
+  getLocalInsight,
+} from '../lib/data/pilot-local-insights';
 
 /**
  * RFC 2606 / RFC 6761 Reserved Test-Only Origins.
@@ -2697,6 +2701,222 @@ test('Phase 6-G2A [15]: Representative QA 8 URLs Contract Verification', () => {
       assert.strictEqual(robots.index, true, `Approved URL ${item.key} must be index`);
     }
   }
+});
+
+/**
+ * PHASE 6-H1A: 5 REGION x 6 INTENT LOCAL INSIGHT PILOT TESTS
+ */
+test('Phase 6-H1A [1]: Exactly 5 Pilot Region Profiles in SSOT', () => {
+  assert.strictEqual(PILOT_LOCAL_INSIGHT_PROFILES.length, 5, 'Must have exactly 5 Pilot profiles');
+  const pilotIds = PILOT_LOCAL_INSIGHT_PROFILES.map((p) => p.regionId);
+  assert(pilotIds.includes('seoul-gangnam-gu'), 'Must include Gangnam-gu');
+  assert(pilotIds.includes('seoul-eunpyeong-bulgwang'), 'Must include Bulgwang-dong');
+  assert(pilotIds.includes('seoul-gangseo-마곡동'), 'Must include Magok-dong');
+  assert(pilotIds.includes('seoul-seongdong-성수동'), 'Must include Seongsu-dong');
+  assert(pilotIds.includes('seoul-jongno-창신동'), 'Must include Changsin-dong');
+});
+
+test('Phase 6-H1A [2]: Exactly 30 Pilot Region-Intent Combinations Render Non-Null Insight', () => {
+  const pilotIds = ['seoul-gangnam-gu', 'seoul-eunpyeong-bulgwang', 'seoul-gangseo-마곡동', 'seoul-seongdong-성수동', 'seoul-jongno-창신동'];
+  let pilotRenderCount = 0;
+
+  for (const pid of pilotIds) {
+    for (const kw of SERVICE_KEYWORDS) {
+      const insight = getLocalInsight(pid, kw);
+      assert(insight !== null, `Pilot insight must not be null for ${pid} + ${kw}`);
+      assert(insight.factText.length > 50, `Fact text must be substantial for ${pid} + ${kw}`);
+      assert(insight.limitationText.length > 20, `Limitation text must be substantial for ${pid} + ${kw}`);
+      assert(insight.checkpointText.length > 30, `Checkpoint text must be substantial for ${pid} + ${kw}`);
+      assert.strictEqual(
+        insight.sourceLabel,
+        '출처: 한국부동산원 공동주택 식별정보 공개자료 · 2026.08 기준',
+        `Source label must match frozen label for ${pid} + ${kw}`
+      );
+      pilotRenderCount++;
+    }
+  }
+
+  assert.strictEqual(pilotRenderCount, 30, 'Must have exactly 30 Pilot combinations');
+});
+
+test('Phase 6-H1A [3]: Control 30 Combinations Render Strictly Null (Zero-DOM)', () => {
+  const controlIds = [
+    'seoul-seocho-gu',
+    'seoul-eunpyeong-갈현동',
+    'seoul-gangseo-가양동',
+    'seoul-gwangjin-자양동',
+    'seoul-jongno-숭인동',
+  ];
+  let controlNullCount = 0;
+
+  for (const cid of controlIds) {
+    for (const kw of SERVICE_KEYWORDS) {
+      const insight = getLocalInsight(cid, kw);
+      assert.strictEqual(insight, null, `Control ${cid} + ${kw} must return null`);
+      controlNullCount++;
+    }
+  }
+
+  assert.strictEqual(controlNullCount, 30, 'All 30 Control combinations must return null');
+});
+
+test('Phase 6-H1A [4]: Non-Pilot Regions Render Strictly Null (Zero-DOM)', () => {
+  const sampleNonPilotIds = [
+    'seoul-mapo-gu',
+    'seoul-songpa-gu',
+    'seoul-nowon-gu',
+    'seoul-yeongdeungpo-yeouido',
+    'seoul-yongsan-itaewon',
+    'seoul-dongdaemun-cheongnyangni',
+    'seoul-seodaemun-sinchon',
+    'seoul-guro-guro',
+    'seoul-gangdong-cheonho',
+    'seoul-jungnang-myeonmok',
+  ];
+
+  for (const rid of sampleNonPilotIds) {
+    for (const kw of SERVICE_KEYWORDS) {
+      const insight = getLocalInsight(rid, kw);
+      assert.strictEqual(insight, null, `Non-pilot ${rid} + ${kw} must return null`);
+    }
+  }
+});
+
+test('Phase 6-H1A [5]: Collision Hold (Sinsa-dong) URLs Render Strictly Null', () => {
+  for (const kw of SERVICE_KEYWORDS) {
+    const insight = getLocalInsight('seoul-eunpyeong-sinsa', kw);
+    assert.strictEqual(insight, null, `Collision hold sinsa + ${kw} must return null`);
+  }
+});
+
+test('Phase 6-H1A [6 & 7]: Source Label and Limitation Text Invariants', () => {
+  const expectedSource = '출처: 한국부동산원 공동주택 식별정보 공개자료 · 2026.08 기준';
+  const expectedLimitation = '※ 공개 데이터의 건물 연식이나 주거 유형만으로 개별 세대의 탄성코트 시공 필요성을 판단할 수는 없습니다.';
+
+  for (const profile of PILOT_LOCAL_INSIGHT_PROFILES) {
+    assert.strictEqual(profile.sourceLabel, expectedSource, `Source mismatch for ${profile.regionName}`);
+    assert.strictEqual(profile.limitationText, expectedLimitation, `Limitation mismatch for ${profile.regionName}`);
+  }
+});
+
+test('Phase 6-H1A [8]: All 6 Intent Checkpoint Keys Present on All 5 Profiles', () => {
+  for (const profile of PILOT_LOCAL_INSIGHT_PROFILES) {
+    for (const kw of SERVICE_KEYWORDS) {
+      const cp = profile.intentCheckpoints[kw];
+      assert(Boolean(cp) && cp.length > 0, `Missing checkpoint for ${profile.regionName} + ${kw}`);
+    }
+  }
+});
+
+test('Phase 6-H1A [9]: Unsupported Local Characterizations Banned', () => {
+  const bannedKeywords = [
+    '북한산',
+    '구도심 빌라',
+    '계획 신도시',
+    '준공업',
+    '재개발 지역',
+    '초고령',
+    '핵심 주거지',
+    '고수요',
+    '인기 지역',
+    '문의가 많은',
+    '수요가 높은',
+  ];
+
+  for (const profile of PILOT_LOCAL_INSIGHT_PROFILES) {
+    for (const banned of bannedKeywords) {
+      assert(!profile.factText.includes(banned), `Fact text of ${profile.regionName} contains banned keyword: ${banned}`);
+      assert(!profile.limitationText.includes(banned), `Limitation text contains banned keyword: ${banned}`);
+      for (const kw of SERVICE_KEYWORDS) {
+        assert(!profile.intentCheckpoints[kw].includes(banned), `Checkpoint contains banned keyword: ${banned}`);
+      }
+    }
+  }
+});
+
+test('Phase 6-H1A [10]: Prohibited Causal / Marketing Claims Banned', () => {
+  const bannedClaims = [
+    '완벽',
+    '100%',
+    '영구',
+    '반드시',
+    '무조건',
+    '최고',
+    '1위',
+    '최저가',
+    '결로 해결',
+    '곰팡이 해결',
+    '누수 해결',
+    '박리 방지 보장',
+    '노후 지역',
+  ];
+
+  for (const profile of PILOT_LOCAL_INSIGHT_PROFILES) {
+    for (const claim of bannedClaims) {
+      assert(!profile.factText.includes(claim), `Fact text of ${profile.regionName} contains prohibited claim: ${claim}`);
+      for (const kw of SERVICE_KEYWORDS) {
+        assert(!profile.intentCheckpoints[kw].includes(claim), `Checkpoint contains prohibited claim: ${claim}`);
+      }
+    }
+  }
+});
+
+test('Phase 6-H1A [11]: No Fabricated Fallback for Unknown Inputs', () => {
+  assert.strictEqual(getLocalInsight('unknown-region-id', '탄성코트'), null);
+  assert.strictEqual(getLocalInsight('', '탄성코트'), null);
+  assert.strictEqual(getLocalInsight(undefined, '탄성코트'), null);
+  assert.strictEqual(getLocalInsight('seoul-gangnam-gu', undefined), null);
+});
+
+test('Phase 6-H1A [12]: Main Page Call Returns Null (Zero Insight)', () => {
+  assert.strictEqual(getLocalInsight(undefined, undefined), null);
+});
+
+test('Phase 6-H1A [13]: Dynamic SEO Metadata Frozen Across Pilot & Non-Pilot', () => {
+  const activeRegions = getActiveRegions();
+  const testKey = '강남구-탄성코트';
+  const validation = validateDynamicRoute(testKey, activeRegions);
+  assert(validation.isValid && validation.region && validation.intent);
+
+  const meta = buildDynamicMetadata(validation.region, validation.intent);
+  assert.strictEqual(meta.title, '강남구 탄성코트 | A/S 보장 | 올케어');
+  assert.strictEqual(meta.alternates?.canonical, 'https://www.allcaretan.co.kr/?k=%EA%B0%95%EB%82%A8%EA%B5%AC-%ED%83%84%EC%84%B1%EC%BD%94%ED%8A%B8');
+});
+
+test('Phase 6-H1A [14 & 15]: Sitemap & Hub Counts Preserved', () => {
+  const approvedRegions = PRODUCTION_REGIONS.filter(
+    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+  );
+  assert.strictEqual(approvedRegions.length, 317, 'Approved regions must remain 317');
+  const expectedDynamicCount = approvedRegions.length * 6;
+  assert.strictEqual(expectedDynamicCount, 1902, 'Expected dynamic URL count must remain 1902');
+});
+
+test('Phase 6-H1A [16]: Pilot Facts Exact Match with Phase 6-H0-R Frozen SSOT', () => {
+  const gangnam = PILOT_LOCAL_INSIGHT_PROFILES.find((p) => p.regionId === 'seoul-gangnam-gu')!;
+  assert(gangnam.factText.includes('4,421개 단위'), 'Gangnam units mismatch');
+  assert(gangnam.factText.includes('168,588세대'), 'Gangnam households mismatch');
+  assert(gangnam.factText.includes('69.3%'), 'Gangnam 20+ share mismatch');
+
+  const bulgwang = PILOT_LOCAL_INSIGHT_PROFILES.find((p) => p.regionId === 'seoul-eunpyeong-bulgwang')!;
+  assert(bulgwang.factText.includes('1,447개 단위'), 'Bulgwang units mismatch');
+  assert(bulgwang.factText.includes('96.1%'), 'Bulgwang multi share mismatch');
+  assert(bulgwang.factText.includes('65.8%'), 'Bulgwang 20+ share mismatch');
+
+  const magok = PILOT_LOCAL_INSIGHT_PROFILES.find((p) => p.regionId === 'seoul-gangseo-마곡동')!;
+  assert(magok.factText.includes('95개 단위'), 'Magok units mismatch');
+  assert(magok.factText.includes('38.9%'), 'Magok apt share mismatch');
+  assert(magok.factText.includes('48.9%'), 'Magok 20+ share mismatch');
+
+  const seongsu = PILOT_LOCAL_INSIGHT_PROFILES.find((p) => p.regionId === 'seoul-seongdong-성수동')!;
+  assert(seongsu.factText.includes('315개 단위'), 'Seongsu units mismatch');
+  assert(seongsu.factText.includes('14,092세대'), 'Seongsu households mismatch');
+  assert(seongsu.factText.includes('59.0%'), 'Seongsu 20+ share mismatch');
+
+  const changsin = PILOT_LOCAL_INSIGHT_PROFILES.find((p) => p.regionId === 'seoul-jongno-창신동')!;
+  assert(changsin.factText.includes('274개 단위'), 'Changsin units mismatch');
+  assert(changsin.factText.includes('89.8%'), 'Changsin multi share mismatch');
+  assert(changsin.factText.includes('92.7%'), 'Changsin 20+ share mismatch');
 });
 
 console.log('\n====================================================');
