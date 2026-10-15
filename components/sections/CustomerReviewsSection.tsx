@@ -20,26 +20,6 @@ function getReducedMotionServerSnapshot() {
   return false;
 }
 
-function StarRatingRow({ count = 5 }: { count?: number }) {
-  return (
-    <div
-      className="flex items-center gap-1 text-[#E5A93C]"
-      aria-label={`고객 만족 후기 별점 ${count}개`}
-    >
-      {Array.from({ length: count }).map((_, i) => (
-        <svg
-          key={i}
-          className="w-4 h-4 fill-current"
-          viewBox="0 0 20 20"
-          aria-hidden="true"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 export function CustomerReviewsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -138,16 +118,16 @@ export function CustomerReviewsSection() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-2 max-w-2xl text-left">
             <p className="text-xs font-semibold text-[#5C5549] tracking-wider uppercase">
-              CUSTOMER REVIEWS
+              CUSTOMER FEEDBACK
             </p>
             <h2
               id="customer-reviews-heading"
               className="text-token-h1 text-[#3E443B] text-balance leading-tight"
             >
-              고객이 전하는 올케어 시공 후기
+              고객이 전하는 올케어 이야기
             </h2>
             <p className="text-token-body text-[#5C5549] leading-relaxed">
-              상담과 시공 과정에서 자주 들었던 고객 의견을 바탕으로 후기 형식으로 재구성했습니다.
+              상담과 시공 과정에서 자주 들었던 고객 의견을 이해하기 쉽게 재구성한 내용입니다.
             </p>
           </div>
 
@@ -176,28 +156,26 @@ export function CustomerReviewsSection() {
 
         {/* Main Section Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
-          {/* LEFT: Customer Satisfaction Summary Card (33% width on Desktop) */}
-          <div className="lg:col-span-4 bg-[#FAF8F5] p-6 sm:p-8 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-6">
+          {/* LEFT: Customer Feedback Summary Card (33% width on Desktop) */}
+          <div className="lg:col-span-4 bg-[#FAF8F5] p-6 sm:p-8 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-6 text-left">
             <div className="space-y-4">
               <span className="inline-block text-xs font-bold text-[#5C5549] bg-[#E7D9C1]/50 px-3 py-1 rounded-md uppercase tracking-wider">
-                고객 만족도
+                고객 상담 안내
               </span>
 
               <div className="space-y-2 pt-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-[#3E443B] font-mono tracking-tight">
-                    4.9
-                  </span>
-                  <span className="text-lg font-semibold text-[#A89F91] font-mono">
-                    / 5.0
-                  </span>
-                </div>
-                <StarRatingRow count={5} />
+                <h3 className="text-xl sm:text-2xl font-bold text-[#3E443B]">
+                  자주 전해주시는<br />고객 이야기
+                </h3>
               </div>
 
               <p className="text-xs sm:text-sm text-[#5C5549] leading-relaxed pt-2 border-t border-[#E7D9C1]/60">
-                상담과 시공 과정에서 전달받은 고객 의견을 바탕으로 구성한 만족 후기입니다.
+                상담과 시공 과정에서 자주 들었던 고객 의견을 이해하기 쉽게 재구성한 내용입니다.
               </p>
+            </div>
+
+            <div className="text-[11px] text-[#8C8375] pt-2 border-t border-[#E7D9C1]/60">
+              ※ 실제 고객 상담 과정의 피드백을 바탕으로 재구성된 안내입니다.
             </div>
           </div>
 
@@ -205,7 +183,7 @@ export function CustomerReviewsSection() {
           <div
             role="region"
             aria-roledescription="carousel"
-            aria-label="올케어 고객 후기 슬라이더"
+            aria-label="올케어 고객 의견 슬라이더"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onFocus={() => setIsFocused(true)}
@@ -240,19 +218,18 @@ export function CustomerReviewsSection() {
                     key={idx === totalReviews ? `wrap-${review.id}` : review.id}
                     role="group"
                     aria-roledescription="slide"
-                    aria-label={`${totalReviews}개 중 ${reviewIndex + 1}번째 후기`}
+                    aria-label={`${totalReviews}개 중 ${reviewIndex + 1}번째 의견`}
                     aria-hidden={!isVisibleInDOM}
-                    className={`w-full flex-shrink-0 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-3 ${
+                    className={`w-full flex-shrink-0 bg-[#FAF8F5] p-6 sm:p-7 rounded-2xl border border-[#E7D9C1] shadow-sm flex flex-col justify-between space-y-3 text-left ${
                       isDesktop ? 'h-[210px]' : 'min-h-[220px]'
                     }`}
                   >
                     <div className="space-y-2">
-                      {/* Top Header Line: Stars, Meta, Speech Bubble Icon */}
+                      {/* Top Header Line: Category Tag, Speech Bubble Icon */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <StarRatingRow count={review.rating} />
-                          <span className="text-xs font-semibold text-[#3E443B]">
-                            {review.regionLabel} · {review.maskedName} 고객님
+                          <span className="text-xs font-semibold text-[#4F5844] bg-[#E7D9C1]/50 px-2.5 py-0.5 rounded">
+                            고객 상담 의견
                           </span>
                         </div>
 
@@ -306,43 +283,46 @@ export function CustomerReviewsSection() {
             </button>
           </div>
 
-          {/* Dot Indicators */}
-          <div className="flex items-center gap-2" aria-label="후기 선택">
-            {CUSTOMER_REVIEWS.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => goToSlide(idx)}
-                aria-label={`고객 후기 ${idx + 1}로 이동`}
-                aria-current={currentIndex === idx ? 'true' : 'false'}
-                className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-2 focus-visible:outline-[#3E443B] ${
-                  currentIndex === idx
-                    ? 'w-7 bg-[#3E443B]'
-                    : 'w-2 bg-[#E7D9C1] hover:bg-[#A3B18A]'
-                }`}
-              />
-            ))}
+          {/* Indicator Dots */}
+          <div
+            role="tablist"
+            aria-label="고객 후기 목록 인디케이터"
+            className="flex items-center gap-2 overflow-x-auto py-1 max-w-full justify-center"
+          >
+            {CUSTOMER_REVIEWS.map((review: CustomerReview, index: number) => {
+              const isSelected = index === currentIndex;
+              return (
+                <button
+                  key={review.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  aria-label={`${totalReviews}개 중 ${index + 1}번째 후기 선택`}
+                  onClick={() => goToSlide(index)}
+                  className={`transition-all rounded-full focus-visible:outline-2 focus-visible:outline-[#3E443B] ${
+                    isSelected
+                      ? 'w-6 h-2 bg-[#4F5844]'
+                      : 'w-2 h-2 bg-[#D1C7B7] hover:bg-[#A89F91]'
+                  }`}
+                />
+              );
+            })}
           </div>
 
-          {/* Autoplay Toggle & Numeric Counter */}
+          {/* Autoplay Pause / Play Control */}
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono font-semibold text-[#5C5549]">
-              0{currentIndex + 1} <span className="text-[#A89F91]">/</span> 0{totalReviews}
-            </span>
             <button
               type="button"
               onClick={togglePlay}
-              aria-label={isPlaying ? '슬라이드 자동 이동 일시정지' : '슬라이드 자동 이동 시작'}
-              className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#E7D9C1] text-[11px] font-semibold text-[#5C5549] hover:bg-[#3E443B] hover:text-[#F5F3EE] transition-colors focus-visible:outline-2 focus-visible:outline-[#3E443B] flex items-center gap-1.5"
+              aria-label={isPlaying ? '자동 넘김 일시정지' : '자동 넘김 시작'}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FAF8F5] border border-[#E7D9C1] text-xs font-medium text-[#5C5549] hover:bg-[#EFE8DC] transition-colors focus-visible:outline-2 focus-visible:outline-[#3E443B]"
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isAutoPlayingActive
-                    ? 'bg-[#A3B18A] animate-pulse'
-                    : 'bg-[#A89F91]'
+                className={`w-2 h-2 rounded-full ${
+                  isAutoPlayingActive ? 'bg-[#4F5844] animate-pulse' : 'bg-[#A89F91]'
                 }`}
               />
-              <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+              <span>{isPlaying ? '자동 전환 중' : '일시정지됨'}</span>
             </button>
           </div>
         </div>

@@ -9,7 +9,6 @@ import { BeforeAfterSection } from '../sections/BeforeAfterSection';
 import { ResidentialSpacesSection } from '../sections/ResidentialSpacesSection';
 import { DecisionGuideSection } from '../sections/DecisionGuideSection';
 import { HowAllcareWorksSection } from '../sections/HowAllcareWorksSection';
-import { CustomerReviewsSection } from '../sections/CustomerReviewsSection';
 import { FaqSection } from '../sections/FaqSection';
 import { RelatedIntentLinksSection } from './RelatedIntentLinksSection';
 import { FinalCtaSection } from '../sections/FinalCtaSection';
@@ -45,22 +44,21 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
       {/* 04 BEFORE & AFTER */}
       <BeforeAfterSection showDisclaimer />
 
-      {/* 05 RESIDENTIAL SPACES */}
-      <ResidentialSpacesSection />
+      {/* 05 RESIDENTIAL SPACES (Distributed Regional Typology Context) */}
+      <ResidentialSpacesSection dynamic={{ region, intent }} />
 
-      {/* 06 DECISION FLOW */}
+      {/* 06 DECISION FLOW & DISTRIBUTED LOCAL FACT CHECK */}
       <DecisionGuideSection dynamic={{ region, intent }} />
 
       {/* 07 WORK TIMELINE */}
       <HowAllcareWorksSection />
 
-      {/* 08 CUSTOMER REVIEWS */}
-      <CustomerReviewsSection />
+      {/* 08 CUSTOMER REVIEWS UNMOUNTED PER PHASE 6-H2B RECOVERY CONTRACT */}
 
-      {/* 09 FAQ (Intent-specific FAQs with Main Accordion UI) */}
-      <FaqSection items={intent.faqItems} />
+      {/* 09 FAQ (Intent-specific FAQs with Region Context Safe Adapter) */}
+      <FaqSection items={intent.faqItems} dynamic={{ region, intent }} />
 
-      {/* 08-B Related Search Intent Compact Internal Links */}
+      {/* 08-B Related Search Intent & Recovery Regional Navigation */}
       <RelatedIntentLinksSection region={region} currentIntent={intent} />
 
       {/* 09 FINAL CONSULTATION CTA */}
@@ -68,4 +66,3 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
     </main>
   );
 }
-

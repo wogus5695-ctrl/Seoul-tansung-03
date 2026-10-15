@@ -75,6 +75,17 @@ import {
   PILOT_LOCAL_INSIGHT_PROFILES,
   getLocalInsight,
 } from '../lib/data/pilot-local-insights';
+import {
+  isRecoveryRegion,
+  isRecoveryIntent,
+  isRecoveryDynamicPage,
+  RECOVERY_ENABLED,
+  RECOVERY_PRIMARY_INTENT,
+  RECOVERY_REGION_IDS,
+  RECOVERY_REGIONS_PROFILES,
+  getRecoveryProfile,
+  getRelatedRecoveryRegions,
+} from '../lib/config/recovery-config';
 
 /**
  * RFC 2606 / RFC 6761 Reserved Test-Only Origins.
@@ -1634,6 +1645,7 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   let previewLeakCount = 0;
   let mainPageCanonicalLeakCount = 0;
   let indexableCount = 0;
+  let noindexFollowCount = 0;
   let noindexFollowNocacheCount = 0;
   let areaServedCount = 0;
 
@@ -1669,11 +1681,13 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
         mainPageCanonicalLeakCount++;
       }
 
-      // 4. Metadata verification (1,902 approved dynamic pages are INDEXABLE, 6 collision hold pages are NOINDEX)
+      // 4. Metadata verification (Phase 6-H2B: 15 Recovery = INDEX, 1,887 Non-recovery Approved = NOINDEX/FOLLOW, 6 Collision Hold = NOINDEX/NOFOLLOW/NOCACHE)
       const metadata = buildDynamicMetadata(region, intent);
       const robots = metadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
       if (robots && robots.index === true && robots.follow === true) {
         indexableCount++;
+      } else if (robots && robots.index === false && robots.follow === true) {
+        noindexFollowCount++;
       } else if (robots && robots.index === false && robots.follow === false && robots.nocache === true) {
         noindexFollowNocacheCount++;
       }
@@ -1709,8 +1723,9 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   assert.strictEqual(localhostLeakCount, 0, 'Must have 0 localhost leaks');
   assert.strictEqual(previewLeakCount, 0, 'Must have 0 preview leaks');
   assert.strictEqual(mainPageCanonicalLeakCount, 0, 'Must have 0 main page canonical leaks');
-  assert.strictEqual(indexableCount, 1902, 'Exactly 1,902 approved dynamic pages are indexable');
-  assert.strictEqual(noindexFollowNocacheCount, 6, 'Exactly 6 collision hold dynamic pages are NOINDEX');
+  assert.strictEqual(indexableCount, 15, 'Phase 6-H2B: Exactly 15 recovery dynamic pages are indexable');
+  assert.strictEqual(noindexFollowCount, 1887, 'Phase 6-H2B: Exactly 1,887 approved non-recovery dynamic pages are NOINDEX, FOLLOW');
+  assert.strictEqual(noindexFollowNocacheCount, 6, 'Phase 6-H2B: Exactly 6 collision hold dynamic pages are NOINDEX, NOFOLLOW, NOCACHE');
   assert.strictEqual(areaServedCount, 1902, 'Area served count must be 1,902');
 });
 
@@ -2075,7 +2090,7 @@ test('PHASE 6-C2: 1,902 Approved Dynamic URLs Indexability & 6 Collision Hold NO
   assert.strictEqual(noindexCount, 6, 'NOINDEX count must be EXACTLY 6 collision hold dynamic URLs');
 });
 
-test('PHASE 6-C2: Sitemap Inclusion Contract (1,904 Total URLs: 1 Main + 1 Hub + 1,902 Dynamic)', () => {
+test('PHASE 6-H2B: Sitemap Inclusion Contract (17 Total URLs: 1 Main + 1 Hub + 15 Recovery Dynamic)', () => {
   const origin = OFFICIAL_SITE_ORIGIN;
   const approvedRegions = PRODUCTION_REGIONS.filter(
     (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
@@ -2084,17 +2099,19 @@ test('PHASE 6-C2: Sitemap Inclusion Contract (1,904 Total URLs: 1 Main + 1 Hub +
   const dynamicUrls: string[] = [];
   for (const r of approvedRegions) {
     for (const intent of SEARCH_INTENTS) {
-      const href = buildPublicHref(r.keywordRegionName, intent.serviceKeyword);
-      dynamicUrls.push(`${origin}${href}`);
+      if (isRecoveryDynamicPage(r.id, intent.serviceKeyword)) {
+        const href = buildPublicHref(r.keywordRegionName, intent.serviceKeyword);
+        dynamicUrls.push(`${origin}${href}`);
+      }
     }
   }
 
   const sitemapUrls = [`${origin}/`, `${origin}/sitemap-seoul`, ...dynamicUrls];
 
-  assert.strictEqual(sitemapUrls.length, 1904, 'Sitemap URL count must be exactly 1,904 (1 Main + 1 Hub + 1,902 Dynamic)');
-  assert.strictEqual(dynamicUrls.length, 1902, 'Dynamic sitemap URLs must be exactly 1,902');
+  assert.strictEqual(sitemapUrls.length, 17, 'Sitemap URL count must be exactly 17 (1 Main + 1 Hub + 15 Dynamic)');
+  assert.strictEqual(dynamicUrls.length, 15, 'Dynamic sitemap URLs must be exactly 15');
 
-  // Verify zero leak of collision hold (seoul-eunpyeong-sinsa / 신사동)
+  // Verify zero leak of collision hold (seoul-eunpyeong-sinsa / 신사동) or noindex URLs
   for (const url of sitemapUrls) {
     assert(!url.includes('신사동'), 'Sitemap must not contain collision hold region (신사동)');
     assert(!url.includes('localhost'), 'Sitemap must not contain localhost');
@@ -2292,7 +2309,7 @@ test('PHASE 6-E4: 1,902 Dynamic Titles (A/S 보장), Meta Description (A/S 보�
 });
 
 // ----------------------------------------------------
-// PHASE 6-F3: CUSTOMER REVIEWS SOCIAL-PROOF UI CONTRACT TESTS
+// PHASE 6-F3: CUSTOMER REVIEWS SOCIAL-PROOF UI CONTRACT TESTS (UPDATED FOR PHASE 6-H2B TRUST NORMALIZATION)
 // ----------------------------------------------------
 test('Phase 6-F3: Customer Reviews Dataset SSOT contains 9 virtual reviewer identities & disclosures', () => {
   // 1. Dataset Count = 9
@@ -2303,10 +2320,10 @@ test('Phase 6-F3: Customer Reviews Dataset SSOT contains 9 virtual reviewer iden
   assert.strictEqual(reviewIds.size, 9, 'All 9 review IDs must be unique');
 
   for (const r of CUSTOMER_REVIEWS) {
-    assert(r.regionLabel.startsWith('서울 '), `Region label [${r.regionLabel}] must start with 서울 for ${r.id}`);
-    assert(r.maskedName.includes('*'), `Masked name [${r.maskedName}] must contain * for ${r.id}`);
-    assert.strictEqual(r.rating, 5, `Rating must be 5 for ${r.id}`);
-    assert.strictEqual(r.disclosureLabel, '재구성 후기', `Disclosure label must be 재구성 후기 for ${r.id}`);
+    assert.strictEqual(r.disclosureLabel, '재구성 의견', `Disclosure label must be 재구성 의견 for ${r.id}`);
+    assert.strictEqual(r.regionLabel, undefined, `Region label must be purged for ${r.id}`);
+    assert.strictEqual(r.maskedName, undefined, `Masked name must be purged for ${r.id}`);
+    assert.strictEqual(r.rating, undefined, `Rating must be purged for ${r.id}`);
   }
 
   // 3. Negative assertions: Zero full real names or unverified platform claims
@@ -2323,7 +2340,8 @@ test('Phase 6-F3: Component UI removes legacy system IDs & footer labels; enforc
   // 4. System IDs and legacy labels removed from user-facing UI text
   assert(!componentContent.includes('<span>{review.id}</span>'), 'Component JSX must NOT render system review ID to user UI text');
   assert(!componentContent.includes('ALLCARE CUSTOMER EXPERIENCE'), 'Component JSX must NOT render legacy ALLCARE CUSTOMER EXPERIENCE label');
-  assert(componentContent.includes('4.9'), 'Component JSX must render 4.9 summary score');
+  assert(!componentContent.includes('4.9'), 'Component JSX must NOT render 4.9 summary score');
+  assert(!componentContent.includes('StarRatingRow'), 'Component JSX must NOT render star rating row');
   assert(!componentContent.includes('기준: 재구성 후기 콘텐츠'), 'Component JSX must NOT render summary card disclosure footer');
 
   // 5. Equipment / Furniture misunderstanding guard (0 occurrences across all reviews)
@@ -2353,7 +2371,7 @@ test('Phase 6-F3: Component UI removes legacy system IDs & footer labels; enforc
   const mainPageContent = fs.readFileSync(path.resolve('app/page.tsx'), 'utf-8');
   const dynamicPageContent = fs.readFileSync(path.resolve('components/dynamic/DynamicLandingPage.tsx'), 'utf-8');
   assert(mainPageContent.includes('CustomerReviewsSection'), 'app/page.tsx must compose CustomerReviewsSection');
-  assert(dynamicPageContent.includes('CustomerReviewsSection'), 'DynamicLandingPage.tsx must compose CustomerReviewsSection');
+  assert(!dynamicPageContent.includes('CustomerReviewsSection'), 'DynamicLandingPage.tsx must NOT compose CustomerReviewsSection (unmounted for duplicate reduction)');
 
   // 7. JSON-LD Verification: Zero Review Schema, Zero AggregateRating Schema
   const activeRegions = getActiveRegions(true);
@@ -2419,15 +2437,15 @@ test('Phase 6-F3B: Review Card Cleanup enforces 0 Category Tags, 0 Per-card Badg
 
   // 4. Section-level disclosure preserved (1 time under section header)
   assert(
-    componentContent.includes('상담과 시공 과정에서 자주 들었던 고객 의견을 바탕으로 후기 형식으로 재구성했습니다.'),
+    componentContent.includes('상담과 시공 과정에서 자주 들었던 고객 의견을 이해하기 쉽게 재구성한 내용입니다.'),
     'Component JSX must render single section-level transparency disclosure in Section Description'
   );
 
-  // 5. Preserves customer satisfaction score 4.9 & star ratings
-  assert(componentContent.includes('4.9'), 'Component JSX must preserve 4.9 score');
-  assert(componentContent.includes('StarRatingRow'), 'Component JSX must preserve star ratings');
-  assert(componentContent.includes('review.regionLabel'), 'Component JSX must preserve reviewer region label');
-  assert(componentContent.includes('review.maskedName'), 'Component JSX must preserve reviewer masked name');
+  // 5. Enforces zero synthetic ratings and zero synthetic reviewer personas (Phase 6-H2B Trust Normalization)
+  assert(!componentContent.includes('4.9'), 'Component JSX must NOT render 4.9 summary score');
+  assert(!componentContent.includes('StarRatingRow'), 'Component JSX must NOT render StarRatingRow');
+  assert(!componentContent.includes('review.regionLabel'), 'Component JSX must NOT render reviewer region label');
+  assert(!componentContent.includes('review.maskedName'), 'Component JSX must NOT render reviewer masked name');
 });
 
 // ----------------------------------------------------
@@ -2638,7 +2656,7 @@ test('Phase 6-G2A [9-12]: Main, Hub, Collision Hold, and Invalid URL Title Isola
   // 10. Seoul Hub Page Title SSOT
   const hubPagePath = path.join(process.cwd(), 'app/sitemap-seoul/page.tsx');
   const hubSource = fs.readFileSync(hubPagePath, 'utf-8');
-  assert(hubSource.includes("title: '서울 탄성코트 전체 지역 및 시공안내 | 올케어'"), 'Hub title metadata must remain frozen');
+  assert(hubSource.includes("title: '서울 탄성코트 주요 지역 및 시공안내 | 올케어'"), 'Hub title metadata must match recovery title');
   assert(!hubSource.includes('DynamicTitleSync'), 'Hub page must NOT contain DynamicTitleSync');
 
   // 11. Collision Hold 6 URLs Title & Robots Invariant
@@ -2671,14 +2689,14 @@ test('Phase 6-G2A [9-12]: Main, Hub, Collision Hold, and Invalid URL Title Isola
 
 test('Phase 6-G2A [15]: Representative QA 8 URLs Contract Verification', () => {
   const representativeTestSet = [
-    { key: '강남구-탄성코트', expectedTitle: '강남구 탄성코트 | A/S 보장 | 올케어', isHold: false },
-    { key: '불광동-탄성코트', expectedTitle: '불광동 탄성코트 | A/S 보장 | 올케어', isHold: false },
-    { key: '마곡동-베란다탄성코트', expectedTitle: '마곡동 베란다탄성코트 | A/S 보장 | 올케어', isHold: false },
-    { key: '삼청동-세탁실탄성코트', expectedTitle: '삼청동 세탁실탄성코트 | A/S 보장 | 올케어', isHold: false },
-    { key: '서초구-아파트탄성코트', expectedTitle: '서초구 아파트탄성코트 | A/S 보장 | 올케어', isHold: false },
-    { key: '성수동-탄성코트업체', expectedTitle: '성수동 탄성코트업체 | A/S 보장 | 올케어', isHold: false },
-    { key: '불광동-탄성코트시공', expectedTitle: '불광동 탄성코트시공 | A/S 보장 | 올케어', isHold: false },
-    { key: '신사동-탄성코트', expectedTitle: '신사동 탄성코트 | A/S 보장 | 올케어', isHold: true },
+    { key: '강남구-탄성코트', expectedTitle: '강남구 탄성코트 | A/S 보장 | 올케어', isHold: false, isRecovery: true },
+    { key: '불광동-탄성코트', expectedTitle: '불광동 탄성코트 | A/S 보장 | 올케어', isHold: false, isRecovery: true },
+    { key: '마곡동-베란다탄성코트', expectedTitle: '마곡동 베란다탄성코트 | A/S 보장 | 올케어', isHold: false, isRecovery: false },
+    { key: '삼청동-세탁실탄성코트', expectedTitle: '삼청동 세탁실탄성코트 | A/S 보장 | 올케어', isHold: false, isRecovery: false },
+    { key: '서초구-아파트탄성코트', expectedTitle: '서초구 아파트탄성코트 | A/S 보장 | 올케어', isHold: false, isRecovery: false },
+    { key: '성수동-탄성코트업체', expectedTitle: '성수동 탄성코트업체 | A/S 보장 | 올케어', isHold: false, isRecovery: false },
+    { key: '불광동-탄성코트시공', expectedTitle: '불광동 탄성코트시공 | A/S 보장 | 올케어', isHold: false, isRecovery: false },
+    { key: '신사동-탄성코트', expectedTitle: '신사동 탄성코트 | A/S 보장 | 올케어', isHold: true, isRecovery: false },
   ];
 
   const activeRegions = getActiveRegions();
@@ -2693,12 +2711,17 @@ test('Phase 6-G2A [15]: Representative QA 8 URLs Contract Verification', () => {
     assert.strictEqual(serverMetadata.title, item.expectedTitle, `Server Title mismatch for ${item.key}`);
     assert.strictEqual(dynamicTitle, item.expectedTitle, `Client Title mismatch for ${item.key}`);
 
+    const robots = serverMetadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
     if (item.isHold) {
-      const robots = serverMetadata.robots as { index?: boolean; follow?: boolean };
       assert.strictEqual(robots.index, false, `Hold URL ${item.key} must be noindex`);
+      assert.strictEqual(robots.follow, false, `Hold URL ${item.key} must be nofollow`);
+      assert.strictEqual(robots.nocache, true, `Hold URL ${item.key} must be nocache`);
+    } else if (item.isRecovery) {
+      assert.strictEqual(robots.index, true, `Recovery URL ${item.key} must be index`);
+      assert.strictEqual(robots.follow, true, `Recovery URL ${item.key} must be follow`);
     } else {
-      const robots = serverMetadata.robots as { index?: boolean; follow?: boolean };
-      assert.strictEqual(robots.index, true, `Approved URL ${item.key} must be index`);
+      assert.strictEqual(robots.index, false, `Non-recovery Approved URL ${item.key} must be noindex`);
+      assert.strictEqual(robots.follow, true, `Non-recovery Approved URL ${item.key} must be follow`);
     }
   }
 });
@@ -2917,6 +2940,103 @@ test('Phase 6-H1A [16]: Pilot Facts Exact Match with Phase 6-H0-R Frozen SSOT', 
   assert(changsin.factText.includes('274개 단위'), 'Changsin units mismatch');
   assert(changsin.factText.includes('89.8%'), 'Changsin multi share mismatch');
   assert(changsin.factText.includes('92.7%'), 'Changsin 20+ share mismatch');
+});
+
+// ----------------------------------------------------
+// PHASE 6-H2B: 15-URL INDEXABLE RECOVERY ARCHITECTURE VERIFICATION
+// ----------------------------------------------------
+
+test('Phase 6-H2B [1]: Recovery SSOT contains exactly 15 Regions & 1 Primary Intent (탄성코트)', () => {
+  assert.strictEqual(RECOVERY_ENABLED, true, 'Recovery mode must be enabled');
+  assert.strictEqual(RECOVERY_PRIMARY_INTENT, '탄성코트', 'Primary intent must strictly be 탄성코트');
+  assert.strictEqual(RECOVERY_REGION_IDS.length, 15, 'Recovery regions must be exactly 15');
+
+  const expectedGu = ['seoul-gangnam-gu', 'seoul-seocho-gu', 'seoul-eunpyeong-gu', 'seoul-gangseo-gu', 'seoul-seongdong-gu'];
+  const expectedDong = [
+    'seoul-eunpyeong-bulgwang',
+    'seoul-eunpyeong-갈현동',
+    'seoul-gangseo-마곡동',
+    'seoul-gangseo-가양동',
+    'seoul-seongdong-성수동',
+    'seoul-gwangjin-자양동',
+    'seoul-jongno-창신동',
+    'seoul-jongno-숭인동',
+    'seoul-nowon-상계동',
+    'seoul-yangcheon-목동',
+  ];
+
+  for (const id of expectedGu) {
+    assert(RECOVERY_REGION_IDS.includes(id as any), `Missing expected GU: ${id}`);
+    assert(isRecoveryRegion(id), `isRecoveryRegion failed for GU: ${id}`);
+  }
+  for (const id of expectedDong) {
+    assert(RECOVERY_REGION_IDS.includes(id as any), `Missing expected DONG: ${id}`);
+    assert(isRecoveryRegion(id), `isRecoveryRegion failed for DONG: ${id}`);
+  }
+
+  // Verify all 15 have complete factual profiles with zero null/undefined
+  for (const id of RECOVERY_REGION_IDS) {
+    const profile = getRecoveryProfile(id);
+    assert(profile, `Profile must exist for ${id}`);
+    assert(profile.units > 0, `Units count must be > 0 for ${id}`);
+    assert(profile.households > 0, `Households count must be > 0 for ${id}`);
+    assert(profile.validDates > 0, `Valid dates count must be > 0 for ${id}`);
+    assert(profile.aptShare.endsWith('%'), `aptShare must end with % for ${id}`);
+    assert(profile.villaShare.endsWith('%'), `villaShare must end with % for ${id}`);
+    assert(profile.over20Share.endsWith('%'), `over20Share must end with % for ${id}`);
+    assert.strictEqual(profile.relatedRecoveryRegionIds.length >= 2, true, `Related count must be >= 2 for ${id}`);
+  }
+});
+
+test('Phase 6-H2B [2]: Full 1,908 Dynamic Robots Split: Exactly 15 Indexable, 1,887 Noindex/Follow, 6 Collision Hold', () => {
+  let indexableCount = 0;
+  let noindexFollowCount = 0;
+  let collisionHoldCount = 0;
+
+  for (const region of PRODUCTION_REGIONS) {
+    for (const intent of SEARCH_INTENTS) {
+      const metadata = buildDynamicMetadata(region, intent);
+      const robots = metadata.robots as { index?: boolean; follow?: boolean; nocache?: boolean };
+
+      if (robots.index === true && robots.follow === true) {
+        indexableCount++;
+        assert(isRecoveryRegion(region.id), `Indexed region ${region.id} must be in Recovery set`);
+        assert.strictEqual(intent.serviceKeyword, '탄성코트', `Indexed intent must strictly be 탄성코트`);
+      } else if (robots.index === false && robots.follow === true) {
+        noindexFollowCount++;
+        assert(region.id !== 'seoul-eunpyeong-sinsa', `Collision hold must not be noindex/follow`);
+      } else if (robots.index === false && robots.follow === false && robots.nocache === true) {
+        collisionHoldCount++;
+        assert.strictEqual(region.id, 'seoul-eunpyeong-sinsa', `Only collision hold region should have nocache/nofollow`);
+      } else {
+        assert.fail(`Unexpected robots configuration: ${JSON.stringify(robots)} for ${region.id}-${intent.serviceKeyword}`);
+      }
+    }
+  }
+
+  assert.strictEqual(indexableCount, 15, 'Recovery indexable count must be exactly 15');
+  assert.strictEqual(noindexFollowCount, 1887, 'Non-recovery approved noindex count must be exactly 1,887');
+  assert.strictEqual(collisionHoldCount, 6, 'Collision hold count must be exactly 6');
+  assert.strictEqual(indexableCount + noindexFollowCount + collisionHoldCount, 1908, 'Total dynamic URLs must be exactly 1,908');
+});
+
+test('Phase 6-H2B [3]: CustomerReviewsSection completely unmounted from DynamicLandingPage (0 duplicate SSR)', () => {
+  const dynamicPagePath = path.resolve('components/dynamic/DynamicLandingPage.tsx');
+  const source = fs.readFileSync(dynamicPagePath, 'utf-8');
+
+  assert(!source.includes('CustomerReviewsSection'), 'CustomerReviewsSection must be unmounted from DynamicLandingPage');
+  assert(!source.includes('CUSTOMER_REVIEWS'), 'CUSTOMER_REVIEWS must not be imported in DynamicLandingPage');
+});
+
+test('Phase 6-H2B [4]: Related Recovery Navigation links strictly to 2-3 adjacent Recovery URLs', () => {
+  for (const id of RECOVERY_REGION_IDS) {
+    const related = getRelatedRecoveryRegions(id);
+    assert(related.length >= 2 && related.length <= 3, `Related regions count for ${id} must be between 2 and 3, got ${related.length}`);
+    for (const r of related) {
+      assert(RECOVERY_REGION_IDS.includes(r.id), `Related region ${r.id} must be in Recovery set`);
+      assert.notStrictEqual(r.id, id, `Self-reference not allowed in related regions for ${id}`);
+    }
+  }
 });
 
 console.log('\n====================================================');

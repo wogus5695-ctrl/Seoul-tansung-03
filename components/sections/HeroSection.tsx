@@ -5,6 +5,7 @@ import { HeroSlider } from '../ui/HeroSlider';
 import { isContactConfigured, SITE_CONFIG } from '../../lib/config/site-config';
 import { RegionItem } from '../../lib/types/regions';
 import { SearchIntentItem } from '../../lib/types/intents';
+import { getRecoveryProfile } from '../../lib/config/recovery-config';
 
 interface DynamicHeroProps {
   region: RegionItem;
@@ -74,6 +75,15 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
                 <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">
                   {dynamic.intent.userIntent}
                 </p>
+                {(() => {
+                  const recoveryProfile = getRecoveryProfile(dynamic.region.id);
+                  if (!recoveryProfile) return null;
+                  return (
+                    <p className="text-xs text-[#6B755D] leading-relaxed pt-1">
+                      {recoveryProfile.name} 등록 공동주택 {recoveryProfile.units.toLocaleString()}개 단위의 주거 지표를 참고하되, 실제 시공 범위는 현장 벽면의 박리·균열 상태를 직접 점검하여 안내합니다.
+                    </p>
+                  );
+                })()}
               </div>
             ) : (
               <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">

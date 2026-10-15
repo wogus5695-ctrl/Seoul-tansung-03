@@ -44,12 +44,35 @@ const MAIN_FAQS: FaqItem[] = [
   },
 ];
 
-interface FaqSectionProps {
-  items?: readonly (FaqItem | IntentFaqItem)[];
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
+import { isRecoveryRegion } from '../../lib/config/recovery-config';
+
+interface DynamicFaqProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
 }
 
-export function FaqSection({ items = MAIN_FAQS }: FaqSectionProps = {}) {
-  const [openId, setOpenId] = useState<string | null>(items[0]?.id || null);
+interface FaqSectionProps {
+  items?: readonly (FaqItem | IntentFaqItem)[];
+  dynamic?: DynamicFaqProps;
+}
+
+export function FaqSection({ items = MAIN_FAQS, dynamic }: FaqSectionProps = {}) {
+  const displayItems =
+    dynamic && isRecoveryRegion(dynamic.region.id)
+      ? [
+          ...items.slice(0, 4),
+          {
+            id: 'recovery-faq-data-limitation',
+            question: '공개된 건물 연식이나 주거 형태만 보고 시공 필요성을 알 수 있나요?',
+            answer:
+              '공개 데이터의 주거 유형이나 연식은 일반적인 참고 지표일 뿐입니다. 개별 세대마다 베란다 환기 상태, 창틀 결로 여부, 기존 페인트 박리 정도가 완전히 다르므로 실제 필요한 시공 범위는 현장 벽면 상태를 직접 점검하여 안내합니다.',
+          },
+        ]
+      : items;
+
+  const [openId, setOpenId] = useState<string | null>(displayItems[0]?.id || null);
 
   const toggleFaq = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
@@ -71,7 +94,7 @@ export function FaqSection({ items = MAIN_FAQS }: FaqSectionProps = {}) {
         </div>
 
         <div className="space-y-3">
-          {items.map((faq) => {
+          {displayItems.map((faq) => {
             const isOpen = openId === faq.id;
             return (
               <div

@@ -2,7 +2,12 @@ import React from 'react';
 import { Container } from '../layout/Container';
 import { RegionItem } from '../../lib/types/regions';
 import { SearchIntentItem } from '../../lib/types/intents';
-import { getLocalInsight } from '../../lib/data/pilot-local-insights';
+import {
+  getRecoveryProfile,
+  COMMON_SOURCE_LABEL,
+  COMMON_LIMITATION_NOTE,
+  COMMON_CHECKPOINT_NOTE,
+} from '../../lib/config/recovery-config';
 
 const DECISION_STEPS = [
   {
@@ -41,9 +46,7 @@ export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}
     ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
     : undefined;
 
-  const insight = dynamic
-    ? getLocalInsight(dynamic.region.id, dynamic.intent.serviceKeyword)
-    : null;
+  const recoveryProfile = dynamic ? getRecoveryProfile(dynamic.region.id) : null;
 
   return (
     <section aria-labelledby="decision-heading" className="w-full py-16 sm:py-24 bg-[#FAF8F5] border-y border-[#E7D9C1]">
@@ -100,32 +103,32 @@ export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}
           </p>
         </div>
 
-        {/* Phase 6-H1A Pilot Local Insight Supporting Block (Strict Zero-DOM if insight is null) */}
-        {insight && (
+        {/* Phase 6-H2B Distributed Local Factual Context (Strict Zero-DOM if null) */}
+        {recoveryProfile && (
           <div
             data-testid="local-insight-block"
-            className="pt-8 border-t border-[#E7D9C1] max-w-2xl mx-auto space-y-3 text-left"
+            className="pt-8 border-t border-[#E7D9C1] max-w-2xl mx-auto space-y-2.5 text-left"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-[11px] font-semibold text-[#6B755D] tracking-wider uppercase">
-                지역 참고 정보
+                지역 데이터 점검 안내
               </span>
               <span className="text-[11px] text-[#8C8375]">
-                {insight.sourceLabel}
+                {COMMON_SOURCE_LABEL}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[#3E443B] leading-relaxed">
-              {insight.factText}
+              한국부동산원 공동주택 식별정보(2026.08 기준)에 따르면, {recoveryProfile.name} 내 등록된 공동주택 {recoveryProfile.units.toLocaleString()}개 단위 중 사용승인일 확인 단위 기준 20년 이상 경과 비율은 {recoveryProfile.over20Share}입니다.
             </p>
             <p className="text-[11px] sm:text-xs text-[#756E61] leading-relaxed">
-              {insight.limitationText}
+              {COMMON_LIMITATION_NOTE}
             </p>
-            <div className="bg-[#F5F2EB] p-3.5 rounded-lg border border-[#E7D9C1] text-xs sm:text-sm text-[#3E443B] leading-relaxed space-y-1">
-              <span className="font-bold text-[#4F5844] block text-xs">
+            <div className="bg-[#F5F2EB] p-3 rounded-lg border border-[#E7D9C1] text-xs text-[#3E443B] leading-relaxed">
+              <span className="font-bold text-[#4F5844] block text-xs mb-0.5">
                 시공 전 점검 안내
               </span>
-              <p className="text-[#3E443B]">
-                {insight.checkpointText}
+              <p>
+                {COMMON_CHECKPOINT_NOTE}
               </p>
             </div>
           </div>
@@ -134,4 +137,3 @@ export function DecisionGuideSection({ dynamic }: DecisionGuideSectionProps = {}
     </section>
   );
 }
-

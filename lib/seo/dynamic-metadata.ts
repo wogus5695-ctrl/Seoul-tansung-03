@@ -6,6 +6,8 @@ import { shouldEmitAreaServed } from '../contracts/regions-contract';
 import { buildCanonicalUrl, buildPublicHref } from '../url/url-builder';
 import { buildDynamicTitle } from '../contracts/intents-contract';
 
+import { isRecoveryDynamicPage } from '../config/recovery-config';
+
 export { buildDynamicTitle };
 
 /**
@@ -15,8 +17,10 @@ export { buildDynamicTitle };
  * - Title strictly starts with Exact Dynamic Keyword: {keywordRegionName} {serviceKeyword}
  * - Meta Description strictly starts with Exact Dynamic Keyword
  * - Canonical is built using the hardened buildCanonicalUrl contract
- * - Phase 6-C1: Exactly 5 Pilot Dynamic URLs on the publication allowlist emit index, follow
- * - All other 1,903 URLs strictly emit NOINDEX
+ * - Phase 6-H2B Recovery Architecture:
+ *   - Exactly 15 Recovery URLs (15 regions x 탄성코트) emit { index: true, follow: true }
+ *   - 1,887 Approved Non-Recovery URLs emit { index: false, follow: true }
+ *   - 6 Collision Hold URLs emit { index: false, follow: false, nocache: true }
  */
 export function buildDynamicMetadata(
   region: RegionItem,
@@ -33,10 +37,9 @@ export function buildDynamicMetadata(
     siteOrigin
   );
 
-  // Phase 6-C2: All 317 Approved Seoul Regions (1,902 Dynamic URLs) achieve INDEXABLE status (index, follow)
-  // Collision Hold region (seoul-eunpyeong-sinsa) strictly emits noindex, nofollow, nocache
   const isCollisionHold = region.id === 'seoul-eunpyeong-sinsa' || region.publicationState === 'PUBLISHED_NOINDEX';
-  const isProductionIndexable = !isCollisionHold && canonicalResult.isSuccess;
+  const isStrictBlock = isCollisionHold || !canonicalResult.isSuccess;
+  const isRecoveryIndexable = !isStrictBlock && isRecoveryDynamicPage(region.id, intent.serviceKeyword);
 
   const publicHref = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
 
@@ -47,9 +50,11 @@ export function buildDynamicMetadata(
     alternates: {
       canonical: canonicalResult.canonicalUrl || publicHref,
     },
-    robots: isProductionIndexable
+    robots: isStrictBlock
+      ? { index: false, follow: false, nocache: true }
+      : isRecoveryIndexable
       ? { index: true, follow: true }
-      : { index: false, follow: false, nocache: true },
+      : { index: false, follow: true },
     openGraph: {
       title,
       description,

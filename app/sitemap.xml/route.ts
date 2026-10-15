@@ -3,6 +3,7 @@ import { OFFICIAL_SITE_ORIGIN } from '../../lib/config/site-config';
 import { getActiveRegions } from '../../lib/contracts/regions-contract';
 import { SEARCH_INTENTS } from '../../lib/contracts/intents-contract';
 import { buildPublicHref } from '../../lib/url/url-builder';
+import { isRecoveryDynamicPage } from '../../lib/config/recovery-config';
 
 export async function GET() {
   const origin = OFFICIAL_SITE_ORIGIN;
@@ -16,8 +17,10 @@ export async function GET() {
       continue;
     }
     for (const intent of SEARCH_INTENTS) {
-      const href = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
-      dynamicUrls.push(`${origin}${href}`);
+      if (isRecoveryDynamicPage(region.id, intent.serviceKeyword)) {
+        const href = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
+        dynamicUrls.push(`${origin}${href}`);
+      }
     }
   }
 

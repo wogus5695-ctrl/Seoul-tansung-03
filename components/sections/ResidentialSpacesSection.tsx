@@ -1,6 +1,9 @@
 import React from 'react';
 import { Container } from '../layout/Container';
 import Image from 'next/image';
+import { RegionItem } from '../../lib/types/regions';
+import { SearchIntentItem } from '../../lib/types/intents';
+import { getRecoveryProfile } from '../../lib/config/recovery-config';
 
 const SPACES = [
   {
@@ -17,11 +20,22 @@ const SPACES = [
   },
 ];
 
-export function ResidentialSpacesSection() {
+interface DynamicSpacesProps {
+  region: RegionItem;
+  intent: SearchIntentItem;
+}
+
+interface ResidentialSpacesSectionProps {
+  dynamic?: DynamicSpacesProps;
+}
+
+export function ResidentialSpacesSection({ dynamic }: ResidentialSpacesSectionProps = {}) {
+  const recoveryProfile = dynamic ? getRecoveryProfile(dynamic.region.id) : null;
+
   return (
     <section aria-labelledby="spaces-heading" className="w-full py-16 sm:py-24 bg-[#F5F3EE]">
       <Container className="space-y-10 sm:space-y-14">
-        <div className="max-w-xl space-y-2">
+        <div className="max-w-xl space-y-2 text-left">
           <p className="text-xs font-semibold text-[#5C5549] tracking-wider uppercase">
             RESIDENTIAL SPACES
           </p>
@@ -49,7 +63,7 @@ export function ResidentialSpacesSection() {
           </div>
 
           {/* Right: 3 Clean Typographic Points (40%) */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-6 text-left">
             {SPACES.map((space, idx) => (
               <div
                 key={space.name}
@@ -70,8 +84,19 @@ export function ResidentialSpacesSection() {
             ))}
           </div>
         </div>
+
+        {/* Phase 6-H2B Distributed Local Typology Context (Strictly Non-Causal) */}
+        {recoveryProfile && (
+          <div className="pt-6 border-t border-[#E7D9C1] text-left max-w-3xl mx-auto space-y-1.5">
+            <p className="text-xs sm:text-sm text-[#3E443B] leading-relaxed">
+              한국부동산원 공개 데이터에 따르면 {recoveryProfile.name} 등록 공동주택 {recoveryProfile.units.toLocaleString()}개 단위 중 아파트 비중은 {recoveryProfile.aptShare}, 다세대·연립 비중은 {recoveryProfile.villaShare}입니다.
+            </p>
+            <p className="text-xs text-[#756E61] leading-relaxed">
+              공간 구조나 주거 유형과 무관하게, 베란다와 세탁실의 실제 시공 구역은 벽면 도막 상태와 보양 필요 범위를 점검하여 결정합니다.
+            </p>
+          </div>
+        )}
       </Container>
     </section>
   );
 }
-
