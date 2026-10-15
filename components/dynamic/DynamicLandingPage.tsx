@@ -56,7 +56,7 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
       {/* 08 CUSTOMER REVIEWS UNMOUNTED PER PHASE 6-H2B RECOVERY CONTRACT */}
 
       {/* 09 FAQ (Intent-specific FAQs with Region Context Safe Adapter) */}
-      <FaqSection items={intent.faqItems} dynamic={{ region, intent }} />
+      <FaqSection items={intent.faqItems} dynamic={{ region: { id: region.id } }} />
 
       {/* 08-B Related Search Intent & Recovery Regional Navigation */}
       <RelatedIntentLinksSection region={region} currentIntent={intent} />

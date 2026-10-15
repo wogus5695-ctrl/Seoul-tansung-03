@@ -20,13 +20,14 @@ interface PageProps {
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;
-  const rawKey = typeof resolvedParams.k === 'string' ? resolvedParams.k : undefined;
+  const hasK = 'k' in resolvedParams;
 
   // If no dynamic keyword param, layout default metadata applies
-  if (!rawKey) {
+  if (!hasK) {
     return {};
   }
 
+  const rawKey = typeof resolvedParams.k === 'string' ? resolvedParams.k : '';
   const activeRegions = getActiveRegions();
   const validation = validateDynamicRoute(rawKey, activeRegions);
 
@@ -42,10 +43,10 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function Page({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
-  const rawKey = typeof resolvedParams.k === 'string' ? resolvedParams.k : undefined;
+  const hasK = 'k' in resolvedParams;
 
   // 1. If no query parameter, render frozen Main Page
-  if (!rawKey) {
+  if (!hasK) {
     return (
       <main className="flex-1 flex flex-col">
         {/* 02 HERO */}
@@ -79,6 +80,7 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   // 2. Validate Dynamic Route Key
+  const rawKey = typeof resolvedParams.k === 'string' ? resolvedParams.k : '';
   const activeRegions = getActiveRegions();
   const validation = validateDynamicRoute(rawKey, activeRegions);
 

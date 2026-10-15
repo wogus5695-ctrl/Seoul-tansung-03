@@ -49,8 +49,7 @@ import { SearchIntentItem } from '../../lib/types/intents';
 import { isRecoveryRegion } from '../../lib/config/recovery-config';
 
 interface DynamicFaqProps {
-  region: RegionItem;
-  intent: SearchIntentItem;
+  region: { id: string };
 }
 
 interface FaqSectionProps {
