@@ -2,12 +2,14 @@ import React from 'react';
 import Link from 'next/link';
 import { Container } from '../layout/Container';
 import { RegionItem } from '../../lib/types/regions';
-import { SearchIntentItem } from '../../lib/types/intents';
+import { SearchIntentItem, ServiceKeyword } from '../../lib/types/intents';
 import { buildPublicHref } from '../../lib/url/url-builder';
 import {
   isRecoveryDynamicPage,
   getRelatedRecoveryRegions,
   RECOVERY_PRIMARY_INTENT,
+  YANGCHEON_COHORT_REGION_IDS,
+  YangcheonCohortRegionId,
 } from '../../lib/config/recovery-config';
 
 interface RelatedIntentLinksSectionProps {
@@ -44,6 +46,15 @@ export function RelatedIntentLinksSection({
 }: RelatedIntentLinksSectionProps) {
   const isRecovery = isRecoveryDynamicPage(region.id, currentIntent.serviceKeyword);
   const relatedRecoveryRegions = isRecovery ? getRelatedRecoveryRegions(region.id) : [];
+
+  const isYangcheonCohort = YANGCHEON_COHORT_REGION_IDS.includes(region.id as YangcheonCohortRegionId);
+  const siblingIntent: ServiceKeyword | null = isYangcheonCohort
+    ? currentIntent.serviceKeyword === '탄성코트'
+      ? '베란다탄성코트'
+      : '탄성코트'
+    : null;
+
+  const visibleRegionName = region.displayName || region.keywordRegionName;
 
   return (
     <section
@@ -83,6 +94,31 @@ export function RelatedIntentLinksSection({
           </div>
         </div>
 
+        {/* Yangcheon Cohort Sibling Intent Direct Navigation (Phase 6-I0B-1) */}
+        {siblingIntent && (
+          <div className="pt-4 border-t border-[#EFE8DC] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#5C5549]">
+                관련 시공 안내 바로가기
+              </span>
+              <span className="text-[11px] text-[#756E61]">
+                {visibleRegionName} 지역의 다른 시공 안내 페이지입니다.
+              </span>
+            </div>
+            <div>
+              <Link
+                href={buildPublicHref(region.keywordRegionName, siblingIntent)}
+                className="px-3.5 py-1.5 rounded-md bg-[#FAF8F5] border border-[#E7D9C1] hover:border-[#4F5844] hover:bg-[#E7D9C1]/40 text-xs font-medium text-[#3E443B] transition-colors inline-flex items-center gap-1.5 shadow-sm"
+              >
+                <span>{visibleRegionName} {siblingIntent}</span>
+                <svg className="w-3 h-3 text-[#5C5549]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Recovery Regional Navigation: Strictly 2-3 Indexable Recovery URLs */}
         {relatedRecoveryRegions.length > 0 && (
           <div className="pt-4 border-t border-[#EFE8DC] space-y-2.5">
@@ -114,6 +150,18 @@ export function RelatedIntentLinksSection({
             </div>
           </div>
         )}
+
+        {/* Informational Guide Reference (Compact & Safe Contextual Navigation) */}
+        <div className="pt-3 border-t border-[#EFE8DC]/80 text-[11px] text-[#756E61] flex items-center justify-between flex-wrap gap-2">
+          <span>※ 시공 전 벽면 점검이나 재시공 고려 시 참고할 수 있는 가이드:</span>
+          <Link
+            href="/guide/balcony-coating-checklist"
+            className="text-[#4F5844] font-medium hover:underline inline-flex items-center gap-1"
+          >
+            <span>베란다 탄성코트 시공 전 도막 점검 항목 확인하기</span>
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
       </Container>
     </section>
   );

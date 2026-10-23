@@ -27,9 +27,10 @@ export function buildDynamicMetadata(
   intent: SearchIntentItem,
   siteOrigin: string | null = SITE_CONFIG.siteOrigin
 ): Metadata {
-  const exactKeyword = `${region.keywordRegionName} ${intent.serviceKeyword}`;
-  const title = intent.titleTemplate(region.keywordRegionName);
-  const description = intent.descriptionTemplate(region.keywordRegionName);
+  const regionLabel = region.displayName || region.keywordRegionName;
+  const exactKeyword = `${regionLabel} ${intent.serviceKeyword}`;
+  const title = intent.titleTemplate(regionLabel);
+  const description = intent.descriptionTemplate(regionLabel);
 
   const canonicalResult = buildCanonicalUrl(
     region.keywordRegionName,
@@ -93,7 +94,8 @@ export function buildDynamicJsonLd(
   intent: SearchIntentItem,
   siteOrigin: string | null = SITE_CONFIG.siteOrigin
 ) {
-  const exactKeyword = `${region.keywordRegionName} ${intent.serviceKeyword}`;
+  const regionLabel = region.displayName || region.keywordRegionName;
+  const exactKeyword = `${regionLabel} ${intent.serviceKeyword}`;
   const canonicalResult = buildCanonicalUrl(
     region.keywordRegionName,
     intent.serviceKeyword,
@@ -119,11 +121,11 @@ export function buildDynamicJsonLd(
       ? {
           areaServed: {
             '@type': 'AdministrativeArea',
-            name: region.displayName || region.keywordRegionName,
+            name: regionLabel,
           },
         }
       : {}),
-    description: intent.descriptionTemplate(region.keywordRegionName),
+    description: intent.descriptionTemplate(regionLabel),
     url: pageUrl,
   };
 

@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
-import { OFFICIAL_SITE_ORIGIN } from '../../lib/config/site-config';
+import { OFFICIAL_SITE_ORIGIN, SITE_CONFIG } from '../../lib/config/site-config';
 import { getActiveRegions } from '../../lib/contracts/regions-contract';
 import { SEARCH_INTENTS } from '../../lib/contracts/intents-contract';
 import { buildPublicHref } from '../../lib/url/url-builder';
-import { isRecoveryDynamicPage } from '../../lib/config/recovery-config';
+import { isIndexableDynamicPage } from '../../lib/config/recovery-config';
+import { getAllGuides } from '../../lib/data/guides-data';
 
 export async function GET() {
-  const origin = OFFICIAL_SITE_ORIGIN;
-  const regions = getActiveRegions(false); // Official production dataset (318 regions)
+  const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
+  const regions = getActiveRegions(false); // Official production dataset (319 regions)
 
   const dynamicUrls: string[] = [];
 
@@ -17,7 +18,7 @@ export async function GET() {
       continue;
     }
     for (const intent of SEARCH_INTENTS) {
-      if (isRecoveryDynamicPage(region.id, intent.serviceKeyword)) {
+      if (isIndexableDynamicPage(region.id, intent.serviceKeyword)) {
         const href = buildPublicHref(region.keywordRegionName, intent.serviceKeyword);
         dynamicUrls.push(`${origin}${href}`);
       }
@@ -25,7 +26,8 @@ export async function GET() {
   }
 
   const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`];
-  const allUrls = [...staticUrls, ...dynamicUrls];
+  const guideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
+  const allUrls = [...staticUrls, ...guideUrls, ...dynamicUrls];
 
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

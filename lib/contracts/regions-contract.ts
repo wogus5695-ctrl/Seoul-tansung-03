@@ -559,6 +559,27 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
   },
   // 28 ~ 318. 291 Approved Seoul DONGs (Phase 5-B2A Rollout)
   ...SEOUL_APPROVED_DONG_REGIONS,
+  // 319. 양천구 신정동 (Disambiguated from Mapo-gu Sinjeong-dong: Phase 6-I0B-1)
+  {
+    id: 'seoul-yangcheon-sinjeong',
+    regionType: 'DONG',
+    parentRegionId: 'seoul-yangcheon-gu',
+    canonicalName: '서울특별시 양천구 신정동',
+    displayName: '양천구 신정동',
+    keywordRegionName: '양천신정동',
+    routeKey: 'seoul-yangcheon-sinjeong',
+    sido: '서울',
+    sigugun: '양천구',
+    dong: '신정동',
+    nearbyRegionIds: [],
+    disambiguationKey: 'yangcheon',
+    disambiguationStatus: 'APPROVED',
+    source: 'production',
+    rolloutStage: 'full',
+    isSyntheticFixture: false,
+    publicationState: 'INDEXABLE',
+    isServiceAreaApproved: true,
+  },
 ];
 
 /**

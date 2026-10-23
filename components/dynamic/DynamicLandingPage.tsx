@@ -25,7 +25,7 @@ export function DynamicLandingPage({ region, intent }: DynamicLandingPageProps) 
     <main className="flex-1 flex flex-col">
       {/* Dynamic Browser Tab Title Client-Side Synchronization (Phase 6-G2A) */}
       <DynamicTitleSync
-        keywordRegionName={region.keywordRegionName}
+        keywordRegionName={region.displayName || region.keywordRegionName}
         serviceKeyword={intent.serviceKeyword}
       />
 

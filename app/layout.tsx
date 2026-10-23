@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     '베란다와 세탁실의 기존 벽면 상태를 확인하고 필요한 작업 범위와 탄성코트 시공 정보를 안내하는 올케어입니다.',
   alternates: {
     canonical: '/',
+    types: {
+      'application/rss+xml': [{ url: '/rss.xml', title: `${SITE_CONFIG.brandName} 탄성코트 시공 가이드 RSS` }],
+    },
   },
   verification: {
     google: SITE_CONFIG.googleSiteVerification,

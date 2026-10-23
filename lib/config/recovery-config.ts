@@ -15,7 +15,9 @@ export const RECOVERY_ENABLED = true;
 export const RECOVERY_PRIMARY_INTENT: ServiceKeyword = '탄성코트';
 export const RECOVERY_PRIMARY_INTENT_ID = 'elastic-coating';
 
-export const RECOVERY_REGION_IDS = [
+export const BASE_RECOVERY_INTENT: ServiceKeyword = '탄성코트';
+
+export const BASE_RECOVERY_REGION_IDS = [
   // 5 Autonomous GUs
   'seoul-gangnam-gu',
   'seoul-seocho-gu',
@@ -33,6 +35,33 @@ export const RECOVERY_REGION_IDS = [
   'seoul-jongno-숭인동',
   'seoul-nowon-상계동',
   'seoul-yangcheon-목동',
+] as const;
+
+export type BaseRecoveryRegionId = typeof BASE_RECOVERY_REGION_IDS[number];
+
+/**
+ * Phase 6-I0B-1 Yangcheon South Cohort Expansion SSOT
+ * Exactly 4 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ */
+export const YANGCHEON_COHORT_REGION_IDS = [
+  'seoul-yangcheon-gu',
+  'seoul-yangcheon-목동',
+  'seoul-yangcheon-신월동',
+  'seoul-yangcheon-sinjeong',
+] as const;
+
+export type YangcheonCohortRegionId = typeof YANGCHEON_COHORT_REGION_IDS[number];
+
+export const YANGCHEON_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+export const RECOVERY_REGION_IDS = [
+  ...BASE_RECOVERY_REGION_IDS,
+  'seoul-yangcheon-gu',
+  'seoul-yangcheon-신월동',
+  'seoul-yangcheon-sinjeong',
 ] as const;
 
 export type RecoveryRegionId = typeof RECOVERY_REGION_IDS[number];
@@ -343,6 +372,63 @@ export const RECOVERY_REGIONS_PROFILES: Record<RecoveryRegionId, RecoveryRegionP
     over20Share: '55.2%',
     relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-gangseo-가양동'],
   },
+  'seoul-yangcheon-gu': {
+    id: 'seoul-yangcheon-gu',
+    name: '양천구',
+    type: 'GU',
+    parentGu: '양천구',
+    units: 5258,
+    households: 135633,
+    validDates: 5230,
+    aptCount: 504,
+    rowCount: 223,
+    multiCount: 4503,
+    aptShare: '9.6%',
+    rowShare: '4.2%',
+    multiShare: '85.6%',
+    villaShare: '89.9%',
+    over20Count: 3454,
+    over20Share: '66.0%',
+    relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-yangcheon-목동'],
+  },
+  'seoul-yangcheon-신월동': {
+    id: 'seoul-yangcheon-신월동',
+    name: '신월동',
+    type: 'DONG',
+    parentGu: '양천구',
+    units: 2292,
+    households: 39175,
+    validDates: 2283,
+    aptCount: 213,
+    rowCount: 118,
+    multiCount: 1952,
+    aptShare: '9.3%',
+    rowShare: '5.1%',
+    multiShare: '85.2%',
+    villaShare: '90.3%',
+    over20Count: 1712,
+    over20Share: '75.0%',
+    relatedRecoveryRegionIds: ['seoul-yangcheon-목동', 'seoul-gangseo-gu'],
+  },
+  'seoul-yangcheon-sinjeong': {
+    id: 'seoul-yangcheon-sinjeong',
+    name: '양천구 신정동',
+    type: 'DONG',
+    parentGu: '양천구',
+    units: 1129,
+    households: 54317,
+    validDates: 1122,
+    aptCount: 159,
+    rowCount: 39,
+    multiCount: 924,
+    aptShare: '14.1%',
+    rowShare: '3.5%',
+    multiShare: '81.8%',
+    villaShare: '85.3%',
+    over20Count: 735,
+    over20Share: '65.5%',
+    relatedRecoveryRegionIds: ['seoul-yangcheon-목동', 'seoul-yangcheon-신월동'],
+  },
 };
 
 export const COMMON_SOURCE_LABEL =
@@ -364,8 +450,37 @@ export function isRecoveryIntent(serviceKeyword: string): boolean {
   return serviceKeyword === RECOVERY_PRIMARY_INTENT;
 }
 
+/**
+ * Phase 6-I0B Centralized Publication Gate SSOT
+ * Evaluates whether a given region + search intent qualifies for INDEXABLE status.
+ *
+ * Rules:
+ * 1. Base Recovery Portfolio: Exactly 15 original regions x '탄성코트' only.
+ * 2. Yangcheon South Cohort: Exactly 4 Yangcheon regions x ['탄성코트', '베란다탄성코트'].
+ * 3. All other region/intent combinations return strictly false (NOINDEX).
+ */
+export function isIndexableDynamicPage(regionId: string, serviceKeyword: string): boolean {
+  if (!RECOVERY_ENABLED) return false;
+
+  // 1. Base Recovery Portfolio (15 regions x '탄성코트' = 15 URLs)
+  if (
+    BASE_RECOVERY_REGION_IDS.includes(regionId as BaseRecoveryRegionId) &&
+    serviceKeyword === BASE_RECOVERY_INTENT
+  ) {
+    return true;
+  }
+
+  // 2. Yangcheon South Cohort (4 regions x 2 intents = 8 URLs; 목동-탄성코트 is in both sets)
+  if (YANGCHEON_COHORT_REGION_IDS.includes(regionId as YangcheonCohortRegionId)) {
+    return YANGCHEON_COHORT_INTENTS.includes(serviceKeyword as typeof YANGCHEON_COHORT_INTENTS[number]);
+  }
+
+  return false;
+}
+
+/** Legacy alias for backwards compatibility */
 export function isRecoveryDynamicPage(regionId: string, serviceKeyword: string): boolean {
-  return isRecoveryRegion(regionId) && isRecoveryIntent(serviceKeyword);
+  return isIndexableDynamicPage(regionId, serviceKeyword);
 }
 
 export function getRecoveryProfile(regionId: string): RecoveryRegionProfile | undefined {

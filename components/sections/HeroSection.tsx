@@ -20,8 +20,12 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
   const hasContact = isContactConfigured();
   const isDev = process.env.NODE_ENV !== 'production';
 
-  const exactKeyword = dynamic
-    ? `${dynamic.region.keywordRegionName} ${dynamic.intent.serviceKeyword}`
+  const regionLabel = dynamic
+    ? dynamic.region.displayName || dynamic.region.keywordRegionName
+    : undefined;
+
+  const exactKeyword = dynamic && regionLabel
+    ? `${regionLabel} ${dynamic.intent.serviceKeyword}`
     : undefined;
 
   return (
@@ -49,7 +53,7 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E7D9C1]/50 text-xs font-semibold text-[#5C5549] tracking-wider uppercase">
               <span>
                 {dynamic
-                  ? `${dynamic.region.keywordRegionName} 시공 안내 · ${SITE_CONFIG.brandNameEn}`
+                  ? `${regionLabel} 시공 안내 · ${SITE_CONFIG.brandNameEn}`
                   : `${SITE_CONFIG.brandNameEn} ELASTIC COATING`}
               </span>
             </div>
@@ -70,7 +74,7 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
             {dynamic ? (
               <div className="space-y-3">
                 <p className="text-token-h3 text-[#3E443B]/90 font-medium leading-relaxed text-pretty">
-                  {dynamic.intent.heroIntroTemplate(dynamic.region.keywordRegionName)}
+                  {dynamic.intent.heroIntroTemplate(regionLabel || dynamic.region.keywordRegionName)}
                 </p>
                 <p className="text-token-body text-[#5C5549] leading-relaxed max-w-md text-pretty">
                   {dynamic.intent.userIntent}
