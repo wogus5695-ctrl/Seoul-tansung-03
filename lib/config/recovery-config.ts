@@ -57,11 +57,34 @@ export const YANGCHEON_COHORT_INTENTS: readonly ServiceKeyword[] = [
   '베란다탄성코트',
 ] as const;
 
+/**
+ * Phase 6-K1A Guro-Gu P1 South Cohort Expansion SSOT
+ * Exactly 8 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ */
+export const GURO_COHORT_REGION_IDS = [
+  'seoul-guro-gu',
+  'seoul-guro-신도림동',
+  'seoul-guro-구로동',
+  'seoul-guro-고척동',
+  'seoul-guro-개봉동',
+  'seoul-guro-오류동',
+  'seoul-guro-천왕동',
+  'seoul-guro-항동',
+] as const;
+
+export type GuroCohortRegionId = typeof GURO_COHORT_REGION_IDS[number];
+
+export const GURO_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
 export const RECOVERY_REGION_IDS = [
   ...BASE_RECOVERY_REGION_IDS,
   'seoul-yangcheon-gu',
   'seoul-yangcheon-신월동',
   'seoul-yangcheon-sinjeong',
+  ...GURO_COHORT_REGION_IDS,
 ] as const;
 
 export type RecoveryRegionId = typeof RECOVERY_REGION_IDS[number];
@@ -429,6 +452,158 @@ export const RECOVERY_REGIONS_PROFILES: Record<RecoveryRegionId, RecoveryRegionP
     over20Share: '65.5%',
     relatedRecoveryRegionIds: ['seoul-yangcheon-목동', 'seoul-yangcheon-신월동'],
   },
+  'seoul-guro-gu': {
+    id: 'seoul-guro-gu',
+    name: '구로구',
+    type: 'GU',
+    parentGu: '구로구',
+    units: 4307,
+    households: 126443,
+    validDates: 4276,
+    aptCount: 769,
+    rowCount: 278,
+    multiCount: 3229,
+    aptShare: '17.9%',
+    rowShare: '6.5%',
+    multiShare: '75.0%',
+    villaShare: '81.4%',
+    over20Count: 2873,
+    over20Share: '67.2%',
+    relatedRecoveryRegionIds: ['seoul-yangcheon-gu', 'seoul-guro-신도림동', 'seoul-guro-구로동'],
+  },
+  'seoul-guro-신도림동': {
+    id: 'seoul-guro-신도림동',
+    name: '신도림동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 55,
+    households: 11052,
+    validDates: 54,
+    aptCount: 28,
+    rowCount: 10,
+    multiCount: 16,
+    aptShare: '50.9%',
+    rowShare: '18.2%',
+    multiShare: '29.1%',
+    villaShare: '47.3%',
+    over20Count: 36,
+    over20Share: '66.7%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-구로동', 'seoul-yangcheon-목동'],
+  },
+  'seoul-guro-구로동': {
+    id: 'seoul-guro-구로동',
+    name: '구로동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 1454,
+    households: 34268,
+    validDates: 1449,
+    aptCount: 539,
+    rowCount: 38,
+    multiCount: 872,
+    aptShare: '37.1%',
+    rowShare: '2.6%',
+    multiShare: '60.0%',
+    villaShare: '62.6%',
+    over20Count: 1187,
+    over20Share: '81.9%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-신도림동', 'seoul-guro-고척동'],
+  },
+  'seoul-guro-고척동': {
+    id: 'seoul-guro-고척동',
+    name: '고척동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 375,
+    households: 15646,
+    validDates: 373,
+    aptCount: 42,
+    rowCount: 31,
+    multiCount: 300,
+    aptShare: '11.2%',
+    rowShare: '8.3%',
+    multiShare: '80.0%',
+    villaShare: '88.3%',
+    over20Count: 235,
+    over20Share: '63.0%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-개봉동', 'seoul-yangcheon-신월동'],
+  },
+  'seoul-guro-개봉동': {
+    id: 'seoul-guro-개봉동',
+    name: '개봉동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 1290,
+    households: 28636,
+    validDates: 1279,
+    aptCount: 51,
+    rowCount: 36,
+    multiCount: 1192,
+    aptShare: '4.0%',
+    rowShare: '2.8%',
+    multiShare: '92.4%',
+    villaShare: '95.2%',
+    over20Count: 718,
+    over20Share: '56.1%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-고척동', 'seoul-guro-오류동'],
+  },
+  'seoul-guro-오류동': {
+    id: 'seoul-guro-오류동',
+    name: '오류동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 447,
+    households: 13813,
+    validDates: 440,
+    aptCount: 50,
+    rowCount: 47,
+    multiCount: 343,
+    aptShare: '11.2%',
+    rowShare: '10.5%',
+    multiShare: '76.7%',
+    villaShare: '87.2%',
+    over20Count: 270,
+    over20Share: '61.4%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-천왕동', 'seoul-guro-개봉동'],
+  },
+  'seoul-guro-천왕동': {
+    id: 'seoul-guro-천왕동',
+    name: '천왕동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 16,
+    households: 6332,
+    validDates: 16,
+    aptCount: 13,
+    rowCount: 0,
+    multiCount: 3,
+    aptShare: '81.3%',
+    rowShare: '0.0%',
+    multiShare: '18.8%',
+    villaShare: '18.8%',
+    over20Count: 0,
+    over20Share: '0.0%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-오류동', 'seoul-guro-항동'],
+  },
+  'seoul-guro-항동': {
+    id: 'seoul-guro-항동',
+    name: '항동',
+    type: 'DONG',
+    parentGu: '구로구',
+    units: 42,
+    households: 6142,
+    validDates: 42,
+    aptCount: 16,
+    rowCount: 9,
+    multiCount: 17,
+    aptShare: '38.1%',
+    rowShare: '21.4%',
+    multiShare: '40.5%',
+    villaShare: '61.9%',
+    over20Count: 20,
+    over20Share: '47.6%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-guro-천왕동', 'seoul-guro-오류동'],
+  },
 };
 
 export const COMMON_SOURCE_LABEL =
@@ -451,13 +626,14 @@ export function isRecoveryIntent(serviceKeyword: string): boolean {
 }
 
 /**
- * Phase 6-I0B Centralized Publication Gate SSOT
+ * Phase 6-K1A Centralized Publication Gate SSOT
  * Evaluates whether a given region + search intent qualifies for INDEXABLE status.
  *
  * Rules:
  * 1. Base Recovery Portfolio: Exactly 15 original regions x '탄성코트' only.
  * 2. Yangcheon South Cohort: Exactly 4 Yangcheon regions x ['탄성코트', '베란다탄성코트'].
- * 3. All other region/intent combinations return strictly false (NOINDEX).
+ * 3. Guro P1 South Cohort: Exactly 8 Guro P1 regions x ['탄성코트', '베란다탄성코트'].
+ * 4. All other region/intent combinations return strictly false (NOINDEX).
  */
 export function isIndexableDynamicPage(regionId: string, serviceKeyword: string): boolean {
   if (!RECOVERY_ENABLED) return false;
@@ -473,6 +649,11 @@ export function isIndexableDynamicPage(regionId: string, serviceKeyword: string)
   // 2. Yangcheon South Cohort (4 regions x 2 intents = 8 URLs; 목동-탄성코트 is in both sets)
   if (YANGCHEON_COHORT_REGION_IDS.includes(regionId as YangcheonCohortRegionId)) {
     return YANGCHEON_COHORT_INTENTS.includes(serviceKeyword as typeof YANGCHEON_COHORT_INTENTS[number]);
+  }
+
+  // 3. Guro P1 South Cohort (8 regions x 2 intents = 16 URLs)
+  if (GURO_COHORT_REGION_IDS.includes(regionId as GuroCohortRegionId)) {
+    return GURO_COHORT_INTENTS.includes(serviceKeyword as typeof GURO_COHORT_INTENTS[number]);
   }
 
   return false;

@@ -10,6 +10,8 @@ import {
   RECOVERY_PRIMARY_INTENT,
   YANGCHEON_COHORT_REGION_IDS,
   YangcheonCohortRegionId,
+  GURO_COHORT_REGION_IDS,
+  GuroCohortRegionId,
 } from '../../lib/config/recovery-config';
 
 interface RelatedIntentLinksSectionProps {
@@ -47,8 +49,10 @@ export function RelatedIntentLinksSection({
   const isRecovery = isRecoveryDynamicPage(region.id, currentIntent.serviceKeyword);
   const relatedRecoveryRegions = isRecovery ? getRelatedRecoveryRegions(region.id) : [];
 
-  const isYangcheonCohort = YANGCHEON_COHORT_REGION_IDS.includes(region.id as YangcheonCohortRegionId);
-  const siblingIntent: ServiceKeyword | null = isYangcheonCohort
+  const isCohortRegion =
+    YANGCHEON_COHORT_REGION_IDS.includes(region.id as YangcheonCohortRegionId) ||
+    GURO_COHORT_REGION_IDS.includes(region.id as GuroCohortRegionId);
+  const siblingIntent: ServiceKeyword | null = isCohortRegion
     ? currentIntent.serviceKeyword === '탄성코트'
       ? '베란다탄성코트'
       : '탄성코트'

@@ -6,7 +6,7 @@ export async function GET() {
   const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
   const guides = getAllGuides();
 
-  const buildDate = 'Fri, 23 Oct 2026 09:00:00 +0900';
+  const buildDate = 'Mon, 26 Oct 2026 09:00:00 +0900';
 
   const itemsXml = guides
     .map((guide) => {
@@ -48,7 +48,7 @@ export async function GET() {
   <channel>
     <title>${escapeXml(SITE_CONFIG.brandName)} 탄성코트 시공 가이드</title>
     <link>${origin}</link>
-    <description>베란다 탄성코트 시공 전 도막 점검 항목 및 구축 아파트 재시공 유의 사항 전문 가이드</description>
+    <description>베란다 탄성코트 시공 전 도막 점검, 재시공, 견적 작업 범위 및 공간 비움·보양 체크리스트 전문 가이드</description>
     <language>ko</language>
     <lastBuildDate>${buildDate}</lastBuildDate>
     <atom:link href="${origin}/rss.xml" rel="self" type="application/rss+xml"/>

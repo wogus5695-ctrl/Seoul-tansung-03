@@ -82,6 +82,7 @@ import {
   BASE_RECOVERY_INTENT,
   BASE_RECOVERY_REGION_IDS,
   YANGCHEON_COHORT_REGION_IDS,
+  GURO_COHORT_REGION_IDS,
   RECOVERY_REGION_IDS,
   getRecoveryProfile,
   getRelatedRecoveryRegions,
@@ -1727,9 +1728,9 @@ test('PHASE 6-B: Full 1,908 Canonical Audit, Uniqueness, and Zero Leak Verificat
   assert.strictEqual(localhostLeakCount, 0, 'Must have 0 localhost leaks');
   assert.strictEqual(previewLeakCount, 0, 'Must have 0 preview leaks');
   assert.strictEqual(mainPageCanonicalLeakCount, 0, 'Must have 0 main page canonical leaks');
-  assert.strictEqual(indexableCount, 22, 'Phase 6-I0B: Exactly 22 recovery & cohort dynamic pages are indexable');
-  assert.strictEqual(noindexFollowCount, 1886, 'Phase 6-I0B: Exactly 1,886 approved non-recovery dynamic pages are NOINDEX, FOLLOW');
-  assert.strictEqual(noindexFollowNocacheCount, 6, 'Phase 6-I0B: Exactly 6 collision hold dynamic pages are NOINDEX, NOFOLLOW, NOCACHE');
+  assert.strictEqual(indexableCount, 38, 'Phase 6-K1A: Exactly 38 recovery & cohort dynamic pages are indexable');
+  assert.strictEqual(noindexFollowCount, 1870, 'Phase 6-K1A: Exactly 1,870 approved non-recovery dynamic pages are NOINDEX, FOLLOW');
+  assert.strictEqual(noindexFollowNocacheCount, 6, 'Phase 6-K1A: Exactly 6 collision hold dynamic pages are NOINDEX, NOFOLLOW, NOCACHE');
   assert.strictEqual(areaServedCount, 1908, 'Area served count must be 1,908');
 });
 
@@ -2094,7 +2095,7 @@ test('PHASE 6-C2: 1,908 Approved Dynamic URLs Indexability & 6 Collision Hold NO
   assert.strictEqual(noindexCount, 6, 'NOINDEX count must be EXACTLY 6 collision hold dynamic URLs');
 });
 
-test('PHASE 6-I0B-2: Sitemap Inclusion Contract (26 Total URLs: 1 Main + 1 Hub + 2 Guides + 22 Recovery & Cohort Dynamic)', async () => {
+test('PHASE 6-K1B: Sitemap Inclusion Contract (44 Total URLs: 1 Main + 1 Hub + 4 Guides + 38 Dynamic)', async () => {
   const origin = OFFICIAL_SITE_ORIGIN;
   const approvedRegions = PRODUCTION_REGIONS.filter(
     (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
@@ -2114,9 +2115,9 @@ test('PHASE 6-I0B-2: Sitemap Inclusion Contract (26 Total URLs: 1 Main + 1 Hub +
   const guideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
   const sitemapUrls = [...staticUrls, ...guideUrls, ...dynamicUrls];
 
-  assert.strictEqual(sitemapUrls.length, 26, 'Sitemap URL count must be exactly 26 (1 Main + 1 Hub + 2 Guides + 22 Dynamic)');
-  assert.strictEqual(dynamicUrls.length, 22, 'Dynamic sitemap URLs must be exactly 22');
-  assert.strictEqual(guideUrls.length, 2, 'Guide sitemap URLs must be exactly 2');
+  assert.strictEqual(sitemapUrls.length, 44, 'Sitemap URL count must be exactly 44 (1 Main + 1 Hub + 4 Guides + 38 Dynamic)');
+  assert.strictEqual(dynamicUrls.length, 38, 'Dynamic sitemap URLs must be exactly 38');
+  assert.strictEqual(guideUrls.length, 4, 'Guide sitemap URLs must be exactly 4');
 
   // Verify direct sitemap.xml route response
   const sitemapRes = await getSitemapResponse();
@@ -2970,12 +2971,13 @@ test('Phase 6-H1A [16]: Pilot Facts Exact Match with Phase 6-H0-R Frozen SSOT', 
 // PHASE 6-I0B: RECOVERY + YANGCHEON COHORT ARCHITECTURE VERIFICATION
 // ----------------------------------------------------
 
-test('Phase 6-I0B [1]: Recovery SSOT contains Base 15 Regions + Yangcheon Cohort 4 Regions', () => {
+test('Phase 6-K1A: Recovery SSOT contains Base 15 Regions + Yangcheon Cohort 4 Regions + Guro P1 8 Regions', () => {
   assert.strictEqual(RECOVERY_ENABLED, true, 'Recovery mode must be enabled');
   assert.strictEqual(BASE_RECOVERY_INTENT, '탄성코트', 'Base primary intent must strictly be 탄성코트');
   assert.strictEqual(BASE_RECOVERY_REGION_IDS.length, 15, 'Base recovery regions must be exactly 15');
   assert.strictEqual(YANGCHEON_COHORT_REGION_IDS.length, 4, 'Yangcheon cohort regions must be exactly 4');
-  assert.strictEqual(RECOVERY_REGION_IDS.length, 18, 'Total recovery profile IDs must be exactly 18');
+  assert.strictEqual(GURO_COHORT_REGION_IDS.length, 8, 'Guro P1 cohort regions must be exactly 8');
+  assert.strictEqual(RECOVERY_REGION_IDS.length, 26, 'Total recovery profile IDs must be exactly 26 (15 Base + 3 Yangcheon New + 8 Guro P1)');
 
   const expectedGu = ['seoul-gangnam-gu', 'seoul-seocho-gu', 'seoul-eunpyeong-gu', 'seoul-gangseo-gu', 'seoul-seongdong-gu'];
   const expectedDong = [
@@ -3014,7 +3016,7 @@ test('Phase 6-I0B [1]: Recovery SSOT contains Base 15 Regions + Yangcheon Cohort
   }
 });
 
-test('Phase 6-I0B [2]: Full 1,914 Dynamic Robots Split: Exactly 22 Indexable, 1,886 Noindex/Follow, 6 Collision Hold', () => {
+test('Phase 6-K1A: Full 1,914 Dynamic Robots Split: Exactly 38 Indexable, 1,870 Noindex/Follow, 6 Collision Hold', () => {
   let indexableCount = 0;
   let noindexFollowCount = 0;
   let collisionHoldCount = 0;
@@ -3039,8 +3041,8 @@ test('Phase 6-I0B [2]: Full 1,914 Dynamic Robots Split: Exactly 22 Indexable, 1,
     }
   }
 
-  assert.strictEqual(indexableCount, 22, 'Indexable count must be exactly 22 (15 Base + 7 Yangcheon Cohort)');
-  assert.strictEqual(noindexFollowCount, 1886, 'Non-recovery approved noindex count must be exactly 1,886');
+  assert.strictEqual(indexableCount, 38, 'Indexable count must be exactly 38 (15 Base + 7 Yangcheon Cohort + 16 Guro P1 Cohort)');
+  assert.strictEqual(noindexFollowCount, 1870, 'Non-recovery approved noindex count must be exactly 1,870');
   assert.strictEqual(collisionHoldCount, 6, 'Collision hold count must be exactly 6');
   assert.strictEqual(indexableCount + noindexFollowCount + collisionHoldCount, 1914, 'Total dynamic URLs must be exactly 1,914');
 });
@@ -3094,9 +3096,9 @@ test('Phase 6-I0B-2 [1]: Production Region Categories Exact Partition Invariant 
   );
 });
 
-test('Phase 6-I0B-2 [2]: Exactly 2 Information Guides (Unique URLs, Titles, Canonicals, Indexable)', () => {
+test('Phase 6-K1B [2]: Exactly 4 Information Guides (Unique URLs, Titles, Canonicals, Indexable)', () => {
   const guides = getAllGuides();
-  assert.strictEqual(guides.length, 2, 'Must contain exactly 2 Information Guides');
+  assert.strictEqual(guides.length, 4, 'Must contain exactly 4 Information Guides');
 
   const seenSlugs = new Set<string>();
   const seenTitles = new Set<string>();
@@ -3104,6 +3106,13 @@ test('Phase 6-I0B-2 [2]: Exactly 2 Information Guides (Unique URLs, Titles, Cano
   const prohibitedWords = [
     '완벽', '100%', '영구', '무조건', '최고', '1위', '최저가',
     '무상 A/S', '평생 A/S', '결로 완전 해결', '곰팡이 완전 방지', '박리 재발 없음',
+  ];
+
+  const allowedSlugs = [
+    'balcony-coating-checklist',
+    'old-apartment-balcony-recoating-guide',
+    'elastic-coating-estimate-work-scope-guide',
+    'elastic-coating-preparation-protection-checklist',
   ];
 
   for (const g of guides) {
@@ -3114,7 +3123,7 @@ test('Phase 6-I0B-2 [2]: Exactly 2 Information Guides (Unique URLs, Titles, Cano
     seenTitles.add(g.title);
 
     // Verify self-canonical path
-    assert(g.slug === 'balcony-coating-checklist' || g.slug === 'old-apartment-balcony-recoating-guide');
+    assert(allowedSlugs.includes(g.slug), `Unexpected guide slug: ${g.slug}`);
     assert(g.title.endsWith('| 올케어 시공 가이드'), `Guide title must end with official suffix: ${g.title}`);
 
     // Verify claim safety
@@ -3136,10 +3145,26 @@ test('Phase 6-I0B-2 [2]: Exactly 2 Information Guides (Unique URLs, Titles, Cano
       assert(fullText.includes('단순 덧칠'), 'Guide 02 must explain difference from simple repainting');
       assert(fullText.includes('밑작업'), 'Guide 02 must emphasize preparatory scraping/putty work');
     }
+
+    // Verify Scope & Estimate variables in Guide 03
+    if (g.slug === 'elastic-coating-estimate-work-scope-guide') {
+      assert(fullText.includes('작업 범위'), 'Guide 03 must discuss work scope definition');
+      assert(fullText.includes('밑작업'), 'Guide 03 must emphasize preparatory work details');
+      assert(fullText.includes('현장 변수'), 'Guide 03 must explain on-site variables influencing costs');
+      assert(fullText.includes('비용 차이'), 'Guide 03 must analyze reasons for estimate discrepancies');
+    }
+
+    // Verify Clear Space & Masking Checklist in Guide 04
+    if (g.slug === 'elastic-coating-preparation-protection-checklist') {
+      assert(fullText.includes('공간 비움'), 'Guide 04 must emphasize clearing space');
+      assert(fullText.includes('보양'), 'Guide 04 must explain masking and surface protection');
+      assert(fullText.includes('사전 이동'), 'Guide 04 must cover pre-moving of household items');
+      assert(fullText.includes('동선 확보'), 'Guide 04 must detail path and ventilation clearance');
+    }
   }
 });
 
-test('Phase 6-I0B-2 [3]: RSS Route Validation (HTTP 200, Valid XML, 2 Items, Zero Dynamic URLs)', async () => {
+test('Phase 6-K1B [3]: RSS Route Validation (HTTP 200, Valid XML, 4 Items, Zero Dynamic URLs)', async () => {
   const rssRes = await getRssResponse();
   assert.strictEqual(rssRes.status, 200, 'RSS endpoint must return HTTP 200');
   assert(rssRes.headers.get('content-type')?.includes('application/xml'), 'RSS must return XML content-type');
@@ -3151,9 +3176,9 @@ test('Phase 6-I0B-2 [3]: RSS Route Validation (HTTP 200, Valid XML, 2 Items, Zer
   assert(rssText.includes('<rss version="2.0"'), 'RSS version must be 2.0');
   assert(rssText.includes('<channel>'), 'RSS must contain <channel>');
 
-  // Exactly 2 items
+  // Exactly 4 items
   const itemMatches = rssText.match(/<item>/g) || [];
-  assert.strictEqual(itemMatches.length, 2, 'RSS must contain exactly 2 <item> tags');
+  assert.strictEqual(itemMatches.length, 4, 'RSS must contain exactly 4 <item> tags');
 
   // Verify item links match Guide URLs
   const guides = getAllGuides();
@@ -3167,21 +3192,156 @@ test('Phase 6-I0B-2 [3]: RSS Route Validation (HTTP 200, Valid XML, 2 Items, Zer
   assert(!rssText.includes('?k='), 'RSS must NOT contain dynamic query parameters');
   assert(!rssText.includes('목동-탄성코트'), 'RSS must NOT contain dynamic landing pages');
   assert(!rssText.includes('양천구-탄성코트'), 'RSS must NOT contain dynamic landing pages');
+  assert(!rssText.includes('구로구-탄성코트'), 'RSS must NOT contain dynamic landing pages');
+  assert(!rssText.includes('신도림동-탄성코트'), 'RSS must NOT contain dynamic landing pages');
 });
 
-test('Phase 6-I0B-2 [4]: Seoul Hub Dynamic Freeze (22 Dynamic SSR Links + Separate Guides Section)', () => {
+test('Phase 6-K1B: Seoul Hub Dynamic Cohort (38 Dynamic SSR Links + 4 Separate Guides)', () => {
   const hubPath = path.resolve('app/sitemap-seoul/page.tsx');
   const hubSource = fs.readFileSync(hubPath, 'utf-8');
 
-  // 1. Exactly 22 Dynamic Regional Links in Recovery & Cohort sections
+  // 1. Exactly 38 Dynamic Regional Links in Recovery & Cohort sections
   assert(hubSource.includes('yangcheonBalconyProfiles.map'), 'Must render Yangcheon Balcony profiles');
+  assert(hubSource.includes('guroBalconyProfiles.map'), 'Must render Guro Balcony profiles');
   assert(hubSource.includes('dongProfiles.map'), 'Must render Dong recovery profiles');
   assert(hubSource.includes('guProfiles.map'), 'Must render GU recovery profiles');
 
-  // 2. Guides section is semantically separate
+  // 2. Guides section is semantically separate and renders all 4 guides
   assert(hubSource.includes('aria-labelledby="guide-links-heading"'), 'Hub must contain separate guide section');
   assert(hubSource.includes('/guide/balcony-coating-checklist'), 'Hub must link to Guide 01');
   assert(hubSource.includes('/guide/old-apartment-balcony-recoating-guide'), 'Hub must link to Guide 02');
+  assert(hubSource.includes('/guide/elastic-coating-estimate-work-scope-guide'), 'Hub must link to Guide 03');
+  assert(hubSource.includes('/guide/elastic-coating-preparation-protection-checklist'), 'Hub must link to Guide 04');
+});
+
+test('Phase 6-K1A [1]: Guro-Gu P1 South Cohort 16 Dynamic URLs Full Matrix Contract', () => {
+  const guroP1Regions = [
+    'seoul-guro-gu',
+    'seoul-guro-신도림동',
+    'seoul-guro-구로동',
+    'seoul-guro-고척동',
+    'seoul-guro-개봉동',
+    'seoul-guro-오류동',
+    'seoul-guro-천왕동',
+    'seoul-guro-항동',
+  ];
+  const p1Intents = ['탄성코트', '베란다탄성코트'] as const;
+
+  assert.strictEqual(guroP1Regions.length, 8, 'Guro P1 must contain exactly 8 regions');
+  assert.strictEqual(p1Intents.length, 2, 'Guro P1 must contain exactly 2 intents');
+
+  for (const regionId of guroP1Regions) {
+    const region = PRODUCTION_REGIONS.find((r) => r.id === regionId);
+    assert(region, `Region ${regionId} must exist in PRODUCTION_REGIONS`);
+
+    for (const intentKeyword of p1Intents) {
+      assert(
+        isIndexableDynamicPage(regionId, intentKeyword),
+        `Guro P1 ${region.keywordRegionName} ${intentKeyword} must be indexable`
+      );
+
+      const intent = SEARCH_INTENTS.find((i) => i.serviceKeyword === intentKeyword);
+      assert(intent, `Intent ${intentKeyword} must exist`);
+
+      const metadata = buildDynamicMetadata(region, intent);
+      const robots = metadata.robots as { index?: boolean; follow?: boolean };
+      assert.strictEqual(robots.index, true, `${region.keywordRegionName} ${intentKeyword} must have robots.index = true`);
+      assert.strictEqual(robots.follow, true, `${region.keywordRegionName} ${intentKeyword} must have robots.follow = true`);
+
+      // Title & H1 format check
+      const expectedTitle: string = `${region.keywordRegionName} ${intentKeyword} | A/S 보장 | 올케어`;
+      assert.strictEqual(metadata.title, expectedTitle);
+
+      const canonical = metadata.alternates?.canonical;
+      const expectedCanonical: string = `https://www.allcaretan.co.kr/?k=${encodeURIComponent(`${region.keywordRegionName}-${intentKeyword}`)}`;
+      assert.strictEqual(canonical, expectedCanonical);
+    }
+
+    // Verify non-authorized intents remain NOINDEX
+    const otherIntents = ['탄성코트시공', '세탁실탄성코트', '아파트탄성코트', '탄성코트업체'] as const;
+    for (const otherKw of otherIntents) {
+      assert(
+        !isIndexableDynamicPage(regionId, otherKw),
+        `Guro P1 non-authorized intent ${region.keywordRegionName} ${otherKw} must NOT be indexable`
+      );
+      const otherIntent = SEARCH_INTENTS.find((i) => i.serviceKeyword === otherKw);
+      if (otherIntent) {
+        const metadata = buildDynamicMetadata(region, otherIntent);
+        const robots = metadata.robots as { index?: boolean; follow?: boolean };
+        assert.strictEqual(robots.index, false, `Non-authorized intent ${otherKw} must have robots.index = false`);
+        assert.strictEqual(robots.follow, true, `Non-authorized intent ${otherKw} must have robots.follow = true`);
+      }
+    }
+  }
+});
+
+test('Phase 6-K1A [2]: Guro-Gu P2 Regions Negative Test (가리봉동, 궁동, 온수동 strictly NOINDEX)', () => {
+  const p2RegionIds = [
+    'seoul-guro-가리봉동',
+    'seoul-guro-궁동',
+    'seoul-guro-온수동',
+  ];
+  const allIntents = ['탄성코트', '베란다탄성코트', '탄성코트시공', '세탁실탄성코트', '아파트탄성코트', '탄성코트업체'] as const;
+
+  for (const p2Id of p2RegionIds) {
+    const region = PRODUCTION_REGIONS.find((r) => r.id === p2Id);
+    assert(region, `P2 Region ${p2Id} must exist in PRODUCTION_REGIONS`);
+
+    for (const kw of allIntents) {
+      assert(!isIndexableDynamicPage(p2Id, kw), `P2 Region ${p2Id} ${kw} must NOT be indexable`);
+      const intent = SEARCH_INTENTS.find((i) => i.serviceKeyword === kw);
+      if (intent) {
+        const metadata = buildDynamicMetadata(region, intent);
+        const robots = metadata.robots as { index?: boolean; follow?: boolean };
+        assert.strictEqual(robots.index, false, `P2 Region ${p2Id} ${kw} must have robots.index = false`);
+        assert.strictEqual(robots.follow, true, `P2 Region ${p2Id} ${kw} must have robots.follow = true`);
+      }
+    }
+  }
+});
+
+test('Phase 6-K1A [3]: Guro P1 Local Fact Profiles Verification', () => {
+  const expectedFacts: Record<string, { units: number; households: number; validDates: number; aptShare: string; villaShare: string; over20Share: string }> = {
+    'seoul-guro-gu': { units: 4307, households: 126443, validDates: 4276, aptShare: '17.9%', villaShare: '81.4%', over20Share: '67.2%' },
+    'seoul-guro-신도림동': { units: 55, households: 11052, validDates: 54, aptShare: '50.9%', villaShare: '47.3%', over20Share: '66.7%' },
+    'seoul-guro-구로동': { units: 1454, households: 34268, validDates: 1449, aptShare: '37.1%', villaShare: '62.6%', over20Share: '81.9%' },
+    'seoul-guro-고척동': { units: 375, households: 15646, validDates: 373, aptShare: '11.2%', villaShare: '88.3%', over20Share: '63.0%' },
+    'seoul-guro-개봉동': { units: 1290, households: 28636, validDates: 1279, aptShare: '4.0%', villaShare: '95.2%', over20Share: '56.1%' },
+    'seoul-guro-오류동': { units: 447, households: 13813, validDates: 440, aptShare: '11.2%', villaShare: '87.2%', over20Share: '61.4%' },
+    'seoul-guro-천왕동': { units: 16, households: 6332, validDates: 16, aptShare: '81.3%', villaShare: '18.8%', over20Share: '0.0%' },
+    'seoul-guro-항동': { units: 42, households: 6142, validDates: 42, aptShare: '38.1%', villaShare: '61.9%', over20Share: '47.6%' },
+  };
+
+  for (const [regionId, facts] of Object.entries(expectedFacts)) {
+    const profile = getRecoveryProfile(regionId);
+    assert(profile, `Profile for ${regionId} must exist`);
+    assert.strictEqual(profile.units, facts.units, `Units mismatch for ${regionId}`);
+    assert.strictEqual(profile.households, facts.households, `Households mismatch for ${regionId}`);
+    assert.strictEqual(profile.validDates, facts.validDates, `ValidDates mismatch for ${regionId}`);
+    assert.strictEqual(profile.aptShare, facts.aptShare, `AptShare mismatch for ${regionId}`);
+    assert.strictEqual(profile.villaShare, facts.villaShare, `VillaShare mismatch for ${regionId}`);
+    assert.strictEqual(profile.over20Share, facts.over20Share, `Over20Share mismatch for ${regionId}`);
+  }
+});
+
+test('Phase 6-K1A [4]: Yangcheon Baseline Freeze Check', () => {
+  const yangcheonTargets = [
+    { key: '양천구-탄성코트', id: 'seoul-yangcheon-gu', kw: '탄성코트' },
+    { key: '양천구-베란다탄성코트', id: 'seoul-yangcheon-gu', kw: '베란다탄성코트' },
+    { key: '목동-탄성코트', id: 'seoul-yangcheon-목동', kw: '탄성코트' },
+    { key: '목동-베란다탄성코트', id: 'seoul-yangcheon-목동', kw: '베란다탄성코트' },
+    { key: '신월동-탄성코트', id: 'seoul-yangcheon-신월동', kw: '탄성코트' },
+    { key: '신월동-베란다탄성코트', id: 'seoul-yangcheon-신월동', kw: '베란다탄성코트' },
+    { key: '양천신정동-탄성코트', id: 'seoul-yangcheon-sinjeong', kw: '탄성코트' },
+    { key: '양천신정동-베란다탄성코트', id: 'seoul-yangcheon-sinjeong', kw: '베란다탄성코트' },
+  ];
+
+  for (const target of yangcheonTargets) {
+    assert(
+      isIndexableDynamicPage(target.id, target.kw),
+      `Yangcheon target ${target.key} must remain indexable`
+    );
+  }
 });
 
 test('Phase 6-I0B-2 [5]: RSS Autodiscovery in Root Layout Metadata', () => {
