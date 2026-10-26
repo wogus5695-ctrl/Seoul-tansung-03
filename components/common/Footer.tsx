@@ -27,21 +27,38 @@ export function Footer() {
               주거 공간의 벽면 상태를 먼저 살피고 정직한 시공 범위를 제안하는 탄성코트 전문 브랜드입니다.
             </p>
           </div>
-          <div className="flex flex-col sm:items-end gap-1">
+          <div className="flex flex-col sm:items-end gap-1.5">
             <div className="text-xs font-semibold text-[#3E443B]">
               {SITE_CONFIG.businessCategory}
             </div>
-            {SITE_CONFIG.phone && (
-              <a
-                href={SITE_CONFIG.phoneHref || `tel:${SITE_CONFIG.phone}`}
-                className="text-sm font-bold text-[#4F5844] hover:text-[#3E443B] transition-colors inline-flex items-center gap-1.5"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <span>문의전화 {SITE_CONFIG.phone}</span>
-              </a>
-            )}
+            <div className="flex flex-wrap items-center gap-3">
+              {SITE_CONFIG.phone && (
+                <a
+                  href={SITE_CONFIG.phoneHref || `tel:${SITE_CONFIG.phone}`}
+                  className="text-sm font-bold text-[#4F5844] hover:text-[#3E443B] transition-colors inline-flex items-center gap-1.5"
+                  aria-label={`문의전화 ${SITE_CONFIG.phone}`}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span>문의전화 {SITE_CONFIG.phone}</span>
+                </a>
+              )}
+              {SITE_CONFIG.kakaoConsultUrl && (
+                <a
+                  href={SITE_CONFIG.kakaoConsultUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold text-[#4F5844] hover:text-[#3E443B] transition-colors inline-flex items-center gap-1.5"
+                  aria-label="카카오톡 채널 문의하기"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#4F5844]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4.5 3.75a3 3 0 00-3 3v9a3 3 0 003 3h2.25v3.19a.75.75 0 001.248.563L11.59 18.75h7.91a3 3 0 003-3v-9a3 3 0 00-3-3h-15z" />
+                  </svg>
+                  <span>카카오톡 문의</span>
+                </a>
+              )}
+            </div>
             <Link
               href="/sitemap-seoul"
               className="text-xs font-medium text-[#6B755D] hover:text-[#3E443B] underline underline-offset-2 transition-colors pt-1"

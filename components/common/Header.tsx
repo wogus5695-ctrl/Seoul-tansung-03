@@ -42,19 +42,19 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Header Right Action: Phone CTA */}
-        <div className="flex items-center gap-2">
+        {/* Header Right Action: Phone + Kakao Contact CTAs */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {SITE_CONFIG.phoneHref ? (
             <a
               href={SITE_CONFIG.phoneHref}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F5F3EE] px-3.5 py-1.5 sm:py-2 rounded-full bg-[#4F5844] hover:bg-[#3E443B] transition-colors shadow-sm"
-              aria-label={`전화 상담 문의 ${SITE_CONFIG.phone}`}
+              className="inline-flex items-center gap-1 sm:gap-1.5 text-xs font-semibold text-[#F5F3EE] px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-[#4F5844] hover:bg-[#3E443B] transition-colors shadow-sm"
+              aria-label={`전화 상담 ${SITE_CONFIG.phone}`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              <span className="hidden sm:inline">{SITE_CONFIG.phone}</span>
-              <span className="sm:hidden">전화상담</span>
+              <span className="hidden sm:inline">전화 상담</span>
+              <span className="sm:hidden">전화</span>
             </a>
           ) : (
             <a
@@ -62,6 +62,21 @@ export function Header() {
               className="text-xs font-semibold text-[#3E443B] px-3 py-1.5 rounded-full bg-[#E7D9C1]/50 hover:bg-[#E7D9C1] transition-colors"
             >
               상담 안내
+            </a>
+          )}
+          {SITE_CONFIG.kakaoConsultUrl && (
+            <a
+              href={SITE_CONFIG.kakaoConsultUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 sm:gap-1.5 text-xs font-semibold text-[#3E443B] px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#4F5844]/40 transition-colors shadow-sm"
+              aria-label="카카오톡 채널 문의하기"
+            >
+              <svg className="w-3.5 h-3.5 text-[#4F5844]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4.5 3.75a3 3 0 00-3 3v9a3 3 0 003 3h2.25v3.19a.75.75 0 001.248.563L11.59 18.75h7.91a3 3 0 003-3v-9a3 3 0 00-3-3h-15z" />
+              </svg>
+              <span className="hidden sm:inline">카카오톡</span>
+              <span className="sm:hidden">카톡</span>
             </a>
           )}
         </div>

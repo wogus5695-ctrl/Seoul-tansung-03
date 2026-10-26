@@ -96,10 +96,10 @@ export const SITE_CONFIG: SiteConfig = {
   // Configured via environment variable with strict fallback to OFFICIAL_SITE_ORIGIN
   siteOrigin: resolveSiteOrigin(process.env.NEXT_PUBLIC_SITE_ORIGIN),
 
-  // Official contact information provided in Phase 3-E1
+  // Official contact information provided in Phase 3-E1 & Phase 6-J1
   phone: '010-8492-6900',
   phoneHref: 'tel:01084926900',
-  kakaoConsultUrl: null, // 추후 연결 예정 (임의 링크 생성 금지)
+  kakaoConsultUrl: 'https://pf.kakao.com/_UjxcFX', // Official Kakao Channel (Phase 6-J1)
   businessNumber: '405-15-02677',
   representativeName: '김재현',
   address: null, // 미제공 (임의 생성 금지)

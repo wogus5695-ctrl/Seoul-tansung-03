@@ -463,8 +463,8 @@ test('Site Config: Official business and phone configured while pending channels
   assert.strictEqual(SITE_CONFIG.phone, '010-8492-6900');
   assert.strictEqual(SITE_CONFIG.phoneHref, 'tel:01084926900');
 
-  // Safety invariants: Kakao is strictly null until user provides real URL
-  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, null);
+  // Phase 6-J1: Kakao Channel URL configured
+  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, 'https://pf.kakao.com/_UjxcFX');
   assert.strictEqual(SITE_CONFIG.address, null);
 
   // Phone is active, so isContactConfigured is true
@@ -689,7 +689,7 @@ test('Business SSOT: Official values locked across SiteConfig and dynamic provid
   assert.strictEqual(SITE_CONFIG.businessNumber, '405-15-02677');
   assert.strictEqual(SITE_CONFIG.phone, '010-8492-6900');
   assert.strictEqual(SITE_CONFIG.phoneHref, 'tel:01084926900');
-  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, null);
+  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, 'https://pf.kakao.com/_UjxcFX');
   assert.strictEqual(SITE_CONFIG.asPolicy, null);
 });
 
@@ -1555,7 +1555,7 @@ test('PHASE 6-A2: Business SSOT exact lock & negative value search in runtime/co
   assert.strictEqual(SITE_CONFIG.representativeName, '김재현');
   assert.strictEqual(SITE_CONFIG.businessNumber, '405-15-02677');
   assert.strictEqual(SITE_CONFIG.phone, '010-8492-6900');
-  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, null);
+  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, 'https://pf.kakao.com/_UjxcFX');
   assert.strictEqual(SITE_CONFIG.address, null);
 
   // Negative Search: '이정우' or '010-9822-2630' must NEVER exist in SITE_CONFIG
@@ -3190,6 +3190,51 @@ test('Phase 6-I0B-2 [5]: RSS Autodiscovery in Root Layout Metadata', () => {
 
   assert(layoutSource.includes('application/rss+xml'), 'Root layout must declare application/rss+xml alternate');
   assert(layoutSource.includes('/rss.xml'), 'Root layout must point to /rss.xml');
+});
+
+// ----------------------------------------------------
+// PHASE 6-J1: GLOBAL PHONE + KAKAO CONTACT CTA CONTRACTS
+// ----------------------------------------------------
+test('Phase 6-J1 [1]: SiteConfig Phone and Kakao Channel URL SSOT Invariants', () => {
+  assert.strictEqual(SITE_CONFIG.phone, '010-8492-6900');
+  assert.strictEqual(SITE_CONFIG.phoneHref, 'tel:01084926900');
+  assert.strictEqual(SITE_CONFIG.kakaoConsultUrl, 'https://pf.kakao.com/_UjxcFX');
+  assert.strictEqual(isContactConfigured(), true);
+});
+
+test('Phase 6-J1 [2]: Header, Hero, FinalCta, MobileFixedCTA, and Footer Two-Channel CTA Contracts', () => {
+  const headerSource = fs.readFileSync(path.resolve('components/common/Header.tsx'), 'utf-8');
+  const heroSource = fs.readFileSync(path.resolve('components/sections/HeroSection.tsx'), 'utf-8');
+  const finalCtaSource = fs.readFileSync(path.resolve('components/sections/FinalCtaSection.tsx'), 'utf-8');
+  const mobileFixedSource = fs.readFileSync(path.resolve('components/common/MobileFixedCTA.tsx'), 'utf-8');
+  const footerSource = fs.readFileSync(path.resolve('components/common/Footer.tsx'), 'utf-8');
+
+  // Header assertions
+  assert(headerSource.includes('전화 상담'), 'Header must contain 전화 상담 label on desktop');
+  assert(headerSource.includes('카카오톡'), 'Header must contain 카카오톡 label on desktop');
+  assert(headerSource.includes('전화'), 'Header must contain 전화 label on mobile');
+  assert(headerSource.includes('카톡'), 'Header must contain 카톡 label on mobile');
+  assert(headerSource.includes('SITE_CONFIG.phoneHref'), 'Header must reference phoneHref');
+  assert(headerSource.includes('SITE_CONFIG.kakaoConsultUrl'), 'Header must reference kakaoConsultUrl');
+
+  // Hero assertions
+  assert(heroSource.includes('전화 문의'), 'Hero must contain compact 전화 문의 action');
+  assert(heroSource.includes('카카오톡 문의'), 'Hero must contain 카카오톡 문의 action');
+  assert(!heroSource.includes('전화 상담 문의 (010-8492-6900)'), 'Hero must not contain phone number inside button copy');
+
+  // Final CTA assertions
+  assert(finalCtaSource.includes('전화 문의'), 'Final CTA must contain compact 전화 문의 action');
+  assert(finalCtaSource.includes('카카오톡 문의'), 'Final CTA must contain 카카오톡 문의 action');
+  assert(!finalCtaSource.includes('전화 상담 연결 (010-8492-6900)'), 'Final CTA must not contain phone number inside button copy');
+
+  // Mobile Sticky CTA assertions
+  assert(mobileFixedSource.includes('전화 문의'), 'Mobile Sticky CTA must contain 전화 문의 action');
+  assert(mobileFixedSource.includes('카카오톡 문의'), 'Mobile Sticky CTA must contain 카카오톡 문의 action');
+  assert(!mobileFixedSource.includes('전화 상담 (010-8492-6900)'), 'Mobile Sticky CTA must not contain phone number inside button copy');
+
+  // Footer assertions
+  assert(footerSource.includes('문의전화'), 'Footer must contain phone contact link');
+  assert(footerSource.includes('카카오톡 문의'), 'Footer must contain kakao contact link');
 });
 
 console.log('\n====================================================');

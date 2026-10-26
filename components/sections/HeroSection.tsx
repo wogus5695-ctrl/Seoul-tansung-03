@@ -97,16 +97,17 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
 
             {/* CTA Container */}
             {hasContact ? (
-              <div className="pt-2 flex flex-wrap gap-3">
+              <div className="pt-2 grid grid-cols-2 gap-2.5 sm:gap-3 max-w-sm">
                 {SITE_CONFIG.phone && (
                   <a
                     href={SITE_CONFIG.phoneHref || `tel:${SITE_CONFIG.phone}`}
-                    className="px-6 py-3.5 rounded-md bg-[#4F5844] text-[#F5F3EE] font-semibold text-sm hover:bg-[#3E443B] transition-colors shadow-sm inline-flex items-center gap-2"
+                    className="w-full py-3.5 px-3 sm:px-4 rounded-md bg-[#4F5844] text-[#F5F3EE] font-semibold text-sm hover:bg-[#3E443B] transition-colors shadow-sm inline-flex items-center justify-center gap-2"
+                    aria-label={`전화 상담 ${SITE_CONFIG.phone}`}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    <span>전화 상담 문의 ({SITE_CONFIG.phone})</span>
+                    <span>전화 문의</span>
                   </a>
                 )}
                 {SITE_CONFIG.kakaoConsultUrl && (
@@ -114,9 +115,13 @@ export function HeroSection({ dynamic }: HeroSectionProps = {}) {
                     href={SITE_CONFIG.kakaoConsultUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-3.5 rounded-md bg-[#A3B18A] text-[#3E443B] font-semibold text-sm hover:bg-[#8F9E77] transition-colors shadow-sm"
+                    className="w-full py-3.5 px-3 sm:px-4 rounded-md bg-[#FAF8F5] sm:bg-white text-[#3E443B] border border-[#4F5844]/50 hover:bg-[#EFE8DC] font-semibold text-sm transition-colors shadow-sm inline-flex items-center justify-center gap-2"
+                    aria-label="카카오톡 채널 문의하기"
                   >
-                    카카오톡 문의
+                    <svg className="w-4 h-4 shrink-0 text-[#4F5844]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4.5 3.75a3 3 0 00-3 3v9a3 3 0 003 3h2.25v3.19a.75.75 0 001.248.563L11.59 18.75h7.91a3 3 0 003-3v-9a3 3 0 00-3-3h-15z" />
+                    </svg>
+                    <span>카카오톡 문의</span>
                   </a>
                 )}
               </div>

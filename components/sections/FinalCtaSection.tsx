@@ -63,18 +63,19 @@ export function FinalCtaSection({ dynamic }: FinalCtaSectionProps = {}) {
           사진이나 현재 벽면 상태를 알려주시면 확인해야 할 부분과 필요한 작업 범위를 상담할 수 있습니다.
         </p>
 
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="pt-4 grid grid-cols-2 gap-2.5 sm:gap-3 max-w-sm mx-auto w-full">
           {hasContact ? (
             <>
               {SITE_CONFIG.phone && (
                 <a
                   href={SITE_CONFIG.phoneHref || `tel:${SITE_CONFIG.phone}`}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-md bg-[#4F5844] text-[#F5F3EE] font-semibold text-sm hover:bg-[#3E443B] transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full py-3.5 px-3 sm:px-4 rounded-md bg-[#4F5844] text-[#F5F3EE] font-semibold text-sm hover:bg-[#3E443B] border border-[#A3B18A]/30 transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
+                  aria-label={`전화 상담 ${SITE_CONFIG.phone}`}
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <span>전화 상담 연결 ({SITE_CONFIG.phone})</span>
+                  <span>전화 문의</span>
                 </a>
               )}
               {SITE_CONFIG.kakaoConsultUrl && (
@@ -82,9 +83,13 @@ export function FinalCtaSection({ dynamic }: FinalCtaSectionProps = {}) {
                   href={SITE_CONFIG.kakaoConsultUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-md bg-[#A3B18A] text-[#3E443B] font-semibold text-sm hover:bg-[#8F9E77] transition-colors"
+                  className="w-full py-3.5 px-3 sm:px-4 rounded-md bg-[#FAF8F5] text-[#3E443B] hover:bg-white border border-[#E7D9C1] font-semibold text-sm transition-colors inline-flex items-center justify-center gap-2 shadow-sm"
+                  aria-label="카카오톡 채널 문의하기"
                 >
-                  카카오톡 상담하기
+                  <svg className="w-4 h-4 shrink-0 text-[#4F5844]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4.5 3.75a3 3 0 00-3 3v9a3 3 0 003 3h2.25v3.19a.75.75 0 001.248.563L11.59 18.75h7.91a3 3 0 003-3v-9a3 3 0 00-3-3h-15z" />
+                  </svg>
+                  <span>카카오톡 문의</span>
                 </a>
               )}
             </>
