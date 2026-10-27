@@ -13,7 +13,20 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { SITE_CONFIG, isContactConfigured, resolveSiteOrigin, OFFICIAL_SITE_ORIGIN } from '../lib/config/site-config';
+import {
+  DYNAMIC_RSS_ENABLED,
+  MAX_DYNAMIC_RSS_ITEMS,
+  DYNAMIC_RSS_REGISTRY,
+  ELASTIC_COATING_PATTERNS,
+  BALCONY_COATING_PATTERNS,
+  buildDynamicRssTitle,
+  generateDynamicRssContent,
+  validateDynamicRssEligibility,
+  getDynamicRssItems,
+  DynamicRssPublicationEntry,
+} from '../lib/data/dynamic-rss-data';
 import { SEARCH_INTENTS, SERVICE_KEYWORDS } from '../lib/contracts/intents-contract';
+import type { ServiceKeyword } from '../lib/types/intents';
 import {
   SEOUL_DONG_MANIFEST_RECORDS,
   SEOUL_GU_MANIFEST_RECORDS,
@@ -3395,6 +3408,209 @@ test('Phase 6-J1 [2]: Header, Hero, FinalCta, MobileFixedCTA, and Footer Two-Cha
   // Footer assertions
   assert(footerSource.includes('문의전화'), 'Footer must contain phone contact link');
   assert(footerSource.includes('카카오톡 문의'), 'Footer must contain kakao contact link');
+});
+
+test('PHASE 6-L1A [1]: Dynamic RSS Engine Unit Contract (Title, Short Body, Canonical Parity, GUID)', () => {
+  const origin = OFFICIAL_SITE_ORIGIN;
+
+  // Direct helper test
+  const directTitle = buildDynamicRssTitle('구로동', '탄성코트');
+  assert.strictEqual(directTitle, '구로동 탄성코트 시공 안내');
+  const directContent = generateDynamicRssContent('seoul-guro-구로동', '구로동', '탄성코트');
+  assert(directContent !== null && directContent.description.length >= 100);
+
+  // Test with valid fixture entry
+  const fixtureEntry: DynamicRssPublicationEntry = {
+    regionId: 'seoul-guro-구로동',
+    serviceKeyword: '탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  };
+
+  const item = validateDynamicRssEligibility(fixtureEntry, origin);
+  assert(item !== null, 'Valid dynamic entry must produce an eligible RSS item');
+  assert.strictEqual(item?.type, 'DYNAMIC');
+  assert.strictEqual(item?.title, '구로동 탄성코트 시공 안내');
+  assert.strictEqual(item?.link, 'https://www.allcaretan.co.kr/?k=%EA%B5%AC%EB%A1%9C%EB%8F%99-%ED%83%84%EC%84%B1%EC%BD%94%ED%8A%B8');
+  assert.strictEqual(item?.guid, item?.link, 'GUID must match canonical link exactly');
+  assert.strictEqual(item?.pubDate, 'Tue, 27 Oct 2026 09:00:00 +0900');
+
+  // Body length contract: 100 ~ 220 Korean characters
+  assert(item!.description.length >= 100 && item!.description.length <= 220, `Description length ${item!.description.length} must be 100~220 chars`);
+  assert(item!.contentEncoded.startsWith('<p>') && item!.contentEncoded.endsWith('</p>'), 'content:encoded must be minimal semantic HTML');
+  assert(item!.description.includes('구로동 탄성코트'), 'Description must naturally include dynamic keyword');
+});
+
+test('PHASE 6-L1A [2]: Dynamic RSS Engine Determinism (Same Inputs = Same Outputs)', () => {
+  const origin = OFFICIAL_SITE_ORIGIN;
+  const fixture: DynamicRssPublicationEntry = {
+    regionId: 'seoul-guro-신도림동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  };
+
+  const item1 = validateDynamicRssEligibility(fixture, origin);
+  const item2 = validateDynamicRssEligibility(fixture, origin);
+  const item3 = validateDynamicRssEligibility(fixture, origin);
+
+  assert.strictEqual(JSON.stringify(item1), JSON.stringify(item2), 'Item 1 and Item 2 must be identical');
+  assert.strictEqual(JSON.stringify(item2), JSON.stringify(item3), 'Item 2 and Item 3 must be identical');
+});
+
+test('PHASE 6-L1A [3]: Intent Differentiation (Elastic Coating vs Balcony Coating Patterns)', () => {
+  assert(ELASTIC_COATING_PATTERNS.length >= 4, 'Must have at least 4 patterns for 탄성코트');
+  assert(BALCONY_COATING_PATTERNS.length >= 4, 'Must have at least 4 patterns for 베란다탄성코트');
+
+  const origin = OFFICIAL_SITE_ORIGIN;
+  const itemElastic = validateDynamicRssEligibility({
+    regionId: 'seoul-guro-개봉동',
+    serviceKeyword: '탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  }, origin);
+
+  const itemBalcony = validateDynamicRssEligibility({
+    regionId: 'seoul-guro-개봉동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  }, origin);
+
+  assert(itemElastic !== null && itemBalcony !== null);
+  assert.notStrictEqual(itemElastic!.description, itemBalcony!.description, 'Different intents must produce different body copies');
+  assert(itemElastic!.title.includes('탄성코트 시공 안내'));
+  assert(itemBalcony!.title.includes('베란다탄성코트 시공 안내'));
+});
+
+test('PHASE 6-L1A [4]: Failure Safety & Eligibility Guard (Noindex, Collision, Missing Date, Banned Claims)', () => {
+  const origin = OFFICIAL_SITE_ORIGIN;
+
+  // 1. Collision hold (은평 신사동)
+  const collisionItem = validateDynamicRssEligibility({
+    regionId: 'seoul-eunpyeong-sinsa',
+    serviceKeyword: '탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  }, origin);
+  assert.strictEqual(collisionItem, null, 'Collision hold regions must be rejected from RSS');
+
+  // 2. Guro P2 (가리봉동 - noindex, follow)
+  const noindexItem = validateDynamicRssEligibility({
+    regionId: 'seoul-guro-가리봉동',
+    serviceKeyword: '탄성코트',
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  }, origin);
+  assert.strictEqual(noindexItem, null, 'Non-indexable regions must be rejected from RSS');
+
+  // 3. Unsupported intent (e.g. 세탁실탄성코트)
+  const unsupportedIntentItem = validateDynamicRssEligibility({
+    regionId: 'seoul-guro-구로동',
+    serviceKeyword: '세탁실탄성코트' as unknown as ServiceKeyword,
+    publishedAt: '2026-10-27T09:00:00+09:00',
+    publishedAtRfc822: 'Tue, 27 Oct 2026 09:00:00 +0900',
+  }, origin);
+  assert.strictEqual(unsupportedIntentItem, null, 'Unsupported intents must be rejected from RSS');
+
+  // 4. Missing publishedAt
+  const missingDateItem = validateDynamicRssEligibility({
+    regionId: 'seoul-guro-구로동',
+    serviceKeyword: '탄성코트',
+    publishedAt: '',
+    publishedAtRfc822: '',
+  }, origin);
+  assert.strictEqual(missingDateItem, null, 'Missing publication date must fail safe');
+});
+
+test('PHASE 6-L1A [5]: Rolling Window Retention (Max 24 Dynamic Items, Guides Retained)', () => {
+  const origin = OFFICIAL_SITE_ORIGIN;
+  assert.strictEqual(MAX_DYNAMIC_RSS_ITEMS, 24, 'Max dynamic RSS items policy must be 24');
+
+  // Generate 30 valid fixture entries
+  const fixture30: DynamicRssPublicationEntry[] = [];
+  const approvedGuro = [
+    'seoul-guro-gu', 'seoul-guro-신도림동', 'seoul-guro-구로동', 'seoul-guro-고척동',
+    'seoul-guro-개봉동', 'seoul-guro-오류동', 'seoul-guro-천왕동', 'seoul-guro-항동'
+  ];
+
+  let count = 0;
+  for (const reg of approvedGuro) {
+    for (const intent of ['탄성코트', '베란다탄성코트'] as const) {
+      count++;
+      const day = count.toString().padStart(2, '0');
+      fixture30.push({
+        regionId: reg,
+        serviceKeyword: intent,
+        publishedAt: `2026-10-${day}T09:00:00+09:00`,
+        publishedAtRfc822: `Sun, ${day} Oct 2026 09:00:00 +0900`,
+      });
+    }
+  }
+
+  // Also add some Base Recovery entries to reach 30
+  const baseApproved = [
+    'seoul-gangnam-gu',
+    'seoul-seocho-gu',
+    'seoul-eunpyeong-gu',
+    'seoul-gangseo-gu',
+    'seoul-seongdong-gu',
+    'seoul-eunpyeong-bulgwang',
+    'seoul-eunpyeong-갈현동',
+    'seoul-gangseo-마곡동',
+  ];
+  for (const reg of baseApproved) {
+    if (fixture30.length >= 30) break;
+    count++;
+    const day = count.toString().padStart(2, '0');
+    fixture30.push({
+      regionId: reg,
+      serviceKeyword: '탄성코트',
+      publishedAt: `2026-10-${day}T09:00:00+09:00`,
+      publishedAtRfc822: `Sun, ${day} Oct 2026 09:00:00 +0900`,
+    });
+  }
+
+  assert(fixture30.length >= 24, `Must have at least 24 fixture entries for test, got ${fixture30.length}`);
+
+  // Test rolling window retention
+  const retained = getDynamicRssItems(origin, {
+    forceEnabled: true,
+    registryOverride: fixture30,
+  });
+
+  assert.strictEqual(retained.length, 24, 'Must retain exactly MAX_DYNAMIC_RSS_ITEMS (24) items');
+  // First item must be the newest
+  assert(retained[0].publishedAtIso >= retained[retained.length - 1].publishedAtIso, 'Items must be sorted newest first');
+});
+
+test('PHASE 6-L1A [6]: No Fake Freshness Contract (Zero Date.now() / Request-time Staggering)', () => {
+  const dynamicRssSourcePath = path.resolve('lib/data/dynamic-rss-data.ts');
+  const source = fs.readFileSync(dynamicRssSourcePath, 'utf-8');
+
+  assert(!source.includes('Date.now()'), 'Must not use Date.now() for publication timestamps');
+  assert(!source.includes('new Date()'), 'Must not use new Date() for dynamic RSS publication timestamps');
+  assert(!source.includes('Math.random()'), 'Must not use Math.random() for dynamic RSS content generation');
+});
+
+test('PHASE 6-L1A [7]: Production-equivalent RSS Route Freeze (4 Guides, 0 Dynamic, 0 ?k=)', async () => {
+  assert.strictEqual(DYNAMIC_RSS_ENABLED, false, 'DYNAMIC_RSS_ENABLED must remain false in Phase 6-L1A');
+  assert.strictEqual(DYNAMIC_RSS_REGISTRY.length, 0, 'DYNAMIC_RSS_REGISTRY must remain empty (0 entries) in Phase 6-L1A');
+
+  const rssRes = await getRssResponse();
+  assert.strictEqual(rssRes.status, 200);
+  const rssText = await rssRes.text();
+
+  const itemMatches = rssText.match(/<item>/g) || [];
+  assert.strictEqual(itemMatches.length, 4, 'Live RSS output must contain exactly 4 Guide items');
+
+  // Zero dynamic query URLs
+  assert(!rssText.includes('?k='), 'RSS must NOT contain dynamic query parameters');
+  assert(!rssText.includes('구로구-탄성코트'), 'RSS must NOT contain dynamic regional landing pages');
+  assert(!rssText.includes('구로동 탄성코트 시공 안내'), 'RSS must NOT contain dynamic RSS titles');
+
+  // Verify lastBuildDate remains unchanged
+  assert(rssText.includes('<lastBuildDate>Mon, 26 Oct 2026 09:00:00 +0900</lastBuildDate>'), 'lastBuildDate must remain frozen');
 });
 
 console.log('\n====================================================');
