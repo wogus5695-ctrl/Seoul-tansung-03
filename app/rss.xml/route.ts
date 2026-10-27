@@ -7,7 +7,7 @@ export async function GET() {
   const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
   const guides = getAllGuides();
 
-  const buildDate = 'Mon, 26 Oct 2026 09:00:00 +0900';
+  const buildDate = 'Tue, 27 Oct 2026 16:00:00 +0900';
 
   // 1. Long-form Informational Guides (Always preserved)
   const guideXmlItems = guides.map((guide) => {

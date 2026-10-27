@@ -4955,14 +4955,14 @@ export const SEOUL_DONG_MANIFEST_RECORDS: readonly RegionManifestRecord[] = [
   {
     "regionRecordId": "seoul-yeongdeungpo-여의동",
     "parentGu": "영등포구",
-    "canonicalName": "서울특별시 영등포구 여의동",
+    "canonicalName": "서울특별시 영등포구 여의도동",
     "officialAdminNames": [
       "여의동"
     ],
     "officialLegalNames": [
       "여의도동"
     ],
-    "publicCandidate": "여의동",
+    "publicCandidate": "여의도동",
     "sourceMembership": [
       "ADMIN",
       "LEGAL"
@@ -4974,7 +4974,7 @@ export const SEOUL_DONG_MANIFEST_RECORDS: readonly RegionManifestRecord[] = [
     "collisionGroup": null,
     "collisionStatus": "NONE",
     "approvalStatus": "APPROVED",
-    "routeKeyCandidate": "seoul-yeongdeungpo-%ec%97%ac%ec%9d%98%eb%8f%99",
+    "routeKeyCandidate": "seoul-yeongdeungpo-%ec%97%ac%ec%9d%98%eb%8f%84%eb%8f%99",
     "includeInApprovedSet": true,
     "excludeReason": null
   },

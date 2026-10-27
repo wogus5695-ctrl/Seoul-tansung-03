@@ -12,6 +12,8 @@ import {
   YangcheonCohortRegionId,
   GURO_COHORT_REGION_IDS,
   GuroCohortRegionId,
+  YEONGDEUNGPO_COHORT_REGION_IDS,
+  YeongdeungpoCohortRegionId,
 } from '../../lib/config/recovery-config';
 
 interface RelatedIntentLinksSectionProps {
@@ -51,7 +53,8 @@ export function RelatedIntentLinksSection({
 
   const isCohortRegion =
     YANGCHEON_COHORT_REGION_IDS.includes(region.id as YangcheonCohortRegionId) ||
-    GURO_COHORT_REGION_IDS.includes(region.id as GuroCohortRegionId);
+    GURO_COHORT_REGION_IDS.includes(region.id as GuroCohortRegionId) ||
+    YEONGDEUNGPO_COHORT_REGION_IDS.includes(region.id as YeongdeungpoCohortRegionId);
   const siblingIntent: ServiceKeyword | null = isCohortRegion
     ? currentIntent.serviceKeyword === '탄성코트'
       ? '베란다탄성코트'

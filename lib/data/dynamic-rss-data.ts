@@ -17,11 +17,18 @@ import { isIndexableDynamicPage } from '../config/recovery-config';
 import { buildCanonicalUrl } from '../url/url-builder';
 import { ServiceKeyword } from '../types/intents';
 
-// Feature gate: Dynamic RSS output remains disabled in Phase 6-L1A
-export const DYNAMIC_RSS_ENABLED = false;
+// Feature gate: Dynamic RSS output enabled for Phase 6-M1A (Yeongdeungpo P1 first cohort)
+export const DYNAMIC_RSS_ENABLED = true;
 
 // Retention policy: maximum dynamic RSS items retained in the rolling window
 export const MAX_DYNAMIC_RSS_ITEMS = 24;
+
+/**
+ * Phase 6-M1A Yeongdeungpo P1 Dynamic Cohort Official Publication Date
+ * Factual planned deployment date SSOT.
+ */
+export const YEONGDEUNGPO_COHORT_PUBDATE = '2026-10-27T16:00:00+09:00';
+export const YEONGDEUNGPO_COHORT_PUBDATE_RFC822 = 'Tue, 27 Oct 2026 16:00:00 +0900';
 
 export interface DynamicRssPublicationEntry {
   readonly regionId: string;
@@ -46,10 +53,128 @@ export interface DynamicRssPublicationEntry {
 /**
  * Production Dynamic RSS Publication Registry
  *
- * Phase 6-L1A: Strictly EMPTY (0 entries).
- * No historical URLs (Base Recovery 15, Yangcheon 7, Guro 16) are backfilled.
+ * Phase 6-M1A: Exactly 18 Yeongdeungpo P1 Cohort entries.
+ * Zero historical URLs (Base Recovery 15, Yangcheon 7, Guro 16) are backfilled.
  */
-export const DYNAMIC_RSS_REGISTRY: readonly DynamicRssPublicationEntry[] = [];
+export const DYNAMIC_RSS_REGISTRY: readonly DynamicRssPublicationEntry[] = [
+  // 1. 영등포구
+  {
+    regionId: 'seoul-yeongdeungpo-gu',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-gu',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 2. 영등포동
+  {
+    regionId: 'seoul-yeongdeungpo-영등포동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-영등포동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 3. 당산동
+  {
+    regionId: 'seoul-yeongdeungpo-당산동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-당산동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 4. 문래동
+  {
+    regionId: 'seoul-yeongdeungpo-문래동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-문래동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 5. 신길동
+  {
+    regionId: 'seoul-yeongdeungpo-신길동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-신길동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 6. 대림동
+  {
+    regionId: 'seoul-yeongdeungpo-대림동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-대림동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 7. 양평동
+  {
+    regionId: 'seoul-yeongdeungpo-양평동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-양평동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 8. 여의도동
+  {
+    regionId: 'seoul-yeongdeungpo-여의동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-여의동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  // 9. 도림동
+  {
+    regionId: 'seoul-yeongdeungpo-도림동',
+    serviceKeyword: '탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+  {
+    regionId: 'seoul-yeongdeungpo-도림동',
+    serviceKeyword: '베란다탄성코트',
+    publishedAt: YEONGDEUNGPO_COHORT_PUBDATE,
+    publishedAtRfc822: YEONGDEUNGPO_COHORT_PUBDATE_RFC822,
+  },
+];
 
 export interface NormalizedRssItem {
   readonly type: 'GUIDE' | 'DYNAMIC';
@@ -79,12 +204,15 @@ export const BALCONY_COATING_PATTERNS: readonly string[] = [
   '{keyword} 전에는 창호 샤시 접합부와 외벽 모서리의 기존 페인트 들뜸 여부를 면밀히 확인하는 것이 좋습니다. 외부 온도와 맞닿는 베란다 특성상 현장 벽면 상태에 맞춘 바탕면 정리와 정밀 보양 공정이 사전에 협의되어야 합니다. 시공 당일에는 세탁기와 건조기 등 대형 가전의 분리 이동 여부를 작업자와 명확히 조율하시기 바랍니다.',
   '{keyword} 시공을 준비할 때는 베란다 천장과 배관 주변의 크랙 및 과거 칠 벗겨짐 흔적을 사전에 점검해야 합니다. 시설물과 바닥 타일에 분사 도료가 묻지 않도록 꼼꼼한 마스킹 테이프 보양 범위를 확인하는 것이 마감 품질에 중요합니다. 시공 후에는 도막 안착을 위해 임의 난방보다는 자연 바람을 통한 환기 관리를 권장합니다.',
   '{keyword} 견적 상담 시에는 다용도실과 세탁실 벽면의 잔여 습기와 도막 들뜸 범위를 미리 살펴보는 것이 현명합니다. 현장 상태에 따라 필요한 부실 도막 정리와 메꿈 작업 범위가 상이하므로 포함 내역을 꼼꼼히 대조해야 합니다. 분사 작업자의 안전한 작업 공간 확보를 위해 선반 소품과 생활 집기를 미리 반출해 두시기 바랍니다.',
-  '{keyword} 계획 시에는 창틀 실리콘 경계면과 세탁기 뒷벽 등 사각지대의 벽면 상태를 사전에 확인해 두는 것이 바람직합니다. 대형 가전이 설치된 공간은 안전한 이동 방안과 도포 가능 범위를 사전 협의해야 시공 분쟁을 방지할 수 있습니다. 뿜칠 완료 후에는 충분한 자연 통풍을 유지하여 표면이 균일하게 건조되도록 환경을 관리해야 합니다.',
+  '{keyword} 계획 시에는 창틀 실리콘 경계면과 세탁기 뒷벽 등 사각지대의 벽면 상태를 사전에 확인해 두는 것이 바람직합니다. 대형 가전이 설치된 공간은 안전한 이동 방안과 도포 가능 범위를 사전 협의해야 원활한 작업 진행에 도움이 됩니다. 뿜칠 완료 후에는 충분한 자연 통풍을 유지하여 표면이 균일하게 건조되도록 환경을 관리해야 합니다.',
 ];
 
 const PROHIBITED_WORDS = [
   '완벽', '100%', '영구', '무조건', '최고', '1위', '최저가',
   '무상 A/S', '평생 A/S', '결로 완전 해결', '곰팡이 완전 방지', '박리 재발 없음',
+  '결로 방지', '결로 예방', '결로 해결',
+  '곰팡이 방지', '곰팡이 예방', '곰팡이 해결',
+  '누수 방지', '습기 완전 차단',
   '수요가 많습니다', '시공이 필요합니다', '결로가 많습니다', '문의가 많습니다',
 ];
 
