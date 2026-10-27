@@ -103,6 +103,14 @@ import {
   getRelatedRecoveryRegions,
 } from '../lib/config/recovery-config';
 import { getAllGuides } from '../lib/data/guides-data';
+import {
+  getAllKeywordGuides,
+  getKeywordGuideForDynamic,
+  getAllGuideSlugs,
+  getAnyGuideBySlug,
+  toGuideArticle,
+  KEYWORD_GUIDES,
+} from '../lib/data/keyword-guides-data';
 import { GET as getSitemapResponse } from '../app/sitemap.xml/route';
 import { GET as getRssResponse } from '../app/rss.xml/route';
 
@@ -2110,7 +2118,7 @@ test('PHASE 6-C2: 1,908 Approved Dynamic URLs Indexability & 6 Collision Hold NO
   assert.strictEqual(noindexCount, 6, 'NOINDEX count must be EXACTLY 6 collision hold dynamic URLs');
 });
 
-test('PHASE 6-K1B: Sitemap Inclusion Contract (44 Total URLs: 1 Main + 1 Hub + 4 Guides + 38 Dynamic)', async () => {
+test('PHASE 6-N1A: Sitemap Inclusion Contract (81 Total URLs: 3 Static + 4 Pillar Guides + 18 Keyword Guides + 56 Dynamic)', async () => {
   const origin = OFFICIAL_SITE_ORIGIN;
   const approvedRegions = PRODUCTION_REGIONS.filter(
     (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
@@ -2126,13 +2134,15 @@ test('PHASE 6-K1B: Sitemap Inclusion Contract (44 Total URLs: 1 Main + 1 Hub + 4
     }
   }
 
-  const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`];
-  const guideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
-  const sitemapUrls = [...staticUrls, ...guideUrls, ...dynamicUrls];
+  const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`, `${origin}/guide`];
+  const pillarGuideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
+  const keywordGuideUrls = getAllKeywordGuides().map((g) => `${origin}/guide/${g.slug}`);
+  const sitemapUrls = [...staticUrls, ...pillarGuideUrls, ...keywordGuideUrls, ...dynamicUrls];
 
-  assert.strictEqual(sitemapUrls.length, 62, 'Sitemap URL count must be exactly 62 (1 Main + 1 Hub + 4 Guides + 56 Dynamic)');
+  assert.strictEqual(sitemapUrls.length, 81, 'Sitemap URL count must be exactly 81 (3 Static + 4 Pillar + 18 Keyword + 56 Dynamic)');
   assert.strictEqual(dynamicUrls.length, 56, 'Dynamic sitemap URLs must be exactly 56');
-  assert.strictEqual(guideUrls.length, 4, 'Guide sitemap URLs must be exactly 4');
+  assert.strictEqual(pillarGuideUrls.length, 4, 'Pillar guide sitemap URLs must be exactly 4');
+  assert.strictEqual(keywordGuideUrls.length, 18, 'Keyword guide sitemap URLs must be exactly 18');
 
   // Verify direct sitemap.xml route response
   const sitemapRes = await getSitemapResponse();
@@ -3180,7 +3190,7 @@ test('Phase 6-K1B [2]: Exactly 4 Information Guides (Unique URLs, Titles, Canoni
   }
 });
 
-test('Phase 6-M1A: RSS Route Validation (HTTP 200, Valid XML, 22 Items: 4 Guides + 18 Dynamic)', async () => {
+test('Phase 6-N1A: RSS Route Validation (HTTP 200, Valid XML, 22 Items: 4 Pillar Guides + 18 Keyword Guides)', async () => {
   const rssRes = await getRssResponse();
   assert.strictEqual(rssRes.status, 200, 'RSS endpoint must return HTTP 200');
   assert(rssRes.headers.get('content-type')?.includes('application/xml'), 'RSS must return XML content-type');
@@ -3192,11 +3202,11 @@ test('Phase 6-M1A: RSS Route Validation (HTTP 200, Valid XML, 22 Items: 4 Guides
   assert(rssText.includes('<rss version="2.0"'), 'RSS version must be 2.0');
   assert(rssText.includes('<channel>'), 'RSS must contain <channel>');
 
-  // Exactly 22 items (4 Guides + 18 Dynamic)
+  // Exactly 22 items (4 Pillar Guides + 18 Keyword Guides)
   const itemMatches = rssText.match(/<item>/g) || [];
-  assert.strictEqual(itemMatches.length, 22, 'RSS must contain exactly 22 <item> tags (4 Guides + 18 Dynamic)');
+  assert.strictEqual(itemMatches.length, 22, 'RSS must contain exactly 22 <item> tags (4 Pillar Guides + 18 Keyword Guides)');
 
-  // Verify item links match Guide URLs
+  // Verify item links match Pillar Guide URLs
   const guides = getAllGuides();
   for (const g of guides) {
     const expectedLink = `https://www.allcaretan.co.kr/guide/${g.slug}`;
@@ -3204,17 +3214,22 @@ test('Phase 6-M1A: RSS Route Validation (HTTP 200, Valid XML, 22 Items: 4 Guides
     assert(rssText.includes(`<guid isPermaLink="true">${expectedLink}</guid>`), `RSS must contain guid for ${expectedLink}`);
   }
 
-  // Strictly ZERO Historical Dynamic URLs in RSS (Base 15, Yangcheon 7, Guro 16)
+  // Verify Keyword Guide URLs and Titles are present in RSS
+  const keywordGuides = getAllKeywordGuides();
+  for (const kg of keywordGuides) {
+    const expectedLink = `https://www.allcaretan.co.kr/guide/${kg.slug}`;
+    assert(rssText.includes(`<link>${expectedLink}</link>`), `RSS must contain link to ${expectedLink}`);
+    assert(rssText.includes(`<guid isPermaLink="true">${expectedLink}</guid>`), `RSS must contain guid for ${expectedLink}`);
+    assert(rssText.includes(kg.title), `RSS must contain Keyword Guide title: ${kg.title}`);
+  }
+
+  // Strictly ZERO Direct Dynamic URLs in RSS
+  assert(!rssText.includes('/?k='), 'RSS must NOT contain direct dynamic landing pages');
   assert(!rssText.includes('목동-탄성코트'), 'RSS must NOT contain historical dynamic landing pages');
   assert(!rssText.includes('양천구-탄성코트'), 'RSS must NOT contain historical dynamic landing pages');
   assert(!rssText.includes('구로구-탄성코트'), 'RSS must NOT contain historical dynamic landing pages');
   assert(!rssText.includes('신도림동-탄성코트'), 'RSS must NOT contain historical dynamic landing pages');
   assert(!rssText.includes('강남구-탄성코트'), 'RSS must NOT contain historical dynamic landing pages');
-
-  // Verify Yeongdeungpo P1 Dynamic URLs are present in RSS
-  assert(rssText.includes('영등포구 탄성코트 시공 안내'), 'RSS must contain Yeongdeungpo dynamic RSS title');
-  assert(rssText.includes('여의도동 탄성코트 시공 안내'), 'RSS must contain Yeouido dynamic RSS title');
-  assert(rssText.includes('당산동 베란다탄성코트 시공 안내'), 'RSS must contain Dangsan dynamic RSS title');
 });
 
 test('Phase 6-M1A: Seoul Hub Compact Directory (56 Dynamic SSR Links + 4 Separate Guides)', () => {
@@ -3600,58 +3615,141 @@ test('PHASE 6-L1A [6]: No Fake Freshness Contract (Zero Date.now() / Request-tim
   assert(!source.includes('Math.random()'), 'Must not use Math.random() for dynamic RSS content generation');
 });
 
-test('PHASE 6-M1A [1]: Live RSS Output Contract (4 Guides + 18 Dynamic = 22 Items)', async () => {
-  assert.strictEqual(DYNAMIC_RSS_ENABLED, true, 'DYNAMIC_RSS_ENABLED must be true in Phase 6-M1A');
-  assert.strictEqual(DYNAMIC_RSS_REGISTRY.length, 18, 'DYNAMIC_RSS_REGISTRY must contain exactly 18 Yeongdeungpo P1 entries');
+test('PHASE 6-N1A [1]: Keyword Guide Registry & Topic Matrix Contract (18 Guides, Unique Slugs, Titles, H1)', () => {
+  const keywordGuides = getAllKeywordGuides();
+  assert.strictEqual(keywordGuides.length, 18, 'Must contain exactly 18 Keyword Guides in registry');
+
+  const pillarGuides = getAllGuides();
+  assert.strictEqual(pillarGuides.length, 4, 'Must contain exactly 4 Pillar Guides');
+
+  const allSlugs = getAllGuideSlugs();
+  assert.strictEqual(allSlugs.length, 22, 'Total guide slugs must be exactly 22 (4 Pillar + 18 Keyword)');
+
+  // 1. Uniqueness of Slugs across ALL 22 Guides
+  const slugSet = new Set<string>();
+  for (const s of allSlugs) {
+    assert(!slugSet.has(s), `Duplicate guide slug detected: ${s}`);
+    slugSet.add(s);
+  }
+
+  // 2. Uniqueness of Titles and H1 across 18 Keyword Guides
+  const titleSet = new Set<string>();
+  const h1Set = new Set<string>();
+  for (const g of keywordGuides) {
+    assert(!titleSet.has(g.title), `Duplicate Keyword Guide title detected: ${g.title}`);
+    assert(!h1Set.has(g.h1), `Duplicate Keyword Guide H1 detected: ${g.h1}`);
+    titleSet.add(g.title);
+    h1Set.add(g.h1);
+
+    // Format check: Title must end with "| 올케어 시공 가이드"
+    assert(g.title.endsWith('| 올케어 시공 가이드'), `Title must end with "| 올케어 시공 가이드": ${g.title}`);
+    // Structure check: 2~4 sections, 3~5 checklist items, limitation note
+    assert(g.sections.length >= 2 && g.sections.length <= 4, `Sections count ${g.sections.length} must be 2~4 for ${g.slug}`);
+    assert(g.checklistItems.length >= 3 && g.checklistItems.length <= 5, `Checklist count ${g.checklistItems.length} must be 3~5 for ${g.slug}`);
+    assert(g.limitationNote.length > 20, `Limitation note must be non-empty for ${g.slug}`);
+  }
+});
+
+test('PHASE 6-N1A [2]: 1:1 Dynamic <-> Keyword Guide Bi-Directional Mapping Contract', () => {
+  const ydpRegionIds = [
+    'seoul-yeongdeungpo-gu',
+    'seoul-yeongdeungpo-영등포동',
+    'seoul-yeongdeungpo-당산동',
+    'seoul-yeongdeungpo-문래동',
+    'seoul-yeongdeungpo-신길동',
+    'seoul-yeongdeungpo-대림동',
+    'seoul-yeongdeungpo-양평동',
+    'seoul-yeongdeungpo-여의동',
+    'seoul-yeongdeungpo-도림동',
+  ];
+
+  for (const regionId of ydpRegionIds) {
+    for (const intent of ['탄성코트', '베란다탄성코트'] as const) {
+      // 1. Dynamic -> Guide
+      const guide = getKeywordGuideForDynamic(regionId, intent);
+      assert(guide, `Every Yeongdeungpo dynamic page must map to a Keyword Guide: ${regionId} ${intent}`);
+      assert.strictEqual(guide.regionId, regionId);
+      assert.strictEqual(guide.serviceKeyword, intent);
+
+      // 2. Guide -> Dynamic
+      const article = toGuideArticle(guide, OFFICIAL_SITE_ORIGIN);
+      const primaryLink = article.relatedLinks[0];
+      assert(primaryLink, `Keyword Guide must have primary dynamic landing link: ${guide.slug}`);
+      const region = PRODUCTION_REGIONS.find(r => r.id === regionId)!;
+      const expectedHref = buildPublicHref(region.keywordRegionName, intent);
+      assert.strictEqual(primaryLink.href, expectedHref, `Primary link href must match dynamic landing href: ${expectedHref}`);
+    }
+  }
+});
+
+test('PHASE 6-N1A [3]: Live RSS Output Contract (4 Pillar Guides + 18 Keyword Guides = 22 Items)', async () => {
+  assert.strictEqual(DYNAMIC_RSS_ENABLED, false, 'Direct DYNAMIC_RSS_ENABLED must be false in Phase 6-N1A');
 
   const rssRes = await getRssResponse();
   assert.strictEqual(rssRes.status, 200);
   const rssText = await rssRes.text();
 
   const itemMatches = rssText.match(/<item>/g) || [];
-  assert.strictEqual(itemMatches.length, 22, 'Live RSS output must contain exactly 22 items (4 Guides + 18 Dynamic)');
+  assert.strictEqual(itemMatches.length, 22, 'Live RSS output must contain exactly 22 items (4 Pillar Guides + 18 Keyword Guides)');
 
-  // 1. Guides: 4 items present with complete content
-  assert(rssText.includes('/guide/balcony-coating-checklist'), 'Guide 01 must be present');
-  assert(rssText.includes('/guide/old-apartment-balcony-recoating-guide'), 'Guide 02 must be present');
-  assert(rssText.includes('/guide/elastic-coating-estimate-work-scope-guide'), 'Guide 03 must be present');
-  assert(rssText.includes('/guide/elastic-coating-preparation-protection-checklist'), 'Guide 04 must be present');
+  // 1. 4 Pillar Guides present
+  assert(rssText.includes('/guide/balcony-coating-checklist'), 'Pillar Guide 01 must be present');
+  assert(rssText.includes('/guide/old-apartment-balcony-recoating-guide'), 'Pillar Guide 02 must be present');
+  assert(rssText.includes('/guide/elastic-coating-estimate-work-scope-guide'), 'Pillar Guide 03 must be present');
+  assert(rssText.includes('/guide/elastic-coating-preparation-protection-checklist'), 'Pillar Guide 04 must be present');
 
-  // 2. Zero historical backfill: Base Recovery (15), Yangcheon (7), Guro (16) must NOT be in RSS
+  // 2. 18 Keyword Guides present with exact guide URLs
+  const keywordGuides = getAllKeywordGuides();
+  for (const kg of keywordGuides) {
+    const expectedUrl = `${OFFICIAL_SITE_ORIGIN}/guide/${kg.slug}`;
+    assert(rssText.includes(`<link>${expectedUrl}</link>`), `RSS must contain Keyword Guide link: ${expectedUrl}`);
+    assert(rssText.includes(`<guid isPermaLink="true">${expectedUrl}</guid>`), `RSS must contain Keyword Guide guid: ${expectedUrl}`);
+  }
+
+  // 3. Zero direct dynamic RSS landing URLs in RSS
+  assert(!rssText.includes('/?k='), 'RSS must NOT contain any direct /?k= landing links after migration');
+
+  // 4. Zero historical backfill
   assert(!rssText.includes('구로구 탄성코트 시공 안내'), 'Historical Guro must NOT be in RSS');
-  assert(!rssText.includes('구로동 탄성코트 시공 안내'), 'Historical Guro must NOT be in RSS');
   assert(!rssText.includes('목동 탄성코트 시공 안내'), 'Historical Yangcheon must NOT be in RSS');
-  assert(!rssText.includes('신도림동 탄성코트 시공 안내'), 'Historical Guro must NOT be in RSS');
   assert(!rssText.includes('강남구 탄성코트 시공 안내'), 'Historical Base must NOT be in RSS');
+});
 
-  // 3. Yeongdeungpo 18 Dynamic items present with "{키워드} 시공 안내"
-  const expectedDynamicTitles = [
-    '영등포구 탄성코트 시공 안내', '영등포구 베란다탄성코트 시공 안내',
-    '영등포동 탄성코트 시공 안내', '영등포동 베란다탄성코트 시공 안내',
-    '당산동 탄성코트 시공 안내', '당산동 베란다탄성코트 시공 안내',
-    '문래동 탄성코트 시공 안내', '문래동 베란다탄성코트 시공 안내',
-    '신길동 탄성코트 시공 안내', '신길동 베란다탄성코트 시공 안내',
-    '대림동 탄성코트 시공 안내', '대림동 베란다탄성코트 시공 안내',
-    '양평동 탄성코트 시공 안내', '양평동 베란다탄성코트 시공 안내',
-    '여의도동 탄성코트 시공 안내', '여의도동 베란다탄성코트 시공 안내',
-    '도림동 탄성코트 시공 안내', '도림동 베란다탄성코트 시공 안내',
+test('PHASE 6-N1A [4]: Keyword Guide Claim Safety & Zero Unsupported Local Characterization', () => {
+  const bannedTerms = [
+    '결로 방지', '결로 예방', '결로 해결',
+    '곰팡이 방지', '곰팡이 예방', '곰팡이 해결',
+    '누수 방지', '습기 완전 차단',
+    '완벽', '100%', '영구', '무조건', '최고', '1위', '최저가',
+    '무상 A/S', '평생 A/S',
   ];
-  for (const title of expectedDynamicTitles) {
-    assert(rssText.includes(`<title>${title}</title>`), `RSS must contain title: ${title}`);
-  }
 
-  // 4. Parity: RSS link == Dynamic canonical == RSS guid
-  for (const entry of DYNAMIC_RSS_REGISTRY) {
-    const region = PRODUCTION_REGIONS.find(r => r.id === entry.regionId)!;
-    const canonicalRes = buildCanonicalUrl(region.keywordRegionName, entry.serviceKeyword, OFFICIAL_SITE_ORIGIN);
-    assert(canonicalRes.isSuccess && canonicalRes.canonicalUrl);
-    const link = canonicalRes.canonicalUrl;
-    assert(rssText.includes(`<link>${link}</link>`), `RSS must contain link: ${link}`);
-    assert(rssText.includes(`<guid isPermaLink="true">${link}</guid>`), `RSS must contain guid: ${link}`);
-  }
+  const unsupportedLocalClaims = [
+    '풍압이 강하다',
+    '풍압이 세다',
+    '구축 아파트가 많다',
+    '구축이 많아',
+    '결로가 많다',
+    '탄성코트 수요가 많다',
+    '탄성코트가 필수',
+    '노후주택이 많아',
+  ];
 
-  // 5. Build date
-  assert(rssText.includes('<lastBuildDate>Tue, 27 Oct 2026 16:00:00 +0900</lastBuildDate>'), 'lastBuildDate must match planned cohort date');
+  const keywordGuides = getAllKeywordGuides();
+  for (const g of keywordGuides) {
+    const fullText = `${g.title} ${g.h1} ${g.intro} ${g.sections.map(s => s.h2 + ' ' + s.paragraphs.join(' ')).join(' ')} ${g.checklistItems.join(' ')} ${g.limitationNote}`;
+
+    for (const term of bannedTerms) {
+      assert(!fullText.includes(term), `Keyword Guide [${g.slug}] must NOT contain banned term: "${term}"`);
+    }
+
+    for (const claim of unsupportedLocalClaims) {
+      assert(!fullText.includes(claim), `Keyword Guide [${g.slug}] must NOT contain unsupported local claim: "${claim}"`);
+    }
+
+    // Content length operating range check: approx 800 ~ 1,400 Korean chars (with spaces)
+    assert(fullText.length >= 700 && fullText.length <= 1400, `Keyword Guide [${g.slug}] char count (${fullText.length}) must be within 700~1,400 chars operating range`);
+  }
 });
 
 test('PHASE 6-M1A [2]: Yeongdeungpo P1 Cohort & Yeouido Public Keyword Contract', () => {
@@ -3739,8 +3837,8 @@ test('PHASE 6-M1B-R: Condensation Claim Safety & Banned Term Scan Across Dynamic
     }
   }
 
-  // 3. Verify all 18 generated RSS items
-  const items = getDynamicRssItems(OFFICIAL_SITE_ORIGIN);
+  // 3. Verify all 18 generated RSS items when forceEnabled
+  const items = getDynamicRssItems(OFFICIAL_SITE_ORIGIN, { forceEnabled: true });
   assert.strictEqual(items.length, 18, 'Must generate exactly 18 dynamic items');
   for (const item of items) {
     for (const term of bannedTerms) {

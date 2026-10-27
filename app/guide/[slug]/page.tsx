@@ -2,22 +2,23 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '../../../components/layout/Container';
-import { getGuideBySlug, getAllGuides } from '../../../lib/data/guides-data';
 import { SITE_CONFIG, OFFICIAL_SITE_ORIGIN } from '../../../lib/config/site-config';
+import { getAnyGuideBySlug, getAllGuideSlugs } from '../../../lib/data/keyword-guides-data';
 
 interface GuidePageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return getAllGuides().map((guide) => ({
-    slug: guide.slug,
+  return getAllGuideSlugs().map((slug) => ({
+    slug,
   }));
 }
 
 export async function generateMetadata({ params }: GuidePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
+  const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
+  const guide = getAnyGuideBySlug(slug, origin);
 
   if (!guide) {
     return {
@@ -26,7 +27,6 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
     };
   }
 
-  const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
   const canonicalUrl = `${origin}/guide/${guide.slug}`;
 
   return {
@@ -61,13 +61,13 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
 
 export default async function GuidePage({ params }: GuidePageProps) {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
+  const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
+  const guide = getAnyGuideBySlug(slug, origin);
 
   if (!guide) {
     notFound();
   }
 
-  const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
   const canonicalUrl = `${origin}/guide/${guide.slug}`;
 
   const articleJsonLd = {

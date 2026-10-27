@@ -17,8 +17,8 @@ import { isIndexableDynamicPage } from '../config/recovery-config';
 import { buildCanonicalUrl } from '../url/url-builder';
 import { ServiceKeyword } from '../types/intents';
 
-// Feature gate: Dynamic RSS output enabled for Phase 6-M1A (Yeongdeungpo P1 first cohort)
-export const DYNAMIC_RSS_ENABLED = true;
+// Feature gate: Direct Dynamic RSS output disabled after Phase 6-N1A Keyword Guide migration (1 Dynamic = 1 Guide = 1 RSS)
+export const DYNAMIC_RSS_ENABLED = false;
 
 // Retention policy: maximum dynamic RSS items retained in the rolling window
 export const MAX_DYNAMIC_RSS_ITEMS = 24;

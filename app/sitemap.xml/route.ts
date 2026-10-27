@@ -5,6 +5,7 @@ import { SEARCH_INTENTS } from '../../lib/contracts/intents-contract';
 import { buildPublicHref } from '../../lib/url/url-builder';
 import { isIndexableDynamicPage } from '../../lib/config/recovery-config';
 import { getAllGuides } from '../../lib/data/guides-data';
+import { getAllKeywordGuides } from '../../lib/data/keyword-guides-data';
 
 export async function GET() {
   const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
@@ -25,9 +26,12 @@ export async function GET() {
     }
   }
 
-  const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`];
-  const guideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
-  const allUrls = [...staticUrls, ...guideUrls, ...dynamicUrls];
+  // Phase 6-N1A Sitemap Contract: Exactly 81 URLs
+  // 3 Static (/, /sitemap-seoul, /guide) + 4 Pillar Guides + 18 Keyword Guides + 56 Dynamic
+  const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`, `${origin}/guide`];
+  const pillarGuideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
+  const keywordGuideUrls = getAllKeywordGuides().map((g) => `${origin}/guide/${g.slug}`);
+  const allUrls = [...staticUrls, ...pillarGuideUrls, ...keywordGuideUrls, ...dynamicUrls];
 
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

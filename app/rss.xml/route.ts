@@ -1,49 +1,23 @@
 import { NextResponse } from 'next/server';
 import { OFFICIAL_SITE_ORIGIN, SITE_CONFIG } from '../../lib/config/site-config';
 import { getAllGuides } from '../../lib/data/guides-data';
+import { getAllKeywordGuides } from '../../lib/data/keyword-guides-data';
 import { getDynamicRssItems } from '../../lib/data/dynamic-rss-data';
 
 export async function GET() {
   const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
-  const guides = getAllGuides();
+  const pillarGuides = getAllGuides();
+  const keywordGuides = getAllKeywordGuides();
 
-  const buildDate = 'Tue, 27 Oct 2026 16:00:00 +0900';
+  const buildDate = 'Tue, 27 Oct 2026 17:30:00 +0900';
 
-  // 1. Long-form Informational Guides (Always preserved)
-  const guideXmlItems = guides.map((guide) => {
-    const guideUrl = `${origin}/guide/${guide.slug}`;
-    const escapedTitle = escapeXml(guide.title);
-    const escapedDesc = escapeXml(guide.description);
+  // 1. Long-form Informational Pillar Guides (4 items - Always preserved)
+  const pillarXmlItems = pillarGuides.map((guide) => renderGuideXmlItem(guide, origin));
 
-    // Full semantic article body representation for RSS readers
-    const sectionsHtml = guide.sections
-      .map(
-        (s) =>
-          `<h2>${s.h2}</h2>${s.paragraphs.map((p) => `<p>${p}</p>`).join('')}`
-      )
-      .join('');
+  // 2. Keyword Guides (18 items - 1 Dynamic = 1 Guide = 1 RSS)
+  const keywordXmlItems = keywordGuides.map((guide) => renderGuideXmlItem(guide, origin));
 
-    const checklistHtml = `<h2>${guide.checklistTitle}</h2><ul>${guide.checklistItems
-      .map((item) => `<li>${item}</li>`)
-      .join('')}</ul>`;
-
-    const limitationHtml = `<p><strong>${guide.limitationTitle}</strong><br/>${guide.limitationNote}</p>`;
-
-    const fullArticleHtml = `<h1>${guide.h1}</h1><p>${guide.intro}</p>${sectionsHtml}${checklistHtml}${limitationHtml}`;
-
-    return `    <item>
-      <title>${escapedTitle}</title>
-      <link>${guideUrl}</link>
-      <guid isPermaLink="true">${guideUrl}</guid>
-      <pubDate>${guide.publishedAtRfc822}</pubDate>
-      <description>${escapedDesc}</description>
-      <category>${escapeXml(guide.category)}</category>
-      <author>${escapeXml(SITE_CONFIG.brandName)}</author>
-      <content:encoded><![CDATA[${fullArticleHtml}]]></content:encoded>
-    </item>`;
-  });
-
-  // 2. Short Dynamic Keyword RSS Items (Phase 6-L1A: 0 items, gated)
+  // 3. Direct Short Dynamic Keyword RSS Items (Phase 6-N1A: 0 items, gated)
   const dynamicRssItems = getDynamicRssItems(origin);
   const dynamicXmlItems = dynamicRssItems.map((item) => {
     return `    <item>
@@ -58,7 +32,7 @@ export async function GET() {
     </item>`;
   });
 
-  const allItemsXml = [...guideXmlItems, ...dynamicXmlItems].join('\n');
+  const allItemsXml = [...pillarXmlItems, ...keywordXmlItems, ...dynamicXmlItems].join('\n');
 
   const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -80,6 +54,55 @@ ${allItemsXml}
       'Cache-Control': 'public, max-age=3600, s-maxage=86400',
     },
   });
+}
+
+function renderGuideXmlItem(
+  guide: {
+    readonly slug: string;
+    readonly title: string;
+    readonly description: string;
+    readonly publishedAtRfc822: string;
+    readonly category: string;
+    readonly h1: string;
+    readonly intro: string;
+    readonly sections: readonly { readonly h2: string; readonly paragraphs: readonly string[] }[];
+    readonly checklistTitle: string;
+    readonly checklistItems: readonly string[];
+    readonly limitationTitle: string;
+    readonly limitationNote: string;
+  },
+  origin: string
+): string {
+  const guideUrl = `${origin}/guide/${guide.slug}`;
+  const escapedTitle = escapeXml(guide.title);
+  const escapedDesc = escapeXml(guide.description);
+
+  // Full semantic article body representation for RSS readers
+  const sectionsHtml = guide.sections
+    .map(
+      (s) =>
+        `<h2>${s.h2}</h2>${s.paragraphs.map((p) => `<p>${p}</p>`).join('')}`
+    )
+    .join('');
+
+  const checklistHtml = `<h2>${guide.checklistTitle}</h2><ul>${guide.checklistItems
+    .map((item) => `<li>${item}</li>`)
+    .join('')}</ul>`;
+
+  const limitationHtml = `<p><strong>${guide.limitationTitle}</strong><br/>${guide.limitationNote}</p>`;
+
+  const fullArticleHtml = `<h1>${guide.h1}</h1><p>${guide.intro}</p>${sectionsHtml}${checklistHtml}${limitationHtml}`;
+
+  return `    <item>
+      <title>${escapedTitle}</title>
+      <link>${guideUrl}</link>
+      <guid isPermaLink="true">${guideUrl}</guid>
+      <pubDate>${guide.publishedAtRfc822}</pubDate>
+      <description>${escapedDesc}</description>
+      <category>${escapeXml(guide.category)}</category>
+      <author>${escapeXml(SITE_CONFIG.brandName)}</author>
+      <content:encoded><![CDATA[${fullArticleHtml}]]></content:encoded>
+    </item>`;
 }
 
 function escapeXml(unsafe: string): string {

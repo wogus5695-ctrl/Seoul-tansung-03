@@ -15,6 +15,7 @@ import {
   YEONGDEUNGPO_COHORT_REGION_IDS,
   YeongdeungpoCohortRegionId,
 } from '../../lib/config/recovery-config';
+import { getKeywordGuideForDynamic } from '../../lib/data/keyword-guides-data';
 
 interface RelatedIntentLinksSectionProps {
   readonly region: RegionItem;
@@ -62,6 +63,7 @@ export function RelatedIntentLinksSection({
     : null;
 
   const visibleRegionName = region.displayName || region.keywordRegionName;
+  const matchingKeywordGuide = getKeywordGuideForDynamic(region.id, currentIntent.serviceKeyword);
 
   return (
     <section
@@ -159,16 +161,29 @@ export function RelatedIntentLinksSection({
         )}
 
         {/* Informational Guide Reference (Compact & Safe Contextual Navigation) */}
-        <div className="pt-3 border-t border-[#EFE8DC]/80 text-[11px] text-[#756E61] flex items-center justify-between flex-wrap gap-2">
-          <span>※ 시공 전 벽면 점검이나 재시공 고려 시 참고할 수 있는 가이드:</span>
-          <Link
-            href="/guide/balcony-coating-checklist"
-            className="text-[#4F5844] font-medium hover:underline inline-flex items-center gap-1"
-          >
-            <span>베란다 탄성코트 시공 전 도막 점검 항목 확인하기</span>
-            <span aria-hidden="true">&rarr;</span>
-          </Link>
-        </div>
+        {matchingKeywordGuide ? (
+          <div className="pt-3 border-t border-[#EFE8DC]/80 text-[11px] text-[#756E61] flex items-center justify-between flex-wrap gap-2">
+            <span>※ 시공 전 참고 정보:</span>
+            <Link
+              href={`/guide/${matchingKeywordGuide.slug}`}
+              className="text-[#4F5844] font-medium hover:underline inline-flex items-center gap-1"
+            >
+              <span>{visibleRegionName} {currentIntent.serviceKeyword} 시공 전 점검 가이드 확인하기</span>
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="pt-3 border-t border-[#EFE8DC]/80 text-[11px] text-[#756E61] flex items-center justify-between flex-wrap gap-2">
+            <span>※ 시공 전 벽면 점검이나 재시공 고려 시 참고할 수 있는 가이드:</span>
+            <Link
+              href="/guide/balcony-coating-checklist"
+              className="text-[#4F5844] font-medium hover:underline inline-flex items-center gap-1"
+            >
+              <span>베란다 탄성코트 시공 전 도막 점검 항목 확인하기</span>
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </div>
+        )}
       </Container>
     </section>
   );
