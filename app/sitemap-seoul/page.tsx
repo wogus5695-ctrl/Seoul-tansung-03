@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(OFFICIAL_SITE_ORIGIN),
   title: '서울 탄성코트 주요 지역 및 시공안내 | 올케어',
   description:
-    '올케어에서 제공하는 서울 주요 56개 공식 안내 페이지(15개 기존 지역, 양천·구로·영등포 남부 코호트)별 공식 공동주택 통계 및 탄성코트·베란다탄성코트 시공 안내 모음입니다.',
+    '올케어에서 제공하는 서울 주요 82개 공식 안내 페이지(기존 지역 및 양천·구로·영등포·동작·금천 남부 코호트)별 공식 공동주택 통계 및 탄성코트·베란다탄성코트 시공 안내 모음입니다.',
   alternates: {
     canonical: `${OFFICIAL_SITE_ORIGIN}/sitemap-seoul`,
   },
@@ -39,6 +39,8 @@ interface DistrictGroup {
 }
 
 const DISTRICT_ORDER = [
+  '동작구',
+  '금천구',
   '영등포구',
   '구로구',
   '양천구',
@@ -113,18 +115,18 @@ export default async function SeoulSitemapPage() {
         {/* Header Block */}
         <div className="space-y-3 border-b border-[#E7D9C1] pb-6 text-left">
           <p className="text-xs font-bold tracking-widest text-[#6B755D] uppercase">
-            SEOUL RECOVERY & COHORT DIRECTORY (56 PRIMARY PAGES)
+            SEOUL RECOVERY & COHORT DIRECTORY (82 PRIMARY PAGES)
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#3E443B]">
             서울 탄성코트 주요 지역 안내
           </h1>
           <p className="text-sm text-[#5C5549] leading-relaxed max-w-2xl">
-            올케어에서 제공하는 서울 주요 56개 공식 안내 페이지(15개 기존 지역, 양천·구로·영등포 남부 코호트)별
+            올케어에서 제공하는 서울 주요 82개 공식 안내 페이지(15개 기존 지역, 양천·구로·영등포·동작·금천 남부 코호트)별
             탄성코트 및 베란다탄성코트 시공 안내입니다. 각 지역별 상세 페이지에서 사전 벽면 점검 기준과 시공 가이드를 확인하실 수 있습니다.
           </p>
         </div>
 
-        {/* Primary Crawlable District Text Directory: Exactly 56 Links */}
+        {/* Primary Crawlable District Text Directory: Exactly 82 Links */}
         <section
           aria-labelledby="recovery-hub-heading"
           className="bg-white rounded-xl border border-[#E7D9C1] p-6 sm:p-8 shadow-sm space-y-6 text-left"
@@ -132,7 +134,7 @@ export default async function SeoulSitemapPage() {
           <div className="border-b border-[#EFE8DC] pb-3">
             <h2 id="recovery-hub-heading" className="text-lg font-bold text-[#3E443B] flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#4F5844]" />
-              주요 공식 시공 안내 바로가기 (56개 공식 안내 페이지)
+              주요 공식 시공 안내 바로가기 (82개 공식 안내 페이지)
             </h2>
             <p className="text-xs sm:text-sm text-[#756E61] pt-1">
               아래 자치구별 시공 의도 안내 링크에서 세부 시공 가이드를 확인하실 수 있습니다.

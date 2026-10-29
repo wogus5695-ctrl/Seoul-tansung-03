@@ -161,5 +161,97 @@ export function buildDynamicJsonLd(
     })),
   };
 
+  // Phase 6-P1B Image Discovery Pilot Layer
+  // Strictly isolated to exactly 2 Gu-level dynamic landing pages:
+  // 1. 동작구 탄성코트 (seoul-dongjak-gu x 탄성코트)
+  // 2. 금천구 베란다탄성코트 (seoul-geumcheon-gu x 베란다탄성코트)
+  const isImagePilotPage =
+    (region.id === 'seoul-dongjak-gu' && intent.serviceKeyword === '탄성코트') ||
+    (region.id === 'seoul-geumcheon-gu' && intent.serviceKeyword === '베란다탄성코트');
+
+  if (isImagePilotPage) {
+    const itemListSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: '올케어 탄성코트 시공 전후 비교 사진',
+      numberOfItems: 6,
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          item: {
+            '@type': 'ImageObject',
+            name: '베란다 탄성코트 시공 전 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-01-before.jpg`,
+            description: '베란다 탄성코트 도포 전 기존 벽면 상태',
+          },
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          item: {
+            '@type': 'ImageObject',
+            name: '베란다 탄성코트 시공 후 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-01-after.png`,
+            description: '베란다 탄성코트 도포 후 정돈된 벽면 상태',
+          },
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          item: {
+            '@type': 'ImageObject',
+            name: '세탁실 탄성코트 시공 전 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-02-before.jpg`,
+            description: '세탁실 탄성코트 도포 전 기존 벽면 상태',
+          },
+        },
+        {
+          '@type': 'ListItem',
+          position: 4,
+          item: {
+            '@type': 'ImageObject',
+            name: '세탁실 탄성코트 시공 후 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-02-after.png`,
+            description: '세탁실 탄성코트 도포 후 정돈된 벽면 상태',
+          },
+        },
+        {
+          '@type': 'ListItem',
+          position: 5,
+          item: {
+            '@type': 'ImageObject',
+            name: '다용도실 탄성코트 시공 전 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-03-before.jpg`,
+            description: '다용도실 탄성코트 도포 전 기존 벽면 상태',
+          },
+        },
+        {
+          '@type': 'ListItem',
+          position: 6,
+          item: {
+            '@type': 'ImageObject',
+            name: '다용도실 탄성코트 시공 후 벽면 상태',
+            contentUrl: `${cleanOrigin}/images/allcare/before-after/ba-03-after.jpg`,
+            description: '다용도실 탄성코트 도포 후 정돈된 벽면 상태',
+          },
+        },
+      ],
+    };
+
+    const representativeImageSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'ImageObject',
+      name: '올케어 주거 공간 시공 사례 전경',
+      contentUrl: `${cleanOrigin}/images/allcare/og-thumbnail.jpg`,
+      description: '베란다 벽면 탄성코트 시공이 완료된 주거 공간 전경',
+      width: 1200,
+      height: 630,
+      representativeOfPage: true,
+    };
+
+    return [serviceSchema, breadcrumbSchema, faqSchema, itemListSchema, representativeImageSchema];
+  }
+
   return [serviceSchema, breadcrumbSchema, faqSchema];
 }

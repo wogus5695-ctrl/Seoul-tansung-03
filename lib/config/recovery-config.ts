@@ -102,6 +102,47 @@ export const YEONGDEUNGPO_COHORT_INTENTS: readonly ServiceKeyword[] = [
   '베란다탄성코트',
 ] as const;
 
+/**
+ * Phase 6-P1B Dongjak-Gu South Cohort Expansion SSOT
+ * Exactly 9 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ */
+export const DONGJAK_COHORT_REGION_IDS = [
+  'seoul-dongjak-gu',
+  'seoul-dongjak-노량진동',
+  'seoul-dongjak-상도동',
+  'seoul-dongjak-흑석동',
+  'seoul-dongjak-사당동',
+  'seoul-dongjak-대방동',
+  'seoul-dongjak-신대방동',
+  'seoul-dongjak-본동',
+  'seoul-dongjak-동작동',
+] as const;
+
+export type DongjakCohortRegionId = typeof DONGJAK_COHORT_REGION_IDS[number];
+
+export const DONGJAK_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+/**
+ * Phase 6-P1B Geumcheon-Gu South Cohort Expansion SSOT
+ * Exactly 4 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ */
+export const GEUMCHEON_COHORT_REGION_IDS = [
+  'seoul-geumcheon-gu',
+  'seoul-geumcheon-가산동',
+  'seoul-geumcheon-독산동',
+  'seoul-geumcheon-시흥동',
+] as const;
+
+export type GeumcheonCohortRegionId = typeof GEUMCHEON_COHORT_REGION_IDS[number];
+
+export const GEUMCHEON_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
 export const RECOVERY_REGION_IDS = [
   ...BASE_RECOVERY_REGION_IDS,
   'seoul-yangcheon-gu',
@@ -109,6 +150,8 @@ export const RECOVERY_REGION_IDS = [
   'seoul-yangcheon-sinjeong',
   ...GURO_COHORT_REGION_IDS,
   ...YEONGDEUNGPO_COHORT_REGION_IDS,
+  ...DONGJAK_COHORT_REGION_IDS,
+  ...GEUMCHEON_COHORT_REGION_IDS,
 ] as const;
 
 export type RecoveryRegionId = typeof RECOVERY_REGION_IDS[number];
@@ -799,6 +842,253 @@ export const RECOVERY_REGIONS_PROFILES: Record<RecoveryRegionId, RecoveryRegionP
     over20Share: '56.1%',
     relatedRecoveryRegionIds: ['seoul-yeongdeungpo-gu', 'seoul-yeongdeungpo-문래동', 'seoul-guro-신도림동'],
   },
+  'seoul-dongjak-gu': {
+    id: 'seoul-dongjak-gu',
+    name: '동작구',
+    type: 'GU',
+    parentGu: '동작구',
+    units: 4301,
+    households: 100564,
+    validDates: 4285,
+    aptCount: 254,
+    rowCount: 329,
+    multiCount: 3702,
+    aptShare: '5.9%',
+    rowShare: '7.6%',
+    multiShare: '86.1%',
+    villaShare: '93.7%',
+    over20Count: 2541,
+    over20Share: '59.3%',
+    relatedRecoveryRegionIds: ['seoul-yeongdeungpo-gu', 'seoul-seocho-gu', 'seoul-dongjak-상도동'],
+  },
+  'seoul-dongjak-노량진동': {
+    id: 'seoul-dongjak-노량진동',
+    name: '노량진동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 165,
+    households: 6427,
+    validDates: 163,
+    aptCount: 12,
+    rowCount: 23,
+    multiCount: 128,
+    aptShare: '7.3%',
+    rowShare: '13.9%',
+    multiShare: '77.6%',
+    villaShare: '91.5%',
+    over20Count: 129,
+    over20Share: '79.1%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-상도동', 'seoul-dongjak-본동'],
+  },
+  'seoul-dongjak-상도동': {
+    id: 'seoul-dongjak-상도동',
+    name: '상도동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 1938,
+    households: 36234,
+    validDates: 1932,
+    aptCount: 88,
+    rowCount: 178,
+    multiCount: 1666,
+    aptShare: '4.5%',
+    rowShare: '9.2%',
+    multiShare: '86.0%',
+    villaShare: '95.1%',
+    over20Count: 1099,
+    over20Share: '56.9%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-노량진동', 'seoul-dongjak-사당동'],
+  },
+  'seoul-dongjak-흑석동': {
+    id: 'seoul-dongjak-흑석동',
+    name: '흑석동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 83,
+    households: 9414,
+    validDates: 83,
+    aptCount: 15,
+    rowCount: 14,
+    multiCount: 54,
+    aptShare: '18.1%',
+    rowShare: '16.9%',
+    multiShare: '65.1%',
+    villaShare: '81.9%',
+    over20Count: 47,
+    over20Share: '56.6%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-상도동', 'seoul-dongjak-동작동'],
+  },
+  'seoul-dongjak-사당동': {
+    id: 'seoul-dongjak-사당동',
+    name: '사당동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 1322,
+    households: 21553,
+    validDates: 1316,
+    aptCount: 61,
+    rowCount: 58,
+    multiCount: 1197,
+    aptShare: '4.6%',
+    rowShare: '4.4%',
+    multiShare: '90.5%',
+    villaShare: '94.9%',
+    over20Count: 783,
+    over20Share: '59.5%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-상도동', 'seoul-dongjak-대방동'],
+  },
+  'seoul-dongjak-대방동': {
+    id: 'seoul-dongjak-대방동',
+    name: '대방동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 388,
+    households: 10693,
+    validDates: 387,
+    aptCount: 36,
+    rowCount: 21,
+    multiCount: 330,
+    aptShare: '9.3%',
+    rowShare: '5.4%',
+    multiShare: '85.1%',
+    villaShare: '90.5%',
+    over20Count: 233,
+    over20Share: '60.2%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-신대방동', 'seoul-yeongdeungpo-신길동'],
+  },
+  'seoul-dongjak-신대방동': {
+    id: 'seoul-dongjak-신대방동',
+    name: '신대방동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 320,
+    households: 11577,
+    validDates: 319,
+    aptCount: 30,
+    rowCount: 20,
+    multiCount: 269,
+    aptShare: '9.4%',
+    rowShare: '6.3%',
+    multiShare: '84.1%',
+    villaShare: '90.3%',
+    over20Count: 193,
+    over20Share: '60.5%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-대방동', 'seoul-guro-구로동'],
+  },
+  'seoul-dongjak-본동': {
+    id: 'seoul-dongjak-본동',
+    name: '본동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 40,
+    households: 3141,
+    validDates: 40,
+    aptCount: 8,
+    rowCount: 1,
+    multiCount: 31,
+    aptShare: '20.0%',
+    rowShare: '2.5%',
+    multiShare: '77.5%',
+    villaShare: '80.0%',
+    over20Count: 22,
+    over20Share: '55.0%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-노량진동', 'seoul-dongjak-흑석동'],
+  },
+  'seoul-dongjak-동작동': {
+    id: 'seoul-dongjak-동작동',
+    name: '동작동',
+    type: 'DONG',
+    parentGu: '동작구',
+    units: 45,
+    households: 1525,
+    validDates: 45,
+    aptCount: 4,
+    rowCount: 14,
+    multiCount: 27,
+    aptShare: '8.9%',
+    rowShare: '31.1%',
+    multiShare: '60.0%',
+    villaShare: '91.1%',
+    over20Count: 35,
+    over20Share: '77.8%',
+    relatedRecoveryRegionIds: ['seoul-dongjak-gu', 'seoul-dongjak-사당동', 'seoul-dongjak-흑석동'],
+  },
+  'seoul-geumcheon-gu': {
+    id: 'seoul-geumcheon-gu',
+    name: '금천구',
+    type: 'GU',
+    parentGu: '금천구',
+    units: 2781,
+    households: 61825,
+    validDates: 2769,
+    aptCount: 192,
+    rowCount: 174,
+    multiCount: 2403,
+    aptShare: '6.9%',
+    rowShare: '6.3%',
+    multiShare: '86.4%',
+    villaShare: '92.7%',
+    over20Count: 1312,
+    over20Share: '47.4%',
+    relatedRecoveryRegionIds: ['seoul-guro-gu', 'seoul-geumcheon-독산동', 'seoul-geumcheon-가산동'],
+  },
+  'seoul-geumcheon-가산동': {
+    id: 'seoul-geumcheon-가산동',
+    name: '가산동',
+    type: 'DONG',
+    parentGu: '금천구',
+    units: 187,
+    households: 6033,
+    validDates: 186,
+    aptCount: 24,
+    rowCount: 7,
+    multiCount: 155,
+    aptShare: '12.8%',
+    rowShare: '3.7%',
+    multiShare: '82.9%',
+    villaShare: '86.6%',
+    over20Count: 73,
+    over20Share: '39.2%',
+    relatedRecoveryRegionIds: ['seoul-geumcheon-gu', 'seoul-geumcheon-독산동', 'seoul-guro-구로동'],
+  },
+  'seoul-geumcheon-독산동': {
+    id: 'seoul-geumcheon-독산동',
+    name: '독산동',
+    type: 'DONG',
+    parentGu: '금천구',
+    units: 1281,
+    households: 26484,
+    validDates: 1274,
+    aptCount: 92,
+    rowCount: 49,
+    multiCount: 1133,
+    aptShare: '7.2%',
+    rowShare: '3.8%',
+    multiShare: '88.4%',
+    villaShare: '92.3%',
+    over20Count: 570,
+    over20Share: '44.7%',
+    relatedRecoveryRegionIds: ['seoul-geumcheon-gu', 'seoul-geumcheon-가산동', 'seoul-geumcheon-시흥동'],
+  },
+  'seoul-geumcheon-시흥동': {
+    id: 'seoul-geumcheon-시흥동',
+    name: '시흥동',
+    type: 'DONG',
+    parentGu: '금천구',
+    units: 1313,
+    households: 29308,
+    validDates: 1309,
+    aptCount: 76,
+    rowCount: 118,
+    multiCount: 1115,
+    aptShare: '5.8%',
+    rowShare: '9.0%',
+    multiShare: '84.9%',
+    villaShare: '93.9%',
+    over20Count: 669,
+    over20Share: '51.1%',
+    relatedRecoveryRegionIds: ['seoul-geumcheon-gu', 'seoul-geumcheon-독산동', 'seoul-guro-항동'],
+  },
 };
 
 export const COMMON_SOURCE_LABEL =
@@ -854,6 +1144,16 @@ export function isIndexableDynamicPage(regionId: string, serviceKeyword: string)
   // 4. Yeongdeungpo P1 South Cohort (9 regions x 2 intents = 18 URLs)
   if (YEONGDEUNGPO_COHORT_REGION_IDS.includes(regionId as YeongdeungpoCohortRegionId)) {
     return YEONGDEUNGPO_COHORT_INTENTS.includes(serviceKeyword as typeof YEONGDEUNGPO_COHORT_INTENTS[number]);
+  }
+
+  // 5. Dongjak South Cohort (9 regions x 2 intents = 18 URLs)
+  if (DONGJAK_COHORT_REGION_IDS.includes(regionId as DongjakCohortRegionId)) {
+    return DONGJAK_COHORT_INTENTS.includes(serviceKeyword as typeof DONGJAK_COHORT_INTENTS[number]);
+  }
+
+  // 6. Geumcheon South Cohort (4 regions x 2 intents = 8 URLs)
+  if (GEUMCHEON_COHORT_REGION_IDS.includes(regionId as GeumcheonCohortRegionId)) {
+    return GEUMCHEON_COHORT_INTENTS.includes(serviceKeyword as typeof GEUMCHEON_COHORT_INTENTS[number]);
   }
 
   return false;
