@@ -143,6 +143,71 @@ export const GEUMCHEON_COHORT_INTENTS: readonly ServiceKeyword[] = [
   '베란다탄성코트',
 ] as const;
 
+/**
+ * Phase 6-Q1B Gangseo-Gu P1 South Cohort Expansion SSOT
+ * Exactly 7 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Note: 강서구, 마곡동, 가양동 already exist in BASE_RECOVERY_REGION_IDS (탄성코트 only).
+ * This cohort enables both intents for all 7 Gangseo regions.
+ */
+export const GANGSEO_COHORT_REGION_IDS = [
+  'seoul-gangseo-gu',
+  'seoul-gangseo-마곡동',
+  'seoul-gangseo-가양동',
+  'seoul-gangseo-화곡동',
+  'seoul-gangseo-등촌동',
+  'seoul-gangseo-염창동',
+  'seoul-gangseo-발산동',
+] as const;
+
+export type GangseoCohortRegionId = typeof GANGSEO_COHORT_REGION_IDS[number];
+
+export const GANGSEO_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+/**
+ * Phase 6-Q1B Gwanak-Gu P1 South Cohort Expansion SSOT
+ * Exactly 4 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Approved canonical dongs: 봉천동, 신림동, 남현동
+ * Disallowed: 삼성동, 신사동, 신원동, 서원동, 조원동 (collision risk or SEO overlap)
+ */
+export const GWANAK_COHORT_REGION_IDS = [
+  'seoul-gwanak-gu',
+  'seoul-gwanak-봉천동',
+  'seoul-gwanak-신림동',
+  'seoul-gwanak-남현동',
+] as const;
+
+export type GwanakCohortRegionId = typeof GWANAK_COHORT_REGION_IDS[number];
+
+export const GWANAK_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+/**
+ * Phase 6-Q1B Seocho-Gu P1 South Cohort Expansion SSOT
+ * Exactly 5 regions x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Note: 서초구 already exists in BASE_RECOVERY_REGION_IDS (탄성코트 only).
+ * This cohort enables both intents for all 5 Seocho regions.
+ * Disallowed: 신원동, 잠원동 (동명이의 risk or P2 hold)
+ */
+export const SEOCHO_COHORT_REGION_IDS = [
+  'seoul-seocho-gu',
+  'seoul-seocho-서초동',
+  'seoul-seocho-반포동',
+  'seoul-seocho-방배동',
+  'seoul-seocho-양재동',
+] as const;
+
+export type SeochoCohortRegionId = typeof SEOCHO_COHORT_REGION_IDS[number];
+
+export const SEOCHO_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
 export const RECOVERY_REGION_IDS = [
   ...BASE_RECOVERY_REGION_IDS,
   'seoul-yangcheon-gu',
@@ -152,6 +217,18 @@ export const RECOVERY_REGION_IDS = [
   ...YEONGDEUNGPO_COHORT_REGION_IDS,
   ...DONGJAK_COHORT_REGION_IDS,
   ...GEUMCHEON_COHORT_REGION_IDS,
+  // Phase 6-Q1B: Gangseo (new DONGs only; GU+마곡동+가양동 already in BASE)
+  'seoul-gangseo-화곡동',
+  'seoul-gangseo-등촌동',
+  'seoul-gangseo-염창동',
+  'seoul-gangseo-발산동',
+  // Phase 6-Q1B: Gwanak
+  ...GWANAK_COHORT_REGION_IDS,
+  // Phase 6-Q1B: Seocho (new DONGs only; GU already in BASE)
+  'seoul-seocho-서초동',
+  'seoul-seocho-반포동',
+  'seoul-seocho-방배동',
+  'seoul-seocho-양재동',
 ] as const;
 
 export type RecoveryRegionId = typeof RECOVERY_REGION_IDS[number];
@@ -1089,7 +1166,239 @@ export const RECOVERY_REGIONS_PROFILES: Record<RecoveryRegionId, RecoveryRegionP
     over20Share: '51.1%',
     relatedRecoveryRegionIds: ['seoul-geumcheon-gu', 'seoul-geumcheon-독산동', 'seoul-guro-항동'],
   },
+  // Phase 6-Q1B: Gangseo New DONGs
+  'seoul-gangseo-화곡동': {
+    id: 'seoul-gangseo-화곡동',
+    name: '화곡동',
+    type: 'DONG',
+    parentGu: '강서구',
+    units: 4982,
+    households: 98624,
+    validDates: 4953,
+    aptCount: 329,
+    rowCount: 108,
+    multiCount: 4527,
+    aptShare: '6.6%',
+    rowShare: '2.2%',
+    multiShare: '90.9%',
+    villaShare: '93.3%',
+    over20Count: 3012,
+    over20Share: '60.8%',
+    relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-gangseo-등촌동', 'seoul-gangseo-염창동'],
+  },
+  'seoul-gangseo-등촌동': {
+    id: 'seoul-gangseo-등촌동',
+    name: '등촌동',
+    type: 'DONG',
+    parentGu: '강서구',
+    units: 601,
+    households: 23985,
+    validDates: 597,
+    aptCount: 93,
+    rowCount: 21,
+    multiCount: 484,
+    aptShare: '15.5%',
+    rowShare: '3.5%',
+    multiShare: '80.5%',
+    villaShare: '84.2%',
+    over20Count: 368,
+    over20Share: '61.6%',
+    relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-gangseo-화곡동', 'seoul-gangseo-염창동'],
+  },
+  'seoul-gangseo-염창동': {
+    id: 'seoul-gangseo-염창동',
+    name: '염창동',
+    type: 'DONG',
+    parentGu: '강서구',
+    units: 543,
+    households: 19296,
+    validDates: 540,
+    aptCount: 59,
+    rowCount: 20,
+    multiCount: 462,
+    aptShare: '10.9%',
+    rowShare: '3.7%',
+    multiShare: '85.1%',
+    villaShare: '88.8%',
+    over20Count: 323,
+    over20Share: '59.9%',
+    relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-gangseo-등촌동', 'seoul-gangseo-화곡동'],
+  },
+  'seoul-gangseo-발산동': {
+    id: 'seoul-gangseo-발산동',
+    name: '발산동',
+    type: 'DONG',
+    parentGu: '강서구',
+    units: 447,
+    households: 12683,
+    validDates: 445,
+    aptCount: 61,
+    rowCount: 18,
+    multiCount: 365,
+    aptShare: '13.6%',
+    rowShare: '4.0%',
+    multiShare: '81.7%',
+    villaShare: '85.7%',
+    over20Count: 231,
+    over20Share: '52.0%',
+    relatedRecoveryRegionIds: ['seoul-gangseo-gu', 'seoul-gangseo-등촌동', 'seoul-gangseo-마곡동'],
+  },
+  // Phase 6-Q1B: Gwanak Cohort
+  'seoul-gwanak-gu': {
+    id: 'seoul-gwanak-gu',
+    name: '관악구',
+    type: 'GU',
+    parentGu: '관악구',
+    units: 6673,
+    households: 147089,
+    validDates: 6630,
+    aptCount: 333,
+    rowCount: 318,
+    multiCount: 5996,
+    aptShare: '5.0%',
+    rowShare: '4.8%',
+    multiShare: '89.9%',
+    villaShare: '94.7%',
+    over20Count: 4107,
+    over20Share: '62.0%',
+    relatedRecoveryRegionIds: ['seoul-gwanak-봉천동', 'seoul-gwanak-신림동', 'seoul-dongjak-gu'],
+  },
+  'seoul-gwanak-봉천동': {
+    id: 'seoul-gwanak-봉천동',
+    name: '봉천동',
+    type: 'DONG',
+    parentGu: '관악구',
+    units: 2697,
+    households: 56432,
+    validDates: 2677,
+    aptCount: 107,
+    rowCount: 104,
+    multiCount: 2479,
+    aptShare: '4.0%',
+    rowShare: '3.9%',
+    multiShare: '91.9%',
+    villaShare: '95.8%',
+    over20Count: 1679,
+    over20Share: '62.7%',
+    relatedRecoveryRegionIds: ['seoul-gwanak-gu', 'seoul-gwanak-신림동', 'seoul-gwanak-남현동'],
+  },
+  'seoul-gwanak-신림동': {
+    id: 'seoul-gwanak-신림동',
+    name: '신림동',
+    type: 'DONG',
+    parentGu: '관악구',
+    units: 3247,
+    households: 72511,
+    validDates: 3224,
+    aptCount: 193,
+    rowCount: 166,
+    multiCount: 2877,
+    aptShare: '5.9%',
+    rowShare: '5.1%',
+    multiShare: '88.6%',
+    villaShare: '93.8%',
+    over20Count: 2103,
+    over20Share: '65.2%',
+    relatedRecoveryRegionIds: ['seoul-gwanak-gu', 'seoul-gwanak-봉천동', 'seoul-dongjak-사당동'],
+  },
+  'seoul-gwanak-남현동': {
+    id: 'seoul-gwanak-남현동',
+    name: '남현동',
+    type: 'DONG',
+    parentGu: '관악구',
+    units: 729,
+    households: 18146,
+    validDates: 729,
+    aptCount: 33,
+    rowCount: 48,
+    multiCount: 640,
+    aptShare: '4.5%',
+    rowShare: '6.6%',
+    multiShare: '87.8%',
+    villaShare: '94.5%',
+    over20Count: 325,
+    over20Share: '44.6%',
+    relatedRecoveryRegionIds: ['seoul-gwanak-gu', 'seoul-gwanak-봉천동', 'seoul-seocho-gu'],
+  },
+  // Phase 6-Q1B: Seocho New DONGs
+  'seoul-seocho-서초동': {
+    id: 'seoul-seocho-서초동',
+    name: '서초동',
+    type: 'DONG',
+    parentGu: '서초구',
+    units: 596,
+    households: 28019,
+    validDates: 594,
+    aptCount: 168,
+    rowCount: 69,
+    multiCount: 358,
+    aptShare: '28.2%',
+    rowShare: '11.6%',
+    multiShare: '60.1%',
+    villaShare: '71.6%',
+    over20Count: 338,
+    over20Share: '57.0%',
+    relatedRecoveryRegionIds: ['seoul-seocho-gu', 'seoul-seocho-반포동', 'seoul-seocho-방배동'],
+  },
+  'seoul-seocho-반포동': {
+    id: 'seoul-seocho-반포동',
+    name: '반포동',
+    type: 'DONG',
+    parentGu: '서초구',
+    units: 437,
+    households: 27617,
+    validDates: 435,
+    aptCount: 157,
+    rowCount: 45,
+    multiCount: 233,
+    aptShare: '35.9%',
+    rowShare: '10.3%',
+    multiShare: '53.3%',
+    villaShare: '63.8%',
+    over20Count: 348,
+    over20Share: '80.0%',
+    relatedRecoveryRegionIds: ['seoul-seocho-gu', 'seoul-seocho-서초동', 'seoul-gangnam-gu'],
+  },
+  'seoul-seocho-방배동': {
+    id: 'seoul-seocho-방배동',
+    name: '방배동',
+    type: 'DONG',
+    parentGu: '서초구',
+    units: 2082,
+    households: 44694,
+    validDates: 2076,
+    aptCount: 302,
+    rowCount: 236,
+    multiCount: 1539,
+    aptShare: '14.5%',
+    rowShare: '11.3%',
+    multiShare: '74.0%',
+    villaShare: '85.4%',
+    over20Count: 1493,
+    over20Share: '71.9%',
+    relatedRecoveryRegionIds: ['seoul-seocho-gu', 'seoul-seocho-서초동', 'seoul-dongjak-사당동'],
+  },
+  'seoul-seocho-양재동': {
+    id: 'seoul-seocho-양재동',
+    name: '양재동',
+    type: 'DONG',
+    parentGu: '서초구',
+    units: 1141,
+    households: 26561,
+    validDates: 1141,
+    aptCount: 156,
+    rowCount: 100,
+    multiCount: 883,
+    aptShare: '13.7%',
+    rowShare: '8.8%',
+    multiShare: '77.4%',
+    villaShare: '86.1%',
+    over20Count: 390,
+    over20Share: '34.2%',
+    relatedRecoveryRegionIds: ['seoul-seocho-gu', 'seoul-seocho-방배동', 'seoul-gangnam-gu'],
+  },
 };
+
 
 export const COMMON_SOURCE_LABEL =
   '출처: 한국부동산원 공동주택 식별정보 공개자료 · 2026.08 기준';
@@ -1123,7 +1432,22 @@ export function isRecoveryIntent(serviceKeyword: string): boolean {
 export function isIndexableDynamicPage(regionId: string, serviceKeyword: string): boolean {
   if (!RECOVERY_ENABLED) return false;
 
+  // 7. Gangseo P1 South Cohort (7 regions x 2 intents = 14 URLs)
+  // Checked BEFORE Base rule to supersede Base's 탄성코트-only restriction
+  // for the 3 overlapping regions (강서구, 마곡동, 가양동).
+  if (GANGSEO_COHORT_REGION_IDS.includes(regionId as GangseoCohortRegionId)) {
+    return GANGSEO_COHORT_INTENTS.includes(serviceKeyword as typeof GANGSEO_COHORT_INTENTS[number]);
+  }
+
+  // 8. Seocho P1 South Cohort (5 regions x 2 intents = 10 URLs)
+  // Checked BEFORE Base rule to supersede Base's 탄성코트-only restriction
+  // for the overlapping region (서초구).
+  if (SEOCHO_COHORT_REGION_IDS.includes(regionId as SeochoCohortRegionId)) {
+    return SEOCHO_COHORT_INTENTS.includes(serviceKeyword as typeof SEOCHO_COHORT_INTENTS[number]);
+  }
+
   // 1. Base Recovery Portfolio (15 regions x '탄성코트' = 15 URLs)
+  // Note: 강서구/마곡동/가양동/서초구 are handled by their cohort rules above.
   if (
     BASE_RECOVERY_REGION_IDS.includes(regionId as BaseRecoveryRegionId) &&
     serviceKeyword === BASE_RECOVERY_INTENT
@@ -1154,6 +1478,11 @@ export function isIndexableDynamicPage(regionId: string, serviceKeyword: string)
   // 6. Geumcheon South Cohort (4 regions x 2 intents = 8 URLs)
   if (GEUMCHEON_COHORT_REGION_IDS.includes(regionId as GeumcheonCohortRegionId)) {
     return GEUMCHEON_COHORT_INTENTS.includes(serviceKeyword as typeof GEUMCHEON_COHORT_INTENTS[number]);
+  }
+
+  // 9. Gwanak P1 South Cohort (4 regions x 2 intents = 8 URLs)
+  if (GWANAK_COHORT_REGION_IDS.includes(regionId as GwanakCohortRegionId)) {
+    return GWANAK_COHORT_INTENTS.includes(serviceKeyword as typeof GWANAK_COHORT_INTENTS[number]);
   }
 
   return false;

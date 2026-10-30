@@ -10,6 +10,13 @@ export const KEYWORD_GUIDE_PUBDATE_RFC822 = 'Tue, 27 Oct 2026 17:30:00 +0900';
 export const DONGJAK_GEUMCHEON_GUIDE_PUBDATE = '2026-10-29T11:10:00+09:00';
 export const DONGJAK_GEUMCHEON_GUIDE_PUBDATE_RFC822 = 'Thu, 29 Oct 2026 11:10:00 +0900';
 
+/**
+ * Phase 6-Q1C Publication Timestamps for Gangseo, Gwanak, Seocho Cohort Guides (6 GU Guides)
+ * Fixed KST release timestamp: 2026-10-30T12:30:00+09:00
+ */
+export const GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE = '2026-10-30T12:30:00+09:00';
+export const GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822 = 'Fri, 30 Oct 2026 12:30:00 +0900';
+
 export interface KeywordGuideEntry {
   readonly id: string;
   readonly regionId: string;
@@ -944,6 +951,278 @@ export const KEYWORD_GUIDES: readonly KeywordGuideEntry[] = [
     limitationNote: '※ 본 가이드는 베란다 보양 작업 및 환경 점검을 돕기 위해 작성되었습니다. 탄성코트는 표면 도막 마감 공정이며, 기존 샷시 코킹의 노후 누수나 외부 빗물 침투 문제는 별도의 창호 코킹 방수 보수가 필요합니다.',
     relatedGuideSlugs: ['elastic-coating-preparation-protection-checklist', 'balcony-coating-checklist'],
   },
+
+  // 23. 강서구 탄성코트 (강서구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-gangseo-gu-elastic',
+    regionId: 'seoul-gangseo-gu',
+    serviceKeyword: '탄성코트',
+    slug: 'gangseo-gu-elastic-coating-surface-recoat-scope',
+    title: '강서구 탄성코트 기존 도막 상태와 재시공 범위 확인 | 올케어 시공 가이드',
+    h1: '강서구 탄성코트 기존 도막 상태와 재시공 범위 확인',
+    description: '강서구 아파트·다세대 베란다 탄성코트 시공 전 기존 수성 도막의 부착력 저하 부위와 균열을 점검하고 밑작업 범위를 확인하는 기준을 설명합니다.',
+    category: '바탕면 진단 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '강서구 지역 베란다 탄성코트 재도포를 계획하고 있다면 현재 벽면에 칠해진 기존 도막의 상태를 먼저 점검해야 합니다. 기존 페인트의 들뜸·박리 흔적과 균열 발생 여부에 따라 밑작업 범위가 달라질 수 있으므로 사전 확인이 중요합니다.',
+    sections: [
+      {
+        h2: '1. 기존 수성 도막의 부착 상태 점검',
+        paragraphs: [
+          '시공 전에 스크래퍼나 헤라로 벽면을 가볍게 긁어 기존 칠의 밀착 정도를 확인하는 것이 좋습니다. 쉽게 박리되거나 가루처럼 부서지는 부위가 있다면 해당 구간에 대한 스크래핑과 퍼티 보수 공정이 필요한지 점검해야 합니다.',
+          '기존 도막이 견고하게 유지되고 있다면 전체 철거 없이 바인더 하도를 도포한 뒤 덧도포하는 방식으로 진행할 수 있습니다. 바탕면 상태에 따라 공정 범위가 달라지므로 사전 상담 시 확인하시기 바랍니다.',
+        ],
+      },
+      {
+        h2: '2. 미세 균열과 타공 흔적 보수 기준',
+        paragraphs: [
+          '베란다 벽면에 발생한 헤어크랙이나 드릴 타공 자국은 탄성코트 분사 전 퍼티로 메워 평탄화해야 합니다. 탄성코트는 도막의 질감과 탄성을 부여하는 마감재이므로, 기존 요철이나 균열이 있다면 밑작업을 통해 정리한 후 도포합니다.',
+        ],
+      },
+      {
+        h2: '3. 밑작업 범위 사전 확인',
+        paragraphs: [
+          '현장 상태에 따라 스크래핑, 퍼티 충전, 하도 프라이머 도포 등의 공정 포함 여부가 달라질 수 있습니다. 견적 내역에 밑작업 항목이 명시되어 있는지 사전에 확인하는 것이 시공 완료 후 분쟁을 예방하는 방법입니다.',
+        ],
+      },
+    ],
+    checklistTitle: '시공 전 바탕면 점검 체크리스트',
+    checklistItems: [
+      '기존 도막을 손으로 문질렀을 때 가루가 묻어나거나 쉽게 벗겨지는 부위가 있는가?',
+      '벽면에 실금이나 헤어크랙, 타공 흔적 등 보수가 필요한 부위가 있는가?',
+      '벽체가 건조한 상태인지, 습기나 결로 흔적이 남아있지 않은가?',
+      '견적 내역에 스크래핑·퍼티·하도 등 밑작업 범위가 명시되어 있는가?',
+    ],
+    limitationTitle: '시공 범위 안내 시 유의 사항',
+    limitationNote: '※ 본 가이드는 탄성코트 시공 전 바탕면 점검을 돕기 위한 일반 기준입니다. 탄성코트는 기능성 도료 마감재이며, 외벽 방수 하자나 구조적 균열을 대체하지 않습니다.',
+    relatedGuideSlugs: ['old-apartment-balcony-recoating-guide', 'elastic-coating-estimate-work-scope-guide'],
+  },
+
+  // 24. 강서구 베란다탄성코트 (강서구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-gangseo-gu-balcony',
+    regionId: 'seoul-gangseo-gu',
+    serviceKeyword: '베란다탄성코트',
+    slug: 'gangseo-gu-balcony-coating-window-workspace-check',
+    title: '강서구 베란다탄성코트 창호 주변 및 베란다 작업 공간 점검 | 올케어 시공 가이드',
+    h1: '강서구 베란다탄성코트 창호 주변 및 베란다 작업 공간 점검',
+    description: '강서구 베란다탄성코트 시공 전 샤시 창호 실리콘 경계 상태와 베란다 내 작업 공간 확보, 수납물 정리 기준을 안내합니다.',
+    category: '시공 준비 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '강서구 베란다탄성코트 시공을 준비할 때는 창호 주변 실리콘 상태 확인과 더불어 베란다 내 작업 동선 확보가 중요한 사전 점검 항목입니다. 시공 당일 현장이 원활하게 진행될 수 있도록 준비 사항을 미리 알아두시기 바랍니다.',
+    sections: [
+      {
+        h2: '1. 창호 실리콘 코킹 경계 상태 점검',
+        paragraphs: [
+          '샷시 프레임과 벽면이 만나는 실리콘 접합부가 들뜨거나 갈라진 경우, 마스킹 테이프를 부착하기 전에 상태를 확인하는 것이 좋습니다. 실리콘이 심하게 삭았거나 탈착된 경우에는 코킹 보수 여부를 시공 담당자와 사전에 상담하시기 바랍니다.',
+          '유리 코너나 샷시 하단부에 실금이나 벌어진 틈이 있다면 탄성 변성 실란트로 보수하여 밀봉한 뒤 도포해야 마감선이 안정적으로 유지됩니다.',
+        ],
+      },
+      {
+        h2: '2. 베란다 내 수납물 정리와 작업 공간 확보',
+        paragraphs: [
+          '베란다에 보관 중인 집기, 세제, 화분, 청소 도구 등은 시공 전날까지 실내 다른 공간으로 옮겨두는 것이 좋습니다. 물건이 남아있으면 분사 시 도료가 묻을 수 있고, 해당 물건 뒤편 벽면에는 도포가 이루어지지 않을 수 있습니다.',
+          '세탁기나 건조기가 설치되어 있는 경우, 장비 이동 여부와 가전 뒤편 벽면 도포 범위를 시공 전 담당자와 조율하는 것이 필요합니다.',
+        ],
+      },
+    ],
+    checklistTitle: '베란다 시공 전 환경 점검표',
+    checklistItems: [
+      '샷시 창호 실리콘 경계에 들뜸이나 벌어진 틈이 없는가?',
+      '베란다 바닥 및 수납물이 시공 공간 밖으로 이동 준비가 되었는가?',
+      '세탁기·건조기 등 대형 가전의 이동 여부가 사전 협의되었는가?',
+      '분사 장비가 베란다 내부로 진입할 수 있도록 현관에서 베란다까지 동선이 정리되었는가?',
+    ],
+    limitationTitle: '시공 준비 안내',
+    limitationNote: '※ 탄성코트는 분사 도포 방식의 기능성 마감재입니다. 외부 빗물 침투나 창호 방수 불량으로 인한 누수 문제는 탄성코트로 해결되지 않으며, 외부 방수 보수가 선행되어야 합니다.',
+    relatedGuideSlugs: ['balcony-coating-checklist', 'elastic-coating-preparation-protection-checklist'],
+  },
+
+  // 25. 관악구 탄성코트 (관악구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-gwanak-gu-elastic',
+    regionId: 'seoul-gwanak-gu',
+    serviceKeyword: '탄성코트',
+    slug: 'gwanak-gu-elastic-coating-crack-peeling-scope',
+    title: '관악구 탄성코트 벽면 균열·들뜸 상태와 보수 범위 판단 | 올케어 시공 가이드',
+    h1: '관악구 탄성코트 벽면 균열·들뜸 상태와 보수 범위 판단',
+    description: '관악구 주거 공간 탄성코트 시공 전 베란다 벽면의 균열 유형과 기존 도막 박리 상태를 점검하고 퍼티 보수 및 하도 공정 포함 여부를 확인하는 기준입니다.',
+    category: '바탕면 진단 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '관악구 지역 베란다 탄성코트 시공에서는 기존 벽면 상태 점검이 시공 품질을 좌우하는 핵심 단계입니다. 균열 유형과 도막 박리 정도에 따라 필요한 밑작업 범위가 달라지므로 사전 확인이 중요합니다.',
+    sections: [
+      {
+        h2: '1. 헤어크랙과 구조 균열의 구분',
+        paragraphs: [
+          '베란다 콘크리트 벽면에 발생한 가는 실금(헤어크랙)은 퍼티로 충전하여 평탄화한 뒤 탄성코트를 도포하면 마감 품질을 유지할 수 있습니다.',
+          '폭이 넓거나 깊이 있는 균열은 구조적 원인에 의한 것일 수 있으므로, 단순 탄성코트 도포만으로는 충분하지 않을 수 있습니다. 현장 상태에 따라 보수 범위를 점검 후 결정하는 것이 중요합니다.',
+        ],
+      },
+      {
+        h2: '2. 기존 도막 들뜸 및 박리 부위 처리',
+        paragraphs: [
+          '외벽 접촉면이나 창호 주변 등 온도 변화가 큰 부위에서 기존 페인트가 풍선처럼 부풀거나 껍질처럼 벗겨지는 경우 스크래퍼로 부실 도막을 제거해야 합니다.',
+          '들뜬 도막을 제거한 후 생긴 단차는 퍼티로 메워 평탄화한 뒤 바탕 정리가 완료된 상태에서 탄성코트를 분사해야 균일한 마감이 가능합니다.',
+        ],
+      },
+      {
+        h2: '3. 작업 공간 및 분사 동선 점검',
+        paragraphs: [
+          '고압 분사 장비를 사용하는 탄성코트 공정 특성상 작업자가 이동할 수 있는 충분한 공간이 확보되어야 합니다. 필요한 경우 대형 수납물이나 가전의 위치를 사전에 조율하면 도포 품질과 작업 안전성을 높일 수 있습니다.',
+        ],
+      },
+    ],
+    checklistTitle: '시공 전 벽면 상태 점검 체크리스트',
+    checklistItems: [
+      '베란다 벽면에 실금(헤어크랙)이나 타공 흔적이 있는가?',
+      '기존 페인트가 손가락으로 눌렀을 때 들뜨거나 박리되는 부위가 있는가?',
+      '벽면이 현재 건조한 상태인지, 습기 흔적이 없는지 확인되었는가?',
+      '견적 내역에 균열 보수·퍼티·하도 등 밑작업 항목이 포함되어 있는가?',
+    ],
+    limitationTitle: '시공 범위 안내',
+    limitationNote: '※ 탄성코트는 표면 도막 마감재로서 기능하며, 외벽 방수 불량이나 구조적 균열의 근본적인 보수를 대체하지 않습니다. 현장 상태에 따라 시공 가능 범위가 달라질 수 있습니다.',
+    relatedGuideSlugs: ['old-apartment-balcony-recoating-guide', 'balcony-coating-checklist'],
+  },
+
+  // 26. 관악구 베란다탄성코트 (관악구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-gwanak-gu-balcony',
+    regionId: 'seoul-gwanak-gu',
+    serviceKeyword: '베란다탄성코트',
+    slug: 'gwanak-gu-balcony-coating-storage-fixture-masking',
+    title: '관악구 베란다탄성코트 수납물 및 고정 시설물 주변 보양 범위 확인 | 올케어 시공 가이드',
+    h1: '관악구 베란다탄성코트 수납물 및 고정 시설물 주변 보양 범위 확인',
+    description: '관악구 베란다탄성코트 시공 전 베란다 수납물 반출 기준과 보일러, 계량기, 선반 등 고정 시설물 보양 범위를 안내합니다.',
+    category: '시공 준비 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '관악구 베란다탄성코트 시공에서는 시공 전 베란다 내부 정리와 고정 시설물 주변 보양이 원활한 공정 진행과 마감 품질에 직접 영향을 미칩니다. 준비 사항을 미리 확인해 두시기 바랍니다.',
+    sections: [
+      {
+        h2: '1. 수납물 사전 반출과 바닥 공간 확보',
+        paragraphs: [
+          '시공 구역 내 보관 중인 세제, 공구, 청소 용품 등 이동 가능한 모든 수납물은 시공 전에 다른 장소로 옮겨두어야 합니다. 물건이 남아있으면 해당 구역 벽면에 도료가 고르게 도포되지 않을 수 있습니다.',
+        ],
+      },
+      {
+        h2: '2. 보일러·가스계량기·선반 등 고정 시설물 보양',
+        paragraphs: [
+          '분리가 어려운 보일러, 계량기, 벽걸이 선반 등의 고정 시설물은 분사 도료가 묻지 않도록 마스킹 테이프와 비닐을 사용해 꼼꼼히 보양합니다.',
+          '시설물 테두리를 따라 마스킹 라인이 깔끔하게 부착되어야 도포 후 테이프를 제거했을 때 도막 경계가 선명하게 나타납니다.',
+        ],
+      },
+      {
+        h2: '3. 세탁기·건조기 주변 작업 범위 협의',
+        paragraphs: [
+          '세탁기나 건조기가 설치된 경우, 가전 이동 가능 여부와 뒷면 벽체 도포 범위를 시공 담당자와 사전에 협의해야 합니다. 배관이 연결된 가전은 임의 이동 시 누수 위험이 있으므로 주의가 필요합니다.',
+        ],
+      },
+    ],
+    checklistTitle: '베란다 준비 체크리스트',
+    checklistItems: [
+      '베란다 내 이동 가능한 수납물이 모두 반출되었는가?',
+      '보일러, 가스계량기, 콘센트 등 고정 시설물의 보양 공간이 확보되었는가?',
+      '세탁기·건조기의 이동 여부가 시공 담당자와 사전 협의되었는가?',
+      '바닥 타일에 도료가 묻지 않도록 비닐 보양이 가능한가?',
+    ],
+    limitationTitle: '시공 준비 안내',
+    limitationNote: '※ 전기·가스 배관이 연결된 가전의 분리 및 이동은 시공 작업자의 역할 범위를 벗어나므로, 필요한 경우 해당 전문 업체에 사전 요청하시기 바랍니다.',
+    relatedGuideSlugs: ['elastic-coating-preparation-protection-checklist', 'balcony-coating-checklist'],
+  },
+
+  // 27. 서초구 탄성코트 (서초구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-seocho-gu-elastic',
+    regionId: 'seoul-seocho-gu',
+    serviceKeyword: '탄성코트',
+    slug: 'seocho-gu-elastic-coating-surface-pretreatment-scope',
+    title: '서초구 탄성코트 기존 도장면 상태와 전처리 포함 범위 확인 | 올케어 시공 가이드',
+    h1: '서초구 탄성코트 기존 도장면 상태와 전처리 포함 범위 확인',
+    description: '서초구 아파트·다세대 베란다 탄성코트 시공 전 기존 수성 도막의 부착력과 노후 상태를 점검하고 전처리 공정 포함 여부를 확인하는 기준을 안내합니다.',
+    category: '바탕면 진단 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '서초구 지역 베란다 탄성코트 시공에서 마감 품질을 결정하는 핵심 요소 중 하나는 기존 도장면 상태와 이에 맞는 전처리 범위 확인입니다. 도막 노후화 정도에 따라 필요한 공정이 달라질 수 있으므로 사전 점검이 중요합니다.',
+    sections: [
+      {
+        h2: '1. 기존 도막 노후화 판단 기준',
+        paragraphs: [
+          '벽면 표면을 손바닥으로 가볍게 문질러 흰 분말이 묻어나오는 초킹(Chalking) 현상이 있다면 도막 수지가 분해된 것으로 판단할 수 있습니다. 이 경우 분말 층 위에 새 도료를 직접 도포하면 부착이 불안정해질 수 있으므로, 바인더 하도 공정의 필요 여부를 점검하는 것이 좋습니다.',
+          '기존 도막이 여러 번 덧칠된 경우 층간 자중으로 인해 도막 전체가 탈락할 가능성이 있으므로, 부착력이 떨어진 구간을 스크래핑하여 정리한 뒤 도포 여부를 판단합니다.',
+        ],
+      },
+      {
+        h2: '2. 퍼티 보수 및 하도 적용 범위 확인',
+        paragraphs: [
+          '균열, 타공 흔적, 스크래핑 후 단차 등 바탕면 요철이 있는 경우 탄성 퍼티로 메우고 평탄화한 뒤 도포합니다. 하도 프라이머는 현장 상태에 따라 필요 여부가 결정되므로, 견적 내역에 해당 공정의 포함 여부를 확인하시기 바랍니다.',
+        ],
+      },
+      {
+        h2: '3. 습기 및 건조 상태 확인',
+        paragraphs: [
+          '탄성코트는 벽면이 충분히 건조된 상태에서만 도포할 수 있습니다. 시공 전 벽면 표면에 결로 물방울이나 습기 흔적이 남아있지 않은지 확인해야 합니다.',
+        ],
+      },
+    ],
+    checklistTitle: '시공 전 도장면 점검 체크리스트',
+    checklistItems: [
+      '벽면에 손을 대었을 때 흰 가루가 묻어나는 초킹 현상이 있는가?',
+      '기존 도막이 테이프 접착 테스트에서 쉽게 떨어져 나오지 않는가?',
+      '균열, 타공 흔적, 페인트 박리 부위에 퍼티 보수가 필요한가?',
+      '견적 내역에 하도·퍼티 등 전처리 공정의 포함 여부가 명시되어 있는가?',
+    ],
+    limitationTitle: '시공 안내 시 유의 사항',
+    limitationNote: '※ 탄성코트는 베란다 벽면 마감 도료로서의 기능을 하며, 외벽 방수 불량이나 구조적 균열 문제를 근본적으로 해결하지 않습니다. 현장 상태에 따라 밑작업 범위가 달라질 수 있습니다.',
+    relatedGuideSlugs: ['old-apartment-balcony-recoating-guide', 'elastic-coating-estimate-work-scope-guide'],
+  },
+
+  // 28. 서초구 베란다탄성코트 (서초구 GU Guide) — Phase 6-Q1B
+  {
+    id: 'kg-seocho-gu-balcony',
+    regionId: 'seoul-seocho-gu',
+    serviceKeyword: '베란다탄성코트',
+    slug: 'seocho-gu-balcony-coating-frame-corner-workspace',
+    title: '서초구 베란다탄성코트 창틀·모서리·세탁 공간 주변 작업 가능 범위 확인 | 올케어 시공 가이드',
+    h1: '서초구 베란다탄성코트 창틀·모서리·세탁 공간 주변 작업 가능 범위 확인',
+    description: '서초구 베란다탄성코트 시공 전 창틀 실리콘 경계, 벽면 모서리 상태, 세탁 공간 내 가전 주변 작업 범위를 확인하는 점검 기준을 안내합니다.',
+    category: '시공 점검 가이드',
+    publishedAt: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE,
+    publishedAtRfc822: GANGSEO_GWANAK_SEOCHO_GUIDE_PUBDATE_RFC822,
+    intro: '서초구 베란다탄성코트 시공을 준비할 때는 창틀 실리콘 경계부와 벽면 모서리 상태, 그리고 세탁 공간 내 시설물 주변 작업 범위를 사전에 점검해야 합니다. 각 공간의 특성을 파악하면 시공 당일 공정을 원활하게 진행하는 데 도움이 됩니다.',
+    sections: [
+      {
+        h2: '1. 창틀 실리콘 경계부 점검',
+        paragraphs: [
+          '샷시 창틀과 벽체가 만나는 실리콘 코킹 부위에 갈라짐이나 들뜸이 있다면 탄성코트 마스킹 전에 상태를 확인하는 것이 좋습니다. 실리콘이 심하게 노후된 경우 도장 라인 유지를 위한 코킹 보수가 선행되어야 할 수 있습니다.',
+        ],
+      },
+      {
+        h2: '2. 벽면 모서리 도막 상태 확인',
+        paragraphs: [
+          '벽체 모서리는 온도 변화에 의한 수축·팽창으로 미세 균열이 발생하기 쉬운 부위입니다. 모서리 실금이 있는 경우 탄성 변성 실란트로 충전한 뒤 도포하면 갈라짐 재발을 줄일 수 있습니다.',
+          '천장과 벽면이 만나는 상단 모서리는 탈락 위험이 있는 기존 도막을 긁어내고 정리한 뒤 분사해야 마감이 안정적으로 유지됩니다.',
+        ],
+      },
+      {
+        h2: '3. 세탁 공간 내 가전 주변 작업 범위',
+        paragraphs: [
+          '세탁기나 건조기가 설치된 경우, 가전 측면과 뒷면의 벽체 도포 범위를 사전에 확인해야 합니다. 배관이 연결된 가전의 임의 이동은 누수 위험이 있으므로 이동 가능 여부를 담당자와 협의하는 것이 중요합니다.',
+        ],
+      },
+    ],
+    checklistTitle: '창틀·모서리·세탁 공간 점검표',
+    checklistItems: [
+      '창틀 실리콘 코킹 부위에 갈라짐이나 탈착 흔적이 없는가?',
+      '벽면 모서리에 실금이나 기존 도막 들뜸이 관찰되는가?',
+      '세탁기·건조기 등 가전 뒤편 벽면 도포 범위가 사전 협의되었는가?',
+      '천장 배관 주변이나 슬리브 관통부에 균열 흔적이 없는가?',
+    ],
+    limitationTitle: '시공 안내 시 유의 사항',
+    limitationNote: '※ 탄성코트는 베란다 벽면 도막 마감재이며, 창호 코킹 불량으로 인한 외부 빗물 유입이나 구조적 누수를 차단하는 외부 방수 공사를 대체하지 않습니다.',
+    relatedGuideSlugs: ['balcony-coating-checklist', 'old-apartment-balcony-recoating-guide'],
+  },
 ] as const;
 
 /**
@@ -1046,7 +1325,8 @@ export function getAnyGuideBySlug(slug: string, origin?: string): GuideArticle |
 }
 
 /**
- * Returns all guide slugs (4 Pillar + 22 Keyword = 26 total).
+ * Returns all guide slugs (4 Pillar + 28 Keyword = 32 total).
+ * Updated Phase 6-Q1B: +6 GU Guides (Gangseo x2, Gwanak x2, Seocho x2)
  */
 export function getAllGuideSlugs(): string[] {
   const pillarSlugs = ['balcony-coating-checklist', 'old-apartment-balcony-recoating-guide', 'elastic-coating-estimate-work-scope-guide', 'elastic-coating-preparation-protection-checklist'];
