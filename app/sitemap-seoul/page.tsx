@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(OFFICIAL_SITE_ORIGIN),
   title: '서울 탄성코트 주요 지역 및 시공안내 | 올케어',
   description:
-    '올케어에서 제공하는 서울 주요 110개 공식 안내 페이지(기존 지역 및 양천·구로·영등포·동작·금천·강서·관악·서초 남부 코호트)별 공식 공동주택 통계 및 탄성코트·베란다탄성코트 시공 안내 모음입니다.',
+    '올케어에서 제공하는 서울 25개 자치구 및 주요 동별 141개 공식 안내 페이지별 공식 공동주택 통계 및 탄성코트·베란다탄성코트 시공 안내 모음입니다.',
   alternates: {
     canonical: `${OFFICIAL_SITE_ORIGIN}/sitemap-seoul`,
   },
@@ -39,26 +39,37 @@ interface DistrictGroup {
 }
 
 const DISTRICT_ORDER = [
-  '동작구',
-  '금천구',
-  '영등포구',
-  '구로구',
-  '양천구',
-  '은평구',
+  '강남구',
+  '강동구',
+  '강북구',
   '강서구',
   '관악구',
-  '성동구',
-  '강남구',
-  '서초구',
-  '종로구',
   '광진구',
+  '구로구',
+  '금천구',
   '노원구',
+  '도봉구',
+  '동대문구',
+  '동작구',
+  '마포구',
+  '서대문구',
+  '서초구',
+  '성동구',
+  '성북구',
+  '송파구',
+  '양천구',
+  '영등포구',
+  '용산구',
+  '은평구',
+  '종로구',
+  '중구',
+  '중랑구',
 ];
 
 export default async function SeoulSitemapPage() {
   const allRegions = getActiveRegions(false);
   const approvedRegions = allRegions.filter(
-    (r) => r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
+    (r) => r.sido === '서울' && r.id !== 'seoul-eunpyeong-sinsa' && r.publicationState !== 'PUBLISHED_NOINDEX'
   );
 
   const districtMap = new Map<string, DistrictGroup>();
@@ -113,21 +124,34 @@ export default async function SeoulSitemapPage() {
   return (
     <main className="flex-1 py-12 sm:py-16 bg-[#FAF8F5]">
       <Container className="max-w-5xl mx-auto space-y-10">
+        {/* Reciprocal Region Navigation Bar */}
+        <nav aria-label="수도권 지역별 안내" className="flex items-center gap-2 text-xs font-medium text-[#756E61]">
+          <span className="font-bold text-[#3E443B] bg-[#EFE8DC] px-2.5 py-1 rounded">서울 지역 안내</span>
+          <span className="text-[#C5BBAA]">|</span>
+          <Link href="/sitemap-gyeonggi" className="hover:text-[#4F5844] hover:underline px-2.5 py-1 rounded transition-colors">
+            경기 지역 안내
+          </Link>
+          <span className="text-[#C5BBAA]">|</span>
+          <Link href="/sitemap-incheon" className="hover:text-[#4F5844] hover:underline px-2.5 py-1 rounded transition-colors">
+            인천 지역 안내
+          </Link>
+        </nav>
+
         {/* Header Block */}
         <div className="space-y-3 border-b border-[#E7D9C1] pb-6 text-left">
           <p className="text-xs font-bold tracking-widest text-[#6B755D] uppercase">
-            SEOUL RECOVERY & COHORT DIRECTORY (110 PRIMARY PAGES)
+            SEOUL REGIONAL DIRECTORY (141 PRIMARY PAGES)
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#3E443B]">
             서울 탄성코트 주요 지역 안내
           </h1>
           <p className="text-sm text-[#5C5549] leading-relaxed max-w-2xl">
-            올케어에서 제공하는 서울 주요 110개 공식 안내 페이지(15개 기존 지역, 양천·구로·영등포·동작·금천·강서·관악·서초 남부 코호트)별
+            올케어에서 제공하는 서울 25개 자치구 및 주요 동별 141개 공식 안내 페이지별
             탄성코트 및 베란다탄성코트 시공 안내입니다. 각 지역별 상세 페이지에서 사전 벽면 점검 기준과 시공 가이드를 확인하실 수 있습니다.
           </p>
         </div>
 
-        {/* Primary Crawlable District Text Directory: Exactly 82 Links */}
+        {/* Primary Crawlable District Text Directory: Exactly 141 Links */}
         <section
           aria-labelledby="recovery-hub-heading"
           className="bg-white rounded-xl border border-[#E7D9C1] p-6 sm:p-8 shadow-sm space-y-6 text-left"
@@ -135,7 +159,7 @@ export default async function SeoulSitemapPage() {
           <div className="border-b border-[#EFE8DC] pb-3">
             <h2 id="recovery-hub-heading" className="text-lg font-bold text-[#3E443B] flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#4F5844]" />
-              주요 공식 시공 안내 바로가기 (110개 공식 안내 페이지)
+              주요 공식 시공 안내 바로가기 (141개 공식 안내 페이지)
             </h2>
             <p className="text-xs sm:text-sm text-[#756E61] pt-1">
               아래 자치구별 시공 의도 안내 링크에서 세부 시공 가이드를 확인하실 수 있습니다.

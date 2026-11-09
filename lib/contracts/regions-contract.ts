@@ -11,6 +11,7 @@
 import { RegionItem } from '../types/regions';
 import { SYNTHETIC_TEST_REGIONS } from '../fixtures/test-regions';
 import { SEOUL_APPROVED_DONG_REGIONS } from './seoul-approved-dongs';
+import { GYEONGGI_CITY_REGIONS, INCHEON_GU_REGIONS } from './metropolitan-regions';
 
 /**
  * Official Production Regions Dataset (Phase 5-B2A Rollout: 25 Seoul GUs + 1 Bulgwang Approved + 1 Sinsa Collision-Hold + 291 Approved DONGs = 318 Regions)
@@ -580,6 +581,10 @@ export const PRODUCTION_REGIONS: readonly RegionItem[] = [
     publicationState: 'INDEXABLE',
     isServiceAreaApproved: true,
   },
+  // 320 ~ 347. 28 Gyeonggi Cities (Phase 6-R1 Metropolitan Expansion)
+  ...GYEONGGI_CITY_REGIONS,
+  // 348 ~ 356. 9 Incheon Reformed GUs (Phase 6-R1 Metropolitan Expansion)
+  ...INCHEON_GU_REGIONS,
 ];
 
 /**

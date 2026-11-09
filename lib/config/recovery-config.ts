@@ -208,6 +208,113 @@ export const SEOCHO_COHORT_INTENTS: readonly ServiceKeyword[] = [
   '베란다탄성코트',
 ] as const;
 
+/**
+ * Phase 6-R1 Seoul GU Full Completion Cohort SSOT
+ * Exactly 25 autonomous GUs x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Covers all 25 Seoul GUs for both primary search intents.
+ */
+export const SEOUL_GU_COHORT_REGION_IDS = [
+  'seoul-jongno-gu',
+  'seoul-jung-gu',
+  'seoul-yongsan-gu',
+  'seoul-seongdong-gu',
+  'seoul-gwangjin-gu',
+  'seoul-dongdaemun-gu',
+  'seoul-jungnang-gu',
+  'seoul-seongbuk-gu',
+  'seoul-gangbuk-gu',
+  'seoul-dobong-gu',
+  'seoul-nowon-gu',
+  'seoul-eunpyeong-gu',
+  'seoul-seodaemun-gu',
+  'seoul-mapo-gu',
+  'seoul-yangcheon-gu',
+  'seoul-gangseo-gu',
+  'seoul-guro-gu',
+  'seoul-geumcheon-gu',
+  'seoul-yeongdeungpo-gu',
+  'seoul-dongjak-gu',
+  'seoul-gwanak-gu',
+  'seoul-seocho-gu',
+  'seoul-gangnam-gu',
+  'seoul-songpa-gu',
+  'seoul-gangdong-gu',
+] as const;
+
+export type SeoulGuCohortRegionId = typeof SEOUL_GU_COHORT_REGION_IDS[number];
+
+export const SEOUL_GU_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+/**
+ * Phase 6-R1 Gyeonggi City Cohort Expansion SSOT
+ * Exactly 28 cities x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Excludes Gyeonggi Guns (가평군, 양평군, 연천군).
+ */
+export const GYEONGGI_CITY_COHORT_REGION_IDS = [
+  'gyeonggi-goyang-si',
+  'gyeonggi-gwacheon-si',
+  'gyeonggi-gwangmyeong-si',
+  'gyeonggi-gwangju-si',
+  'gyeonggi-guri-si',
+  'gyeonggi-gunpo-si',
+  'gyeonggi-gimpo-si',
+  'gyeonggi-namyangju-si',
+  'gyeonggi-dongducheon-si',
+  'gyeonggi-bucheon-si',
+  'gyeonggi-seongnam-si',
+  'gyeonggi-suwon-si',
+  'gyeonggi-siheung-si',
+  'gyeonggi-ansan-si',
+  'gyeonggi-anseong-si',
+  'gyeonggi-anyang-si',
+  'gyeonggi-yangju-si',
+  'gyeonggi-yeoju-si',
+  'gyeonggi-osan-si',
+  'gyeonggi-yongin-si',
+  'gyeonggi-uiwang-si',
+  'gyeonggi-uijeongbu-si',
+  'gyeonggi-icheon-si',
+  'gyeonggi-paju-si',
+  'gyeonggi-pyeongtaek-si',
+  'gyeonggi-pocheon-si',
+  'gyeonggi-hanam-si',
+  'gyeonggi-hwaseong-si',
+] as const;
+
+export type GyeonggiCityCohortRegionId = typeof GYEONGGI_CITY_COHORT_REGION_IDS[number];
+
+export const GYEONGGI_CITY_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
+/**
+ * Phase 6-R1 Incheon GU Cohort Expansion SSOT
+ * Exactly 9 reformed GUs x 2 authorized search intents ('탄성코트', '베란다탄성코트')
+ * Excludes Incheon Guns (강화군, 옹진군) and old Incheon (중구, 동구, 서구).
+ */
+export const INCHEON_GU_COHORT_REGION_IDS = [
+  'incheon-jemulpo-gu',
+  'incheon-yeongjong-gu',
+  'incheon-michuhol-gu',
+  'incheon-yeonsu-gu',
+  'incheon-namdong-gu',
+  'incheon-bupyeong-gu',
+  'incheon-gyeyang-gu',
+  'incheon-seohae-gu',
+  'incheon-geomdan-gu',
+] as const;
+
+export type IncheonGuCohortRegionId = typeof INCHEON_GU_COHORT_REGION_IDS[number];
+
+export const INCHEON_GU_COHORT_INTENTS: readonly ServiceKeyword[] = [
+  '탄성코트',
+  '베란다탄성코트',
+] as const;
+
 export const RECOVERY_REGION_IDS = [
   ...BASE_RECOVERY_REGION_IDS,
   'seoul-yangcheon-gu',
@@ -1431,6 +1538,22 @@ export function isRecoveryIntent(serviceKeyword: string): boolean {
  */
 export function isIndexableDynamicPage(regionId: string, serviceKeyword: string): boolean {
   if (!RECOVERY_ENABLED) return false;
+
+  // Phase 6-R1: Metropolitan Region-Level Cohorts (GU/CITY)
+  // 10. Seoul 25 Autonomous GUs (25 GUs x 2 intents = 50 URLs)
+  if (SEOUL_GU_COHORT_REGION_IDS.includes(regionId as SeoulGuCohortRegionId)) {
+    return SEOUL_GU_COHORT_INTENTS.includes(serviceKeyword as typeof SEOUL_GU_COHORT_INTENTS[number]);
+  }
+
+  // 11. Gyeonggi 28 Cities (28 cities x 2 intents = 56 URLs)
+  if (GYEONGGI_CITY_COHORT_REGION_IDS.includes(regionId as GyeonggiCityCohortRegionId)) {
+    return GYEONGGI_CITY_COHORT_INTENTS.includes(serviceKeyword as typeof GYEONGGI_CITY_COHORT_INTENTS[number]);
+  }
+
+  // 12. Incheon 9 Reformed GUs (9 GUs x 2 intents = 18 URLs)
+  if (INCHEON_GU_COHORT_REGION_IDS.includes(regionId as IncheonGuCohortRegionId)) {
+    return INCHEON_GU_COHORT_INTENTS.includes(serviceKeyword as typeof INCHEON_GU_COHORT_INTENTS[number]);
+  }
 
   // 7. Gangseo P1 South Cohort (7 regions x 2 intents = 14 URLs)
   // Checked BEFORE Base rule to supersede Base's 탄성코트-only restriction

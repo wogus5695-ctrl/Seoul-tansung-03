@@ -9,7 +9,7 @@ import { getAllKeywordGuides } from '../../lib/data/keyword-guides-data';
 
 export async function GET() {
   const origin = SITE_CONFIG.siteOrigin || OFFICIAL_SITE_ORIGIN;
-  const regions = getActiveRegions(false); // Official production dataset (319 regions)
+  const regions = getActiveRegions(false); // Official production dataset (356 regions)
 
   const dynamicUrls: string[] = [];
 
@@ -26,9 +26,15 @@ export async function GET() {
     }
   }
 
-  // Phase 6-N1A Sitemap Contract: Exactly 81 URLs
-  // 3 Static (/, /sitemap-seoul, /guide) + 4 Pillar Guides + 18 Keyword Guides + 56 Dynamic
-  const staticUrls = [`${origin}/`, `${origin}/sitemap-seoul`, `${origin}/guide`];
+  // Phase 6-R1 Sitemap Contract: Exactly 252 URLs
+  // 5 Static (/, /sitemap-seoul, /sitemap-gyeonggi, /sitemap-incheon, /guide) + 4 Pillar Guides + 28 Keyword Guides + 215 Dynamic
+  const staticUrls = [
+    `${origin}/`,
+    `${origin}/sitemap-seoul`,
+    `${origin}/sitemap-gyeonggi`,
+    `${origin}/sitemap-incheon`,
+    `${origin}/guide`,
+  ];
   const pillarGuideUrls = getAllGuides().map((g) => `${origin}/guide/${g.slug}`);
   const keywordGuideUrls = getAllKeywordGuides().map((g) => `${origin}/guide/${g.slug}`);
   const allUrls = [...staticUrls, ...pillarGuideUrls, ...keywordGuideUrls, ...dynamicUrls];
